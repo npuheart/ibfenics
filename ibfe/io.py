@@ -10,7 +10,9 @@
 #           ln -s /mnt/large0/data0/ibfenics data/large
 
 import os
+import pandas as pd
 from datetime import datetime
+from dolfin import XDMFFile
 
 output_path = "data/large/"
 
@@ -24,10 +26,22 @@ def check_path(path):
 def unique_filename(current_file_name, tag, extension):
     check_path(output_path)
     note =  os.path.splitext(current_file_name)[0]  # 去掉扩展名
-    file_id = f"{output_path}{note}/{tag}-" + datetime.now().strftime('%Y%m%d-%H%M%S') + extension
+    file_id = f"{output_path}{note}/{tag}/" + datetime.now().strftime('%Y%m%d-%H%M') + extension
     return file_id
 
+def create_xdmf_file(mpi_comm, filename):
+    file = XDMFFile(mpi_comm, filename)
+    file.parameters['rewrite_function_mesh'] = False
+    file.parameters["functions_share_mesh"] = True
+    file.parameters["flush_output"] = True
+    return file
 
 
-__all__ = ['unique_filename']
+# 指定要保存的文件名和表单名称
+def write_excel(volume_list,excel_file1,sheet_name = 'v'):
+    df = pd.DataFrame(volume_list)
+    df.to_excel(excel_file1, sheet_name=sheet_name, index=False)
+
+
+__all__ = ['unique_filename', 'create_xdmf_file', 'write_excel']
 

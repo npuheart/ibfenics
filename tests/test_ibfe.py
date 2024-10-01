@@ -7,109 +7,103 @@
 
 from ibfe import Interaction
 from ibfe.nssolver import TaylorHoodSolver
+from ibfe.io import unique_filename, create_xdmf_file, write_excel
 
 from dolfin import *
 from mshr import *
-from datetime import datetime
 import os
 import numpy as np
 
 
-# Define fluid solver
-rho = 1.0
+# Define time parameters
 T = 10.0
-n_mesh = 80
 dt = 0.001
-nu = 0.01
-nu_s = 0.2
 
-# stabliization parameter
+# Define fluid parameters
+rho = 1.0
+nu = 0.01
+n_mesh_fluid = 32
+
+# Define solid parameters
+nu_s = 0.2
+n_mesh_solid = 32
+
+# Define stablization parameters
 alpha = 1.0*dt
 stab = False
 
-current_file_name = os.path.basename(__file__)
-note =  os.path.splitext(current_file_name)[0]
-file_id = "data/" + note + "-" + datetime.now().strftime('%Y%m%d-%H%M%S')
-
+# Define finite element parameters
 order_velocity = 2 
 order_pressure = 1
 order_displacement = 1
-solid_mesh = generate_mesh(Circle(Point(0.6,0.5), 0.2), n_mesh)
-orders = [order_velocity, order_pressure, order_displacement]
-points = [Point(0,0), Point(1, 1)]
-seperations = [64, 64]
-interaction = Interaction(points, seperations, solid_mesh, orders)
 
+orders       = [order_velocity, order_pressure, order_displacement]
+seperations  = [n_mesh_fluid, n_mesh_fluid]
+box_points   = [Point(0,0), Point(1, 1)]
+solid_mesh   = generate_mesh(Circle(Point(0.6,0.5), 0.2), n_mesh_solid)
+interaction  = Interaction(box_points, seperations, solid_mesh, orders)
 
-fluid_mesh = interaction.fluid_mesh
-ib_mesh = interaction.ib_mesh
-ib_interpolation = interaction.ib_interpolation
-Vs = interaction.Vs
-Vf = interaction.Vf
-Vf_1 = interaction.Vf_1
-Vp = interaction.Vp
+fluid_mesh          = interaction.fluid_mesh
+ib_mesh             = interaction.ib_mesh
+ib_interpolation    = interaction.ib_interpolation
+Vs                  = interaction.Vs
+Vf                  = interaction.Vf
+Vf_1                = interaction.Vf_1
+Vp                  = interaction.Vp
 
-
-print("solid_mesh.hmax() ", solid_mesh.hmax())
-print("solid_mesh.hmin() ", solid_mesh.hmin())
-print("fluid_mesh.hmax() ", fluid_mesh.hmax())
-print("fluid_mesh.hmin() ", fluid_mesh.hmin())
-
-print("ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
-
-# Define trial and test functions for solid
-us = TrialFunction(Vs)
-vs = TestFunction(Vs)
+print(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
+print(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
+print("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
 
 # Create functions for fluid
-u0 = Function(Vf, name="velocity")
+u0 =   Function(Vf,   name="velocity")
 u0_1 = Function(Vf_1, name="velocity 1st order")
-p0 = Function(Vp, name="pressure")
-f = Function(Vf_1, name="force")
+p0 =   Function(Vp,   name="pressure")
+f =    Function(Vf_1, name="force")
 
 # Create functions for solid
 velocity = Function(Vs, name="velocity")
-disp = Function(Vs, name="displacement")
-force = Function(Vs, name="force")
+disp     = Function(Vs, name="displacement")
+force    = Function(Vs, name="force")
 disp.interpolate(Expression(("x[0]", "x[1]"), degree=2))
 
-# Define interpolation object and fluid solver object
+# Create fluid solver
 navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
 W = navier_stokes_solver.W
 
-# Define boundary conditions
+# Define boundary conditions for fluid solver
 noslip = DirichletBC(W.sub(0), (0, 0), "near(x[0],1) || near(x[0],0) || near(x[1],0)")
 upflow = DirichletBC(W.sub(0), (1, 0), "near(x[1],1)")
 pinpoint = DirichletBC(W.sub(1), 0, "near(x[0],0) && near(x[1],0)", "pointwise")
 bcu = [noslip, upflow]
 bcp = [pinpoint]
 
+# Define trial and test functions for solid solver
+us = TrialFunction(Vs)
+vs = TestFunction(Vs)
+
+# Define variational problem for solid solver
 F = grad(disp)
 P = nu_s*(F-inv(F).T)
-# Define variational problem for solid
 F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
 a2 = lhs(F2)
 L2 = rhs(F2)
 A2 = assemble(a2)
 
-# Output Directory name
-directory = file_id + "-" + str(nu_s) + "-" + str(dt)
+# Define output path
 if stab:
-    directory = directory + "-" + str(alpha)
+    note = f"{nu_s}-{dt}-{alpha}"
+else :
+    note = f"{nu_s}-{dt}"
 
-print("output directory : ", directory)
+file_solid_name = unique_filename(os.path.basename(__file__), note, "/solid.xdmf")
+file_fluid_name = unique_filename(os.path.basename(__file__), note, "/fluid.xdmf")
+file_excel_name = unique_filename(os.path.basename(__file__), note, "/volume.xlsx")
+file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
+file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
 
-# Create files for storing solution
-file_solid = XDMFFile(directory+"/solid.xdmf")
-file_solid.parameters['rewrite_function_mesh'] = False
-file_solid.parameters["functions_share_mesh"] = True
-file_solid.parameters["flush_output"] = True
 
-file_fluid = XDMFFile(directory+"/fluid.xdmf")
-file_fluid.parameters['rewrite_function_mesh'] = False
-file_fluid.parameters["functions_share_mesh"] = True
-file_fluid.parameters["flush_output"] = True
-
+# For post-processing
 def elastic_energy(disp):
     F = grad(disp)
     C = F*F.T
@@ -163,15 +157,12 @@ for n in range(1, num_steps+1):
     t = n*dt
     print(t)
 
-import pandas as pd
 
-print(volume_list)
-df = pd.DataFrame(volume_list)
 
-# 指定要保存的文件名和表单名称
-excel_file1 = 'volume_64-fe.xlsx'
-sheet_name = 'v'
+write_excel(volume_list, file_excel_name)
 
-# 将数据写入 Excel 文件
-df.to_excel(excel_file1, sheet_name=sheet_name, index=False)
+
+
+
+
 

@@ -7,3 +7,9 @@ _generate/
 *.egg-info
 *env*
 data/large
+
+*.xdmf
+*.h5
+*.pvd
+*.vtu
+*.vti
