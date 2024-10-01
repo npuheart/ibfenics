@@ -1,3 +1,9 @@
+# Copyright (C) 2024 Pengfei Ma
+#
+# This file is part of ibfenics (https://github.com/ibfenics)
+#
+# SPDX-License-Identifier:    LGPL-3.0-or-later
+
 import os
 import re
 import subprocess
@@ -134,7 +140,13 @@ setup(
     long_description="implementation of the immersed boundary method in FEniCS",
     ext_modules=[CMakeExtension("ibfe.cpp")],
     cmdclass={"build_ext": CMakeBuild},
-    packages=["ibfe","feni","ibfe.mesh", "ibfe.interaction"],
+    packages=[
+        "ibfe",
+        "feni",
+        "ibfe.mesh", 
+        "ibfe.nssolver", 
+        "ibfe.interaction"
+        ],
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.7",

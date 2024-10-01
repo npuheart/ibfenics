@@ -5,7 +5,7 @@
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 
 
-from .ale import test_cpp
+from .TaylorHoodSolver import TaylorHoodSolver
+__name__ = "ibfe.nssolver"
 
-
-__all__ = ['test_cpp']
+__all__ = ['TaylorHoodSolver', "__version__"]
