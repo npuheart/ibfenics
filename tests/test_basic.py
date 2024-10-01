@@ -1,7 +1,8 @@
-import cmake_example as m
+import ibfe
+
+assert ibfe.cpp.add(1,5) == 6
+assert ibfe.cpp.__version__ == "0.0.1"
 
 
-def test_main():
-    assert m.__version__ == "0.0.1"
-    assert m.add(1, 2) == 3
-    assert m.subtract(1, 2) == -1
+
+ibfe.mesh.ale.test_cpp()
