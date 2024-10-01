@@ -127,14 +127,14 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="ib-fenics",
-    version="0.0.1",
+    version="0.0.2",
     author="Ma Pengfei",
     author_email="ibfenics@pengfeima.cn",
     description="A ibfenics project using pybind11 and CMake",
     long_description="implementation of the immersed boundary method in FEniCS",
     ext_modules=[CMakeExtension("ibfe.cpp")],
     cmdclass={"build_ext": CMakeBuild},
-    packages=["ibfe","feni","ibfe.mesh"],
+    packages=["ibfe","feni","ibfe.mesh", "ibfe.interaction"],
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.7",

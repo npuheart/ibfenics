@@ -1,3 +1,4 @@
+#include <dolfin.h>
 #include <pybind11/pybind11.h>
 
 #define STRINGIFY(x) #x

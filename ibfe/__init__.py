@@ -7,4 +7,5 @@
 import numpy
 from .cpp import __version__
 from .mesh import *
+from .interaction import *
 
