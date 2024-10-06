@@ -34,4 +34,6 @@ class Interaction:
         self.ib_mesh = ib_mesh
         self.fluid_mesh = fluid_mesh
         self.weights = weights
+        
+        # TODO: Wrappers for Dual Operators
 

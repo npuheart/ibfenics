@@ -42,89 +42,61 @@ f = interpolate(Expression(("-sin(x[0])*cos(x[1])","cos(x[0])*sin(x[1])"),degree
 # F = F1
 # f = f1
 
-
-
-
-
 EF = Function(Vf_1)
 If = Function(Vs)
 
 ib_interpolation.fluid_to_solid(f._cpp_object, If._cpp_object)
-ib_interpolation.solid_to_fluid(EF._cpp_object, F._cpp_object)
-
-u = TrialFunction(Vf_1)
-v = TestFunction(Vf_1)
-a = inner(u,v)*dx
-Af = assemble(a)
 
 
 
-EF_ = Function(Vf_1)
-EF_vector = Function(Vf_1)
-weights = []
-n = Vf_1.dim()
-for i in range(0,n):
-    function = Function(Vf_1)
-    function.vector()[i] = 1
-    weights.append(assemble(function[i%2]*dx))
+def fluid_to_solid_v1(f, If, ib_interpolation):
+    ib_interpolation.fluid_to_solid(f._cpp_object, If._cpp_object)
+    u = TrialFunction(Vs)
+    v = TestFunction(Vs)
+    a = inner(u,v)*dx
+    As = assemble(a)
+
+    If_ = Function(Vs)
+    If_vector = Function(Vs)
+    weights = []
+    n = Vs.dim()
+    for i in range(0,n):
+        function = Function(Vs)
+        function.vector()[i] = 1
+        weights.append(assemble(function[i%2]*dx))
+
+    for i in range(len(weights)):
+        If_vector.vector()[i] = If.vector()[i]*weights[i]
+
+    solve(As, If_.vector(), If_vector.vector())
+    assign(If, If_)
 
 
-for i in range(len(weights)):
-    # EF_vector.vector()[i] = EF.vector()[i]*weights[i]
-    EF_vector.vector()[i] = EF.vector()[i]/n_mesh/n_mesh
-# for i in range(len(EF_vector.vector())):
-    # EF_vector.vector()[i] = EF.vector()[i]/n_mesh/n_mesh/2/2
+def solid_to_fluid_v1(F, EF, ib_interpolation):
+    ib_interpolation.solid_to_fluid(EF._cpp_object, F._cpp_object)
+    Vf_1 = ib_interpolation.Vf_1
+    u = TrialFunction(Vf_1)
+    v = TestFunction(Vf_1)
+    a = inner(u,v)*dx
+    Af = assemble(a)
+    # 
+    EF_ = Function(Vf_1)
+    EF_vector = Function(Vf_1)
+    weights = []
+    n = Vf_1.dim()
+    for i in range(0,n):
+        function = Function(Vf_1)
+        function.vector()[i] = 1
+        weights.append(assemble(function[i%2]*dx))
 
-solve(Af, EF_.vector(), EF_vector.vector())
+    for i in range(len(weights)):
+        EF_vector.vector()[i] = EF.vector()[i]/n_mesh/n_mesh
 
-u = TrialFunction(Vs)
-v = TestFunction(Vs)
-a = inner(u,v)*dx
-As = assemble(a)
+    solve(Af, EF_.vector(), EF_vector.vector())
+    assign(EF, EF_)
 
-If_ = Function(Vs)
-If_vector = Function(Vs)
-weights = []
-n = Vs.dim()
-for i in range(0,n):
-    function = Function(Vs)
-    function.vector()[i] = 1
-    weights.append(assemble(function[i%2]*dx))
-
-for i in range(len(weights)):
-    If_vector.vector()[i] = If.vector()[i]*weights[i]
-
-solve(As, If_.vector(), If_vector.vector())
-
-# print(assemble(inner(F, If_)*dx))
-print(assemble(inner(EF_, EF_)*dx))
-print(assemble(inner(EF, EF)*dx))
-print(assemble(inner(EF_, f)*dx))
-print(assemble(inner(EF, f)*dx))
-print(assemble(inner(EF_, f)*dx) - assemble(inner(F, If_)*dx))
-print(assemble(inner(EF, f)*dx)  - assemble(inner(F, If)*dx))
-
-# print(EF(0.5,0.5), EF_(0.5,0.5))
-File("EF_.pvd") << EF_
-File("EF.pvd") << EF
-File("F.pvd") << F
-File("f.pvd") << f
-File("If_.pvd") << If_
-File("If.pvd") << If
-print(If(0.5,0.5), If_(0.5,0.5))
 
 import numpy as np
-print(np.sqrt(assemble(inner(If_-F, If_-F)*dx)))
 print(np.sqrt(assemble(inner(If-F, If-F)*dx)))
-# print(np.sqrt(assemble(inner(If-F, If-F)*dx)))
-
-# print(np.sqrt(assemble(div(If)*div(If)*dx)))
-# print(np.sqrt(assemble(div(f)*div(f)*dx)))
-# print(np.sqrt(assemble(div(If_)*div(If_)*dx)))
-
-
-# print(np.sqrt(assemble(div(EF)*div(EF)*dx)))
-# print(np.sqrt(assemble(div(F)*div(F)*dx)))
-# print(np.sqrt(assemble(div(EF_)*div(EF_)*dx)))
-# assemble(inner(EF_, u)*dx)
+print(assemble(inner(EF, f)*dx)  - assemble(inner(F, If)*dx))
 
