@@ -1,4 +1,4 @@
-from ibfe import cpp
+from ibfenics import cpp
 
 
 def test_cpp():

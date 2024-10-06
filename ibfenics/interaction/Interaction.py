@@ -1,5 +1,5 @@
 from fenics import *
-from ibfe.cpp import IBMesh, IBInterpolation
+from ibfenics.cpp import IBMesh, IBInterpolation
 class Interaction:  
     def __init__(self, points, seperations, solid_mesh, orders):
         # 背景网格使用一阶元

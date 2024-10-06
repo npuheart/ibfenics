@@ -1,3 +1,12 @@
+
+
+## 依赖
+- FEniCS 2019.1
+- pybind11, cmake: 暴露 C++ 程序 Python 接口
+- github submodule 网格文件(WIP)
+
+
+
 ## 在用户目录下安装此库
 ```bash
 python3 setup.py install --user

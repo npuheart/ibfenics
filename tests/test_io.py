@@ -10,8 +10,8 @@
 
 
 import os
-import ibfe.io 
+import ibfenics.io 
 
 print(__file__)
 print(os.path.basename(__file__))
-print(ibfe.io.unique_filename(os.path.basename(__file__), "tag", ".txt"))
+print(ibfenics.io.unique_filename(os.path.basename(__file__), "tag", ".txt"))

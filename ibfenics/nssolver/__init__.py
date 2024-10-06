@@ -8,6 +8,6 @@
 
 
 from .TaylorHoodSolver import TaylorHoodSolver
-__name__ = "ibfe.nssolver"
+__name__ = "ibfenics.nssolver"
 
 __all__ = ['TaylorHoodSolver', "__version__"]

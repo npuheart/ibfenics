@@ -8,7 +8,7 @@
 
 from fenics import *
 from mshr import *
-from ibfe import Interaction
+from ibfenics import Interaction
 
 order_velocity = 2
 order_pressure = 1

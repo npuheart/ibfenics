@@ -5,9 +5,9 @@
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 # email : ibfenics@pengfeima.cn
 
-from ibfe import Interaction
-from ibfe.nssolver import TaylorHoodSolver
-from ibfe.io import unique_filename, create_xdmf_file, write_excel
+from ibfenics import Interaction
+from ibfenics.nssolver import TaylorHoodSolver
+from ibfenics.io import unique_filename, create_xdmf_file, write_excel
 
 from dolfin import *
 from mshr import *

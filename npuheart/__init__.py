@@ -4,4 +4,4 @@
 This module is identical with the main DOLFIN module.
 """
 
-from ibfe import *
+from ibfenics import *

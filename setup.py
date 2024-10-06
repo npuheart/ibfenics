@@ -134,20 +134,20 @@ class CMakeBuild(build_ext):
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="ib-fenics",
-    version="0.0.2",
+    name="npuheart-ibfenics",
+    version="0.0.3",
     author="Ma Pengfei",
     author_email="ibfenics@pengfeima.cn",
-    description="A ibfenics project using pybind11 and CMake",
-    long_description="implementation of the immersed boundary method in FEniCS",
-    ext_modules=[CMakeExtension("ibfe.cpp")],
+    description="IB-FEniCS project using pybind11",
+    long_description="This is an implementation of the immersed boundary method in FEniCS",
+    ext_modules=[CMakeExtension("ibfenics.cpp")],
     cmdclass={"build_ext": CMakeBuild},
     packages=[
-        "ibfe",
-        "feni",
-        "ibfe.mesh", 
-        "ibfe.nssolver", 
-        "ibfe.interaction"
+        "ibfenics",
+        "npuheart",
+        "ibfenics.mesh", 
+        "ibfenics.nssolver", 
+        "ibfenics.interaction"
         ],
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
