@@ -54,14 +54,13 @@ def run_solver(dt, nu, T, Nx, Ny):
 
     u0, p0 = Function(W).split(True)
     u0.interpolate(u_exact)
-    navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt=dt, nu=nu)
-
+    navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu)
     for n in range(1, num_steps+1):
         # 更新时间
-        # print("Time : ", n*dt)
         u_exact.t = n*dt
         p_exact.t = n*dt
         f.t = n*dt
+        logger.info(f"Step : {n}, Time : {n*dt}, u0(0.5,0.9) : {u0(0.5,0.5)}.")
         
         navier_stokes_solver.update(u0, p0)
         u1, p1 = navier_stokes_solver.solve(bcus, bcps)

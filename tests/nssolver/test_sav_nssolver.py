@@ -93,6 +93,7 @@ def run_solver(dt, nu, T, Nx, Ny):
         many_sav.append(SAV)
         
 
+        logger.info(f"u0(0.5,0.5) : {u0(0.5,0.5)}.")
 
 
 
