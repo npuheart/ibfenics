@@ -13,3 +13,4 @@ data/large
 *.pvd
 *.vtu
 *.vti
+nohup.out
