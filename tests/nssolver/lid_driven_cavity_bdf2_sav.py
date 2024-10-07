@@ -13,8 +13,13 @@ from loguru import logger
 import numpy as np
 from fenics import *
 from mshr import *
-from ibfenics.nssolver import TaylorHoodSolver_1, TaylorHoodSolver_2, modified_energy, CAL_SAV_2
+from ibfenics.nssolver import SAVTaylorHoodSolverBDF2
 from ibfenics.io import unique_filename, create_xdmf_file
+
+TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
+TaylorHoodSolverBDF2_2 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2
+modified_energy = SAVTaylorHoodSolverBDF2.modified_energy
+calculate_SAV = SAVTaylorHoodSolverBDF2.calculate_SAV
 
 note = "lid_driven_cavity"
 file_fluid_name = unique_filename(os.path.basename(__file__), note, "/fluid.xdmf")
@@ -61,9 +66,11 @@ def run_solver(dt, nu, T, Nx, Ny):
     bcps_2 = []
 
     u0, p0 = Function(W).split(True)
+    u0_, p0_ = Function(W).split(True)
     u_old, p_old = Function(W).split(True)
-    navier_stokes_solver_1 = TaylorHoodSolver_1(u0, p0, dt, nu)
-    navier_stokes_solver_2 = TaylorHoodSolver_2(u0, p0, f, dt, nu)
+    # u0.interpolate(u_exact)
+    navier_stokes_solver_1 = TaylorHoodSolverBDF2_1(u0_, u0, p0, dt, nu)
+    navier_stokes_solver_2 = TaylorHoodSolverBDF2_2(u0_, u0, p0, f, dt, nu)
     for n in range(1, num_steps+1):
         # 更新时间
         qn = np.sqrt(modified_energy(2*u_old-u0, _, rho, delta))
@@ -76,11 +83,8 @@ def run_solver(dt, nu, T, Nx, Ny):
         u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
         u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
         # TODO: 构造出最后的解
-        # SAV = CAL_SAV_2(2*u_old-u0, u1, u2, _, dt, nu, delta, qn)
-        N = FacetNormal(mesh)
-        # SAV = CAL_SAV_2(dt, dt, nu, _, delta, _, u0, u1, u2, p0, p1, p2, rho)
-        SAV = 1.0
-        print(qn, SAV, n)
+        SAV = calculate_SAV(2*u_old-u0, u1, u2, _, dt, nu, delta, qn)
+        logger.info(f"qn : {qn}, SAV : {SAV}, n : {n}.")
         u_old.vector()[:] = u0.vector()[:]
         u0.vector()[:] = u1.vector()[:] + SAV*u2.vector()[:]
         p0.vector()[:] = p1.vector()[:] - SAV*p2.vector()[:]

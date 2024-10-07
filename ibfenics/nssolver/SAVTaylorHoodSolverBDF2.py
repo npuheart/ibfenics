@@ -39,32 +39,7 @@ def calculate_SAV(u0, u1, u2, E, dt, nu, delta, qn):
     return S
 
 
-
-
-
-# from dolfin import *
-# import numpy as np
-
 def calculate_SAV_2(h, dt, mu, En, qn, qnm1, unp1, un, unm1, u1, u2, p1, p2, delta, alpha, n, rho):
-    # h = 0.1
-    # dt = 0.1
-    # mu = 0.1
-    # En = 0.1
-    # qn = 0.1
-    # qnm1 = 0.1
-
-    # unp1 = 0.1 # velocity
-    # un = 0.1
-    # unm1 = 0.1
-    # u1 = 0.1
-    # u2 = 0.1
-    # p1 = 0.1
-    # p2 = 0.1
-    # delta = 0.1
-    # alpha = 0.1
-    # n = 0.1 # normal vector
-    # rho = 0.1
-
     _0 = 3.0/dt*(En + delta)
     _1 = (mu+3.0*alpha*h)*assemble(inner(grad(u2), grad(u2))*dx)
     _2 = 1.0/dt*(-4.0*qn + qnm1)*np.sqrt(En + delta)
@@ -87,8 +62,6 @@ def calculate_SAV_2(h, dt, mu, En, qn, qnm1, unp1, un, unm1, u1, u2, p1, p2, del
 
     S = (-B+np.sqrt(B*B-4.0*A*C))/2.0/A
     return S
-
-
 
 class TaylorHoodSolverBDF2_1:
     def __init__(self, u0_, u0, p0, dt, nu, stab=False, alpha = 0.1):

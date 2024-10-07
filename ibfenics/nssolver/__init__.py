@@ -13,6 +13,16 @@ from .SAVTaylorHoodSolver import TaylorHoodSolver_2 as TaylorHoodSolver_2
 from .SAVTaylorHoodSolver import modified_energy, CAL_SAV_2
 from .TaylorHoodSolverBDF2 import TaylorHoodSolverBDF2
 
+
+
+
+class SAVTaylorHoodSolverBDF2:
+    from .SAVTaylorHoodSolverBDF2 import TaylorHoodSolverBDF2_1 
+    from .SAVTaylorHoodSolverBDF2 import TaylorHoodSolverBDF2_2
+    from .SAVTaylorHoodSolverBDF2 import modified_energy
+    from .SAVTaylorHoodSolverBDF2 import calculate_SAV
+
+
 __name__ = "ibfenics.nssolver"
 
 __all__ = [
@@ -20,8 +30,9 @@ __all__ = [
     'TaylorHoodSolver_1'  ,
     'TaylorHoodSolver_2'  ,
     'modified_energy'     ,
-    'CAL_SAV_2'           ,
-    'TaylorHoodSolverBDF2',
+    'CAL_SAV_2'               ,
+    'TaylorHoodSolverBDF2'    ,
+    'SAVTaylorHoodSolverBDF2' ,
     "__version__"
 ]
 
