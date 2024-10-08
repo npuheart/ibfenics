@@ -3,21 +3,24 @@
 # This file is part of ibfenics (https://github.com/npuheart/ibfenics)
 #
 # SPDX-License-Identifier:    LGPL-3.0-or-later
+#
 # email : ibfenics@pengfeima.cn
 
+import os
+from loguru import logger
+import numpy as np
+from fenics import *
+from mshr import *
 from ibfenics import Interaction
 from ibfenics.nssolver import TaylorHoodSolver
 from ibfenics.io import unique_filename, create_xdmf_file, write_excel
 
-from dolfin import *
-from mshr import *
-import os
-import numpy as np
 
 
 # Define time parameters
 T = 10.0
 dt = 0.001
+num_steps = int(T/dt)
 
 # Define fluid parameters
 rho = 1.0
@@ -33,7 +36,7 @@ alpha = 1.0*dt
 stab = False
 
 # Define finite element parameters
-order_velocity = 2 
+order_velocity = 2
 order_pressure = 1
 order_displacement = 1
 
@@ -120,9 +123,8 @@ def calculate_volume(X):
 t = dt
 volume_list = []
 En = 0.0 # elastic energy
-num_steps = int(T/dt)
 for n in range(1, num_steps+1):
-    En = elastic_energy(disp)
+    En = elastic_energy(disp)+ assemble(0.5*rho*inner(u0, u0)*dx)
     print(En)
     if np.isnan(En):
         print("The simulation is blowing up!")
@@ -157,12 +159,5 @@ for n in range(1, num_steps+1):
     t = n*dt
     print(t)
 
-
-
 write_excel(volume_list, file_excel_name)
-
-
-
-
-
 

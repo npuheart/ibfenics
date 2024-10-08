@@ -23,3 +23,8 @@ python3 tests/test_duality.py
 - cmake 3.27.8
 - Python 3.8.10 
 - pybind11 2.4.3
+- loguru 0.7.2
+
+```bash
+pip3 show loguru
+```

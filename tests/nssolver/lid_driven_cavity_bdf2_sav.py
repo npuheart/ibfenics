@@ -92,7 +92,7 @@ def run_solver(dt, nu, T, Nx, Ny):
         file_fluid.write(u0, n*dt)
         file_fluid.write(p0, n*dt)
         
-        print(np.sqrt(assemble(inner(u0,u0)*dx)))
+        logger.info(f"|un|_2 : {np.sqrt(assemble(inner(u0,u0)*dx))}")
         many_sav.append(SAV)
         
 
