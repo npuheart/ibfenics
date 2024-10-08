@@ -5,17 +5,19 @@
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 #
 # email : ibfenics@pengfeima.cn
+#
+# brief : Soft elastic disc in lid driven cavity
 
 import os
-from loguru import logger
 import numpy as np
-from fenics import *
+from loguru import logger
+
 from mshr import *
+from fenics import *
+
 from ibfenics import Interaction
 from ibfenics.nssolver import TaylorHoodSolver
 from ibfenics.io import unique_filename, create_xdmf_file, write_excel
-
-
 
 # Define time parameters
 T = 10.0
@@ -69,8 +71,9 @@ velocity = Function(Vs, name="velocity")
 disp     = Function(Vs, name="displacement")
 force    = Function(Vs, name="force")
 disp.interpolate(Expression(("x[0]", "x[1]"), degree=2))
+ib_interpolation.evaluate_current_points(disp._cpp_object)
 
-# Create fluid solver
+# Define interpolation object and fluid solver object
 navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
 W = navier_stokes_solver.W
 
@@ -102,8 +105,10 @@ else :
 file_solid_name = unique_filename(os.path.basename(__file__), note, "/solid.xdmf")
 file_fluid_name = unique_filename(os.path.basename(__file__), note, "/fluid.xdmf")
 file_excel_name = unique_filename(os.path.basename(__file__), note, "/volume.xlsx")
+file_log_name   = unique_filename(os.path.basename(__file__), note, "/info.log")
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
+logger.add(file_log_name)
 
 
 # For post-processing
