@@ -9,12 +9,10 @@
 # brief : 测试IBFE方法的正确性
 
 import os
-import numpy as np
 from loguru import logger
-
-from mshr import *
+import numpy as np
 from fenics import *
-
+from mshr import *
 from ibfenics import Interaction
 from ibfenics.nssolver import SAVTaylorHoodSolverBDF2
 from ibfenics.io import unique_filename, create_xdmf_file, write_excel
@@ -26,7 +24,6 @@ modified_energy        = SAVTaylorHoodSolverBDF2.modified_energy
 calculate_SAV          = SAVTaylorHoodSolverBDF2.calculate_SAV
 
 
-
 def advance_disp_bdf2(disp, disp_, velocity, dt):
     Vs = disp.function_space()
     temp_disp = Function(Vs)
@@ -34,12 +31,12 @@ def advance_disp_bdf2(disp, disp_, velocity, dt):
     disp_.vector()[:] = disp.vector()[:]
     disp.vector()[:] = temp_disp.vector()[:]
 
-def advance_disp_be(disp, velocity, dt):
-    disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
+def advance_disp_be(disp, disp_, velocity, dt):
+    pass
 
-# Define time parameters
-T = 1.0
-dt = 1/500
+# Define fluid solver
+T = 10.0
+dt = 1/8000
 num_steps = int(T/dt)
 
 # Define fluid parameters
@@ -52,8 +49,8 @@ nu_s = 1.0/0.0625
 n_mesh_solid = 40
 
 # Define stablization parameters
-alpha = 10.0*dt
-stab = True
+alpha = 1.0*dt
+stab = False
 delta = 0.1
 SAV = 1.0
 
@@ -212,7 +209,7 @@ for n in range(1, num_steps+1):
     # step 2. interpolate velocity from fluid to solid
     ib_interpolation.fluid_to_solid(u0._cpp_object, velocity._cpp_object)
     # step 3. calculate disp for solid and update current gauss points and dof points
-    advance_disp_be(disp, velocity, dt)
+    advance_disp_bdf2(disp, disp_, velocity, dt)
     ib_interpolation.evaluate_current_points(disp._cpp_object)
     # step 4. calculate body force.
     b2 = assemble(L2)

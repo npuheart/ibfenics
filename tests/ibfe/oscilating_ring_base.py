@@ -30,7 +30,7 @@ def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
 
 # Define time parameters
-T = 10.0
+T = 1.0
 dt = 1/8000
 num_steps = int(T/dt)
 
@@ -44,10 +44,8 @@ nu_s = 1.0/0.0625
 n_mesh_solid = 40
 
 # Define stablization parameters
-alpha = 1.0*dt
-stab = False
-delta = 0.1
-SAV = 1.0
+alpha = 10.0*dt
+stab = True
 
 # Define finite element parameters
 order_velocity = 2

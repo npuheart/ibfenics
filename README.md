@@ -24,7 +24,9 @@ python3 tests/test_duality.py
 - Python 3.8.10 
 - pybind11 2.4.3
 - loguru 0.7.2
+- serverchan-sdk 1.0.2
+
 
 ```bash
-pip3 show loguru
+pip3 show serverchan-sdk
 ```

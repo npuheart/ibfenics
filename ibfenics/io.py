@@ -36,6 +36,14 @@ def create_xdmf_file(mpi_comm, filename):
     file.parameters["flush_output"] = True
     return file
 
+def send_to_xiaomi(desp):
+    # pip install serverchan-sdk
+    sdk_key = "sctp1508t8kbmtrb5kat2nsazwhmqy2"
+    from serverchan_sdk import sc_send; 
+    response = sc_send(
+        sdk_key, "ibfenics log", desp, {"tags": "ibfenics"})
+    
+    return response
 
 # 指定要保存的文件名和表单名称
 def write_excel(volume_list,excel_file1,sheet_name = 'v'):
