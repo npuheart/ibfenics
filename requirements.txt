@@ -1,2 +1,7 @@
 loguru==0.7.2
 serverchan-sdk==1.0.2
+openpyxl
+pandas
+scipy
+wheel
+setuptools

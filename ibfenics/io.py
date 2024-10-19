@@ -12,7 +12,8 @@
 import os
 import pandas as pd
 from datetime import datetime
-from dolfin import XDMFFile
+from dolfin import *
+from mshr import *
 
 output_path = "data/large/"
 
@@ -45,11 +46,72 @@ def send_to_xiaomi(desp):
     
     return response
 
+
 # 指定要保存的文件名和表单名称
 def write_excel(volume_list,excel_file1,sheet_name = 'v'):
     df = pd.DataFrame(volume_list)
     df.to_excel(excel_file1, sheet_name=sheet_name, index=False)
 
 
-__all__ = ['unique_filename', 'create_xdmf_file', 'write_excel']
+def write_mesh(_mesh, _domains, boundary,mesh_size, mesh_name, mesh_path):
+    # output mesh
+    mesh_file = XDMFFile(mesh_path+mesh_name+"_"+str(mesh_size)+".xdmf")
+    mesh_file.write(_mesh)
+    mesh_file.close()
+
+    # output domains
+    domains_file = XDMFFile(mesh_path+mesh_name+"_"+str(mesh_size)+"_domains.xdmf")
+    domains_file.write(_domains)
+    domains_file.close()
+
+    # output domains xml
+    File(mesh_path+mesh_name+"_"+str(mesh_size)+"_domains.xml") << _domains
+
+    # output boundaries xml
+    domains_file = XDMFFile(mesh_path+mesh_name+"_"+str(mesh_size)+"_boundaries.xdmf")
+    domains_file.write(boundary)
+    domains_file.close()
+    File(mesh_path+mesh_name+"_"+str(mesh_size)+"_boundaries.xml") << boundary
+
+
+def write_bg_mesh(L,H,mesh_size, mesh_name, mesh_path):
+    _domain = Rectangle(Point(0,0), Point(L,H))
+    _mesh = generate_mesh(_domain,mesh_size)
+    
+    # output boundaries
+    class Boundary_1(SubDomain):
+        def inside(self, x, on_boundary):
+            return x[0]<DOLFIN_EPS_LARGE and on_boundary
+
+    class Boundary_4(SubDomain):
+        def inside(self, x, on_boundary):
+            return x[0]>L*(1.0 - DOLFIN_EPS_LARGE) and on_boundary
+
+    class Boundary_2(SubDomain):
+        def inside(self, x, on_boundary):
+            return x[1]<DOLFIN_EPS_LARGE and on_boundary
+
+    class Boundary_3(SubDomain):
+        def inside(self, x, on_boundary):
+            return x[1]>H*(1.0 - DOLFIN_EPS_LARGE) and on_boundary
+
+    boundary = MeshFunction("size_t", _mesh, 1)
+    Boundary_1().mark(boundary, 1)
+    Boundary_2().mark(boundary, 2)
+    Boundary_3().mark(boundary, 3)
+    Boundary_4().mark(boundary, 4)
+    
+    # output mesh
+    mesh_file = XDMFFile(mesh_path+mesh_name+"_bg_"+str(mesh_size)+".xdmf")
+    mesh_file.write(_mesh)
+    mesh_file.close()
+    
+    domains_file = XDMFFile(mesh_path+mesh_name+"_bg_"+str(mesh_size)+"_boundaries.xdmf")
+    domains_file.write(boundary)
+    domains_file.close()
+    File(mesh_path+mesh_name+"_bg_"+str(mesh_size)+"_boundaries.xml") << boundary
+
+
+
+__all__ = ['unique_filename', 'create_xdmf_file', 'write_excel', 'write_bg_mesh', 'write_mesh']
 
