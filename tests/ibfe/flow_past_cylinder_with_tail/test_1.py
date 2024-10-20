@@ -107,9 +107,11 @@ vs = TestFunction(Vs)
 # r = as_vector((-cos(s[0]/R), -sin(s[0]/R)))
 # G = mu/omega/(1+s[1])/R*r
 # H = - inner(G, V)*dx + inner(U, V)*dx
+X0 = SpatialCoordinate(solid_mesh)
 F = grad(disp)
 P = nu_s*(F-inv(F).T)
 F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
+F2 += 10e5*inner((disp - X0),vs)*dx
 a2 = lhs(F2)
 L2 = rhs(F2)
 A2 = assemble(a2)
@@ -158,25 +160,25 @@ for n in range(1, num_steps+1):
     u1, p1 = navier_stokes_solver.solve(bcus, bcps)
     u0.assign(u1)
     p0.assign(p1)
-    # # step 2. interpolate velocity from fluid to solid
-    # u0_1 = project(u0, Vf_1)
-    # ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
-    # # step 3. calculate disp for solid and update current gauss points and dof points
-    # advance_disp_be(disp, velocity, dt)
-    # ib_interpolation.evaluate_current_points(disp._cpp_object)
-    # # step 4. calculate body force.
-    # b2 = assemble(L2)
-    # solve(A2, force.vector(), b2)
-    # # step 5. interpolate force from solid to fluid
-    # ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
-    # # step 6. update variables and save to file.
+    # step 2. interpolate velocity from fluid to solid
+    u0_1 = project(u0, Vf_1)
+    ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
+    # step 3. calculate disp for solid and update current gauss points and dof points
+    advance_disp_be(disp, velocity, dt)
+    ib_interpolation.evaluate_current_points(disp._cpp_object)
+    # step 4. calculate body force.
+    b2 = assemble(L2)
+    solve(A2, force.vector(), b2)
+    # step 5. interpolate force from solid to fluid
+    ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
+    # step 6. update variables and save to file.
     file_fluid.write(u0, t)
     file_fluid.write(p0, t)
-    # file_fluid.write(f, t)
-    # file_solid.write(disp, t)
-    # file_solid.write(force, t)
-    # file_solid.write(velocity, t)
-    # volume_list.append(calculate_volume(disp))
+    file_fluid.write(f, t)
+    file_solid.write(disp, t)
+    file_solid.write(force, t)
+    file_solid.write(velocity, t)
+    volume_list.append(calculate_volume(disp))
     t = n*dt
     print(t)
 

@@ -78,7 +78,7 @@ def run_solver(dt, nu, T, Nx, Ny):
 
 if __name__ == '__main__':
     N = 32
-    dt = 1.0/2560
-    T = 1
+    dt = 1.0/1000.0
+    T = 10
     nu = 0.001
     run_solver(dt, nu, T, Nx = N, Ny = N)
