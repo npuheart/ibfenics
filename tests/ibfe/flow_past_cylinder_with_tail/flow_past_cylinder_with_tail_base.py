@@ -51,7 +51,6 @@ order_displacement = 1
 orders       = [order_velocity, order_pressure, order_displacement]
 seperations  = [n_mesh_fluid, n_mesh_fluid]
 box_points   = [Point(0,0), Point(1, 1)]
-
 solid_mesh = Mesh()
 with XDMFFile(os.path.expanduser("~") + "/mesh/benchmark/beam_80.xdmf") as xdmf:
     xdmf.read(solid_mesh)
@@ -59,17 +58,17 @@ with XDMFFile(os.path.expanduser("~") + "/mesh/benchmark/beam_80.xdmf") as xdmf:
 solid_mesh   = generate_mesh(circle_outer-circle_inner, n_mesh_solid)
 interaction  = Interaction(box_points, seperations, solid_mesh, orders)
 
-# fluid_mesh          = interaction.fluid_mesh
-# ib_mesh             = interaction.ib_mesh
-# ib_interpolation    = interaction.ib_interpolation
-# Vs                  = interaction.Vs
-# Vf                  = interaction.Vf
-# Vf_1                = interaction.Vf_1
-# Vp                  = interaction.Vp
+fluid_mesh          = interaction.fluid_mesh
+ib_mesh             = interaction.ib_mesh
+ib_interpolation    = interaction.ib_interpolation
+Vs                  = interaction.Vs
+Vf                  = interaction.Vf
+Vf_1                = interaction.Vf_1
+Vp                  = interaction.Vp
 
-# print(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
-# print(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
-# print("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
+print(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
+print(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
+print("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
 
 # # Create functions for fluid
 # u0   = Function(Vf,   name="velocity")

@@ -13,4 +13,7 @@ data/large
 *.pvd
 *.vtu
 *.vti
+*.xml.gz
+
+
 nohup.out
