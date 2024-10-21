@@ -3,6 +3,10 @@
 import os
 from fenics import *
 
+marker_circle = 1
+marker_beam = 2
+
+ 
 mesh_path = os.path.expanduser("~") + "/mesh/benchmark/circle_beam/"
 
 solid_mesh = Mesh()

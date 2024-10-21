@@ -6,7 +6,7 @@
 #
 # email : ibfenics@pengfeima.cn
 #
-# brief : 测试IBFE方法的正确性
+# brief : flow past cylinder with tail
 
 import os
 import numpy as np
@@ -17,19 +17,19 @@ from fenics import *
 
 from ibfenics import Interaction
 from ibfenics.nssolver import TaylorHoodSolver
-from ibfenics.io import unique_filename, create_xdmf_file
+from ibfenics.io import unique_filename, create_xdmf_file, write_excel
 
-from local_mesh import get_mesh
-from ref_coordinates import FiberForce
+def advance_disp_be(disp, velocity, dt):
+    disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
 
 # Define time parameters
 T = 10.0
-dt = 1/1000
+dt = 1/8000
 num_steps = int(T/dt)
 
 # Define fluid parameters
 rho = 1.0
-nu = 0.01
+nu = 0.001
 n_mesh_fluid = 32
 
 # Define solid parameters
@@ -47,40 +47,11 @@ order_velocity = 2
 order_pressure = 1
 order_displacement = 1
 
-def advance_disp_be(disp, velocity, dt):
-    disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
-
-# Define boundary conditions for fluid solver
-def calculate_fluid_boundary_conditions(W):
-    bcu_1 = DirichletBC(W.sub(0), Constant((0,0)), "near(x[1],1.0)")
-    bcu_2 = DirichletBC(W.sub(0), Constant((0,0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)")
-    bcp_1 = DirichletBC(W.sub(1), Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
-    bcu = [bcu_1, bcu_2]
-    bcp = [bcp_1]
-    return bcu, bcp
-
-# TODO: Define solid constituitive model
-def calculate_constituitive_model(disp, nu_s, vs, us):
-    fiber_force = FiberForce()
-    F2 = -inner(fiber_force, vs)*dx + inner(us, vs)*dx
-    a2 = lhs(F2)
-    L2 = rhs(F2)
-    A2 = assemble(a2)
-    return A2, L2
-
-def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t):
-    if n % 10 == 0:
-        file_fluid.write(u0, t)
-        file_fluid.write(p0, t)
-        file_fluid.write(f, t)
-        file_solid.write(disp, t)
-        file_solid.write(force, t)
-        file_solid.write(velocity, t)
-
+# Define spatial discretizations
 orders       = [order_velocity, order_pressure, order_displacement]
-seperations  = [n_mesh_fluid, n_mesh_fluid]
-box_points   = [Point(0,0), Point(1, 1)]
-solid_mesh   = get_mesh(n_mesh_solid)
+seperations  = [n_mesh_fluid*6, n_mesh_fluid]
+box_points   = [Point(0,0), Point(2.2, 0.41)]
+from local_mesh import solid_mesh, bdry, domains, dx, marker_circle
 interaction  = Interaction(box_points, seperations, solid_mesh, orders)
 
 fluid_mesh          = interaction.fluid_mesh
@@ -91,51 +62,102 @@ Vf                  = interaction.Vf
 Vf_1                = interaction.Vf_1
 Vp                  = interaction.Vp
 
+File("b.pvd") << fluid_mesh
 print(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
 print(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
 print("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
 
+
 # Create functions for fluid
-u0 =   Function(Vf,   name="velocity")
+u0   = Function(Vf,   name="velocity")
 u0_1 = Function(Vf_1, name="velocity 1st order")
-p0 =   Function(Vp,   name="pressure")
-f =    Function(Vf_1, name="force")
+p0   = Function(Vp,   name="pressure")
+f    = Function(Vf_1, name="force")
 
 # Create functions for solid
 velocity = Function(Vs, name="velocity")
 disp     = Function(Vs, name="displacement")
 force    = Function(Vs, name="force")
-disp.interpolate(Expression(("x[0]", "x[1]"), degree=2))
+disp.interpolate(Expression(("x[0]","x[1]"),degree=2))
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define interpolation object and fluid solver object
 navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
-bcu, bcp = calculate_fluid_boundary_conditions(navier_stokes_solver.W)
+W = navier_stokes_solver.W
+
+# Define boundary conditions for fluid solver
+inflow   = 'near(x[0], 0)'
+outflow  = 'near(x[0], 2.2)'
+walls    = 'near(x[1], 0) || near(x[1], 0.41)'
+cylinder = 'on_boundary && x[0]>0.1 && x[0]<0.3 && x[1]>0.1 && x[1]<0.3'
+inflow_profile = ('4.0*1.5*x[1]*(0.41 - x[1]) / pow(0.41, 2)', '0')
+bcu_inflow = DirichletBC(W.sub(0), Expression(inflow_profile, degree=2), inflow)
+bcu_walls = DirichletBC(W.sub(0), Constant((0, 0)), walls)
+bcu_cylinder = DirichletBC(W.sub(0), Constant((0, 0)), cylinder)
+bcp_outflow = DirichletBC(W.sub(1), Constant(0), outflow)
+bcus = [bcu_inflow, bcu_walls, bcu_cylinder]
+bcps = [bcp_outflow]
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
 vs = TestFunction(Vs)
-A2, L2 = calculate_constituitive_model(disp, nu_s, vs, us)
+
+# TODO: Define solid constituitive model
+# Define variational problem for solid solver
+# r = as_vector((-cos(s[0]/R), -sin(s[0]/R)))
+# G = mu/omega/(1+s[1])/R*r
+# H = - inner(G, V)*dx + inner(U, V)*dx
+X0 = SpatialCoordinate(solid_mesh)
+F = grad(disp)
+P = nu_s*(F-inv(F).T)
+F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
+F2 += 10e5*inner((disp - X0),vs)*dx(subdomain_id=marker_circle)
+a2 = lhs(F2)
+L2 = rhs(F2)
+A2 = assemble(a2)
 
 # Define output path
-file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
-file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
-file_excel_name = unique_filename(os.path.basename(__file__), "note", "/volume.xlsx")
-file_log_name   = unique_filename(os.path.basename(__file__), "note", "/info.log")
+note = "note"
+# if stab:
+#     note = f"{nu_s}-{dt}-{alpha}"
+# else :
+#     note = f"{nu_s}-{dt}"
+
+file_solid_name = unique_filename(os.path.basename(__file__), note, "/solid.xdmf")
+file_fluid_name = unique_filename(os.path.basename(__file__), note, "/fluid.xdmf")
+file_excel_name = unique_filename(os.path.basename(__file__), note, "/volume.xlsx")
+file_log_name   = unique_filename(os.path.basename(__file__), note, "/info.log")
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
-logger.add(file_solid_name)
-logger.add(file_fluid_name)
-logger.add(file_excel_name)
 logger.add(file_log_name)
+print(f"file_solid_name: {file_solid_name}")
+print(f"file_fluid_name: {file_fluid_name}")
+
+
+# For post-processing
+def elastic_energy(disp):
+    F = grad(disp)
+    C = F*F.T
+    Ic = tr(C)
+    J = det(F)
+    return assemble(0.5*nu_s*(Ic - 2 - 2*ln(J))*dx)
+
+
+def calculate_volume(X):
+    volume_J = assemble(det(grad(X))*dx)
+    print("体积：", volume_J)
+    return volume_J
+
 
 t = dt
+volume_list = []
 En = 0.0 # elastic energy
 for n in range(1, num_steps+1):
+    # En = elastic_energy(disp)+ assemble(0.5*rho*inner(u0, u0)*dx)
     # step 1. calculate velocity and pressure
     # 计算流体的速度和压力
     navier_stokes_solver.update(u0, p0)
-    u1, p1 = navier_stokes_solver.solve(bcu, bcp)
+    u1, p1 = navier_stokes_solver.solve(bcus, bcps)
     u0.assign(u1)
     p0.assign(p1)
     # step 2. interpolate velocity from fluid to solid
@@ -150,8 +172,17 @@ for n in range(1, num_steps+1):
     # step 5. interpolate force from solid to fluid
     ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
     # step 6. update variables and save to file.
-    output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t)
+    file_fluid.write(u0, t)
+    file_fluid.write(p0, t)
+    file_fluid.write(f, t)
+    file_solid.write(disp, t)
+    file_solid.write(force, t)
+    file_solid.write(velocity, t)
+    volume_list.append(calculate_volume(disp))
     t = n*dt
     print(t)
+
+write_excel(volume_list, file_excel_name)
+
 
 
