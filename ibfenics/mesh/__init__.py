@@ -7,7 +7,3 @@
 # email : ibfenics@pengfeima.cn
 
 
-from .ale import test_cpp
-
-
-__all__ = ['test_cpp']

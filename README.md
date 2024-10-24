@@ -15,7 +15,6 @@ python3 setup.py install --user
 ## 测试
 ```bash
 python3 tests/test_duality.py
-
 ```
 
 ## 通过以下环境测试

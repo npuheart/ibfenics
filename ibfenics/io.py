@@ -14,6 +14,7 @@ import pandas as pd
 from datetime import datetime
 from dolfin import *
 from mshr import *
+import json
 
 output_path = "data/large/"
 
@@ -26,8 +27,8 @@ def check_path(path):
 
 def unique_filename(current_file_name, tag, extension):
     check_path(output_path)
-    note =  os.path.splitext(current_file_name)[0]  # 去掉扩展名
-    file_id = f"{output_path}{note}/{tag}/" + datetime.now().strftime('%Y%m%d-%H%M') + extension
+    note =  os.path.splitext(current_file_name)[0]
+    file_id = f"{output_path}{note}/{tag}/" + datetime.now().strftime('%Y%m%d-%H%M%S') +  extension
     return file_id
 
 def create_xdmf_file(mpi_comm, filename):
@@ -51,6 +52,29 @@ def send_to_xiaomi(desp):
 def write_excel(volume_list,excel_file1,sheet_name = 'v'):
     df = pd.DataFrame(volume_list)
     df.to_excel(excel_file1, sheet_name=sheet_name, index=False)
+
+def write_paramters(filename, **params):
+    params = params or {}
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(params, f, ensure_ascii=False, indent=4)
+
+class TimeManager:
+    def __init__(self, total_time, total_steps, fps=100):
+        self.total_time = total_time  # 总时间T
+        self.total_steps = total_steps  # 总步数
+        self.fps = fps  # 每秒帧数
+        self.time_per_step = total_time / total_steps  # 每步时间
+        self.step_interval = int(total_steps / (fps * total_time))  # 计算多少步输出一次
+    
+    def should_output(self, current_step):
+        # 判断当前步是否是输出步
+        if current_step > self.total_steps - 1:
+            raise ValueError("当前步数超过总步数。")
+        if current_step % int(self.step_interval) == 0:
+            return True
+        if current_step == self.total_steps - 1:
+            return True
+        return False
 
 
 def write_mesh(_mesh, _domains, boundary,mesh_size, mesh_name, mesh_path):

@@ -8,7 +8,7 @@
 
 import numpy
 from .io import *
-from .IU import IU
+from .IU import IU,UserIU
 from .cpp import __version__
 from .mesh import *
 from .interaction import *

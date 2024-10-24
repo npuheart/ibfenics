@@ -17,7 +17,7 @@ from fenics import *
 
 from ibfenics import Interaction
 from ibfenics.nssolver import TaylorHoodSolver
-from ibfenics.io import unique_filename, create_xdmf_file
+from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters
 
 from local_mesh import get_mesh
 from ref_coordinates import FiberForce
@@ -26,6 +26,7 @@ from ref_coordinates import FiberForce
 T = 10.0
 dt = 1/1000
 num_steps = int(T/dt)
+time_manager = TimeManager(T, num_steps, 20)
 
 # Define fluid parameters
 rho = 1.0
@@ -46,6 +47,7 @@ SAV   = 1.0
 order_velocity = 2
 order_pressure = 1
 order_displacement = 1
+
 
 def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
@@ -68,8 +70,10 @@ def calculate_constituitive_model(disp, nu_s, vs, us):
     A2 = assemble(a2)
     return A2, L2
 
-def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t):
-    if n % 10 == 0:
+def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
+    print(f"{n}")
+    if time_manager.should_output(n):
+        print(f"{n}: output...")
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
         file_fluid.write(f, t)
@@ -122,12 +126,16 @@ file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xd
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_excel_name = unique_filename(os.path.basename(__file__), "note", "/volume.xlsx")
 file_log_name   = unique_filename(os.path.basename(__file__), "note", "/info.log")
+file_parameters_name   = unique_filename(os.path.basename(__file__), "note", "/parameters.json")
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
-logger.add(file_solid_name)
-logger.add(file_fluid_name)
-logger.add(file_excel_name)
 logger.add(file_log_name)
+logger.info(file_solid_name)
+logger.info(file_fluid_name)
+logger.info(file_excel_name)
+# print(f"file_solid_name {file_solid_name}")
+# write_parameters(param_filename, tag + filename_param)
+write_paramters(file_parameters_name, beta=1)
 
 t = dt
 En = 0.0 # elastic energy
@@ -150,7 +158,7 @@ for n in range(1, num_steps+1):
     # step 5. interpolate force from solid to fluid
     ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
     # step 6. update variables and save to file.
-    output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t)
+    output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     t = n*dt
     print(t)
 

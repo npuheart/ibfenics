@@ -15,26 +15,31 @@ from loguru import logger
 from mshr import *
 from fenics import *
 
-from ibfenics import Interaction
+from ibfenics import Interaction, UserIU
 from ibfenics.nssolver import TaylorHoodSolver
 from ibfenics.io import unique_filename, create_xdmf_file, write_excel
 
 def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
 
+# Standard units
+units = UserIU(g=0.001,cm=0.01)
+
 # Define time parameters
-T = 10.0
-dt = 1/8000
+T = 12.0      *units.s
+dt = 1/20000   *units.s
 num_steps = int(T/dt)
 
 # Define fluid parameters
-rho = 1.0
+rho = 1.0       
 nu = 0.001
 n_mesh_fluid = 32
 
 # Define solid parameters
-nu_s = 1.0/0.0625 
-n_mesh_solid = 40
+n_mesh_solid = 40 
+beta_s      = 1e7
+kappa_stab  = 1e6
+G_s         = 1000.0
 
 # Define stablization parameters
 alpha = 1.0*dt
@@ -98,31 +103,32 @@ bcp_outflow = DirichletBC(W.sub(1), Constant(0), outflow)
 bcus = [bcu_inflow, bcu_walls, bcu_cylinder]
 bcps = [bcp_outflow]
 
-# Define trial and test functions for solid solver
-us = TrialFunction(Vs)
-vs = TestFunction(Vs)
 
-# TODO: Define solid constituitive model
-# Define variational problem for solid solver
-# r = as_vector((-cos(s[0]/R), -sin(s[0]/R)))
-# G = mu/omega/(1+s[1])/R*r
-# H = - inner(G, V)*dx + inner(U, V)*dx
-X0 = SpatialCoordinate(solid_mesh)
-F = grad(disp)
-P = nu_s*(F-inv(F).T)
-F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
-F2 += 10e5*inner((disp - X0),vs)*dx(subdomain_id=marker_circle)
-a2 = lhs(F2)
-L2 = rhs(F2)
-A2 = assemble(a2)
+# Define solid constituitive model
+def calculate_constituitive_model(disp, Vs):
+    # Define trial and test functions for solid solver
+    us = TrialFunction(Vs)
+    vs = TestFunction(Vs)
+    X0 = SpatialCoordinate(solid_mesh)
+    # Define neo-Hookean material
+    F = grad(disp)
+    I3 = det(F)*det(F)
+    P = G_s/2.0*(F-inv(F).T) + kappa_stab*ln(I3)*inv(F).T
+    F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
+    # Define stablization term
+    F2 += kappa_stab*inner(grad(us), grad(vs))*dx
+    # Define constraints for cylinder
+    F2 += beta_s*inner((disp - X0),vs)*dx(subdomain_id=marker_circle)
+    a2 = lhs(F2)
+    L2 = rhs(F2)
+    A2 = assemble(a2)
+    return L2, A2
+
+
+L2, A2 = calculate_constituitive_model(disp, Vs)
 
 # Define output path
 note = "note"
-# if stab:
-#     note = f"{nu_s}-{dt}-{alpha}"
-# else :
-#     note = f"{nu_s}-{dt}"
-
 file_solid_name = unique_filename(os.path.basename(__file__), note, "/solid.xdmf")
 file_fluid_name = unique_filename(os.path.basename(__file__), note, "/fluid.xdmf")
 file_excel_name = unique_filename(os.path.basename(__file__), note, "/volume.xlsx")
