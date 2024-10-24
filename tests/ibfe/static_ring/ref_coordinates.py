@@ -13,11 +13,13 @@ class FiberForce(UserExpression):
     def eval(self, values, x):
         R, gamma = self.R, self.gamma
         s = self.fun(x[0], x[1])
+        mu = 1.0
+        omega = 0.0625
         # print(s)
         # print(x[0], x[1])
         r = (-np.cos(s[0]/R), -np.sin(s[0]/R))
-        values[0] = (1+s[1])/R*r[0]
-        values[1] = (1+s[1])/R*r[1]
+        values[0] = mu/omega/(1+s[1])/R*r[0]
+        values[1] = mu/omega/(1+s[1])/R*r[1]
 
     def value_shape(self):
         return (2,)

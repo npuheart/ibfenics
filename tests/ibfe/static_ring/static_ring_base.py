@@ -29,12 +29,10 @@ num_steps = int(T/dt)
 time_manager = TimeManager(T, num_steps, 20)
 
 # Define fluid parameters
-rho = 1.0
 nu = 0.01
 n_mesh_fluid = 32
 
 # Define solid parameters
-nu_s = 1.0/0.0625 
 n_mesh_solid = 40
 
 # Define stablization parameters
@@ -62,7 +60,7 @@ def calculate_fluid_boundary_conditions(W):
     return bcu, bcp
 
 # TODO: Define solid constituitive model
-def calculate_constituitive_model(disp, nu_s, vs, us):
+def calculate_constituitive_model(disp, vs, us):
     fiber_force = FiberForce()
     F2 = -inner(fiber_force, vs)*dx + inner(us, vs)*dx
     a2 = lhs(F2)
@@ -119,7 +117,7 @@ bcu, bcp = calculate_fluid_boundary_conditions(navier_stokes_solver.W)
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
 vs = TestFunction(Vs)
-A2, L2 = calculate_constituitive_model(disp, nu_s, vs, us)
+A2, L2 = calculate_constituitive_model(disp, vs, us)
 
 # Define output path
 file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")

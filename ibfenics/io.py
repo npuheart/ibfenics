@@ -60,12 +60,12 @@ def write_paramters(filename, **params):
 
 class TimeManager:
     def __init__(self, total_time, total_steps, fps=100):
-        self.total_time = total_time  # 总时间T
-        self.total_steps = total_steps  # 总步数
-        self.fps = fps  # 每秒帧数
-        self.time_per_step = total_time / total_steps  # 每步时间
-        self.step_interval = int(total_steps / (fps * total_time))  # 计算多少步输出一次
-    
+        self.total_time = total_time
+        self.total_steps = total_steps
+        self.fps = fps
+        self.time_per_step = total_time / total_steps
+        fps_m_time = max(fps * total_time, 1)
+        self.step_interval = max(int( total_steps / fps_m_time ), 1)
     def should_output(self, current_step):
         # 判断当前步是否是输出步
         if current_step > self.total_steps - 1:
