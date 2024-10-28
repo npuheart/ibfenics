@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 from scipy.optimize import fsolve
-from local_mesh import get_mesh
+from local_mesh import *
 from fenics import *
 
 class FiberForce(UserExpression):
@@ -18,8 +18,8 @@ class FiberForce(UserExpression):
         # print(s)
         # print(x[0], x[1])
         r = (-np.cos(s[0]/R), -np.sin(s[0]/R))
-        values[0] = mu/omega/(1+s[1])/R*r[0]
-        values[1] = mu/omega/(1+s[1])/R*r[1]
+        values[0] = mu/omega*(1+s[1])/R*r[0]
+        values[1] = mu/omega*(1+s[1])/R*r[1]
 
     def value_shape(self):
         return (2,)
@@ -34,7 +34,7 @@ class FiberForce(UserExpression):
             d = R + s2 + gamma
             return 1 - (a / c)**2 - (b / d)**2
 
-        initial_guess = -0.03
+        initial_guess = 0.03
         
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")  # 记录所有警告
@@ -47,7 +47,7 @@ class FiberForce(UserExpression):
                 for warning in w:
                     print(f"捕获到警告: {warning.message}")
         
-        
+
         s1 = np.arccos((X0 - 0.5) / (R + s2)) * R
         s1 = 1.0 if np.isnan(s1) else s1  # arccos(?) = nan when ? > 1
         s1 = 2.0 * np.pi * R - s1 if X1 < 0.5 else s1
@@ -56,7 +56,6 @@ class FiberForce(UserExpression):
 
 
 if __name__ == "__main__":
-    solid_mesh = get_mesh(40)
     V = VectorFunctionSpace(solid_mesh, "CG", 1)
     velocity_inlet = FiberForce()
     u = Function(V)

@@ -58,6 +58,10 @@ def write_paramters(filename, **params):
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(params, f, ensure_ascii=False, indent=4)
 
+
+# 1. 时间步长为 total_time / total_steps
+# 2. total_steps 太大了怎么办？ 用 fps (frame per second) 控制输出的步数，fps*total_time
+# 3. total_time 特别小怎么办？ 忽略fps，直接按照 total_steps 输出
 class TimeManager:
     def __init__(self, total_time, total_steps, fps=100):
         self.total_time = total_time
