@@ -15,7 +15,6 @@ from loguru import logger
 from mshr import *
 from fenics import *
 
-from ibfenics import Interaction
 from ibfenics.nssolver import SAVTaylorHoodSolverBDF2
 from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters
 TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
@@ -24,33 +23,24 @@ modified_energy        = SAVTaylorHoodSolverBDF2.modified_energy
 # calculate_SAV_2        = SAVTaylorHoodSolverBDF2.calculate_SAV_2
 calculate_SAV          = SAVTaylorHoodSolverBDF2.calculate_SAV
 
-from local_mesh import get_mesh
 from ref_coordinates import FiberForce
+from local_mesh import *
+from post_processing import *
 
 # Define time parameters
-T =  0.00005
-dt = 0.00001
+T =  0.0000005
+dt = 0.0000001
 num_steps = int(T/dt)
 time_manager = TimeManager(T, num_steps, 20)
 
 # Define fluid parameters
 nu = 0.01
-n_mesh_fluid = 32
-
-# Define solid parameters
-n_mesh_solid = 40
 
 # Define stablization parameters
 alpha = 1.0*dt
 stab  = False
 delta = 0.1
 SAV   = 1.0
-
-# Define finite element parameters
-order_velocity = 2
-order_pressure = 1
-order_displacement = 1
-
 
 def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
@@ -91,23 +81,6 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
         file_solid.write(force, t)
         file_solid.write(velocity, t)
 
-orders       = [order_velocity, order_pressure, order_displacement]
-seperations  = [n_mesh_fluid, n_mesh_fluid]
-box_points   = [Point(0,0), Point(1, 1)]
-solid_mesh   = get_mesh(n_mesh_solid)
-interaction  = Interaction(box_points, seperations, solid_mesh, orders)
-
-fluid_mesh          = interaction.fluid_mesh
-ib_mesh             = interaction.ib_mesh
-ib_interpolation    = interaction.ib_interpolation
-Vs                  = interaction.Vs
-Vf                  = interaction.Vf
-Vf_1                = interaction.Vf_1
-Vp                  = interaction.Vp
-
-print(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
-print(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
-print("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
 
 # Create functions for fluid
 u0_ = Function(Vf, name="velocity_")
@@ -196,8 +169,17 @@ for n in range(1, num_steps+1):
     # step 5. interpolate force from solid to fluid
     ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
     # step 6. update variables and save to file.
-    output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
+    # output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     t = n*dt
-    print(t, assemble(inner(u0, u0)*dx))
+    result = assemble(inner(u0, u0)*dx)
+    print(f"{t:.2e}, {result:.2e}")
 
 
+
+a,b,c = calculate_error_p(p0)
+d,e,f = calculate_error_u(u0)
+
+File("p0.pvd") << p0
+
+logger.info(f"p error: {a:.2e},{b:.2e},{c:.2e}")
+logger.info(f"u error: {d:.2e},{e:.2e},{f:.2e}")

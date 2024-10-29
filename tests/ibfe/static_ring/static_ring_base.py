@@ -105,9 +105,14 @@ logger.info(file_solid_name)
 logger.info(file_fluid_name)
 logger.info(file_excel_name)
 write_paramters(file_parameters_name, beta=1)
-print(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
-print(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
-print("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
+
+
+logger.info(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
+logger.info(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
+logger.info("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
+logger.info(f"dt {dt}, num_steps {num_steps}")
+logger.info(f"fluid_mesh.num_cells() {fluid_mesh.num_cells()}, Vp.dim() {Vp.dim()}, Vf.dim() {Vf.dim()}")
+logger.info(f"solid_mesh.num_cells() {solid_mesh.num_cells()}, Vs.dim() {Vs.dim()}")
 
 
 t = dt
@@ -133,13 +138,15 @@ for n in range(1, num_steps+1):
     # step 6. update variables and save to file.
     # output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     t = n*dt
-    print(t, assemble(inner(u0, u0)*dx))
+    result = assemble(inner(u0, u0)*dx)
+    print(f"{t:.2e}, {result:.2e}")
 
 
-pe = interpolate(pressure_exact, p0.function_space())
-error = calculate_error(pe, p0)
 
-File("pe.pvd") << pe
+a,b,c = calculate_error_p(p0)
+d,e,f = calculate_error_u(u0)
+
 File("p0.pvd") << p0
 
-logger.info(f"error: {error}")
+logger.info(f"p error: {a:.2e},{b:.2e},{c:.2e}")
+logger.info(f"u error: {d:.2e},{e:.2e},{f:.2e}")

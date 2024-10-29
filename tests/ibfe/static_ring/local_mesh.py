@@ -10,6 +10,9 @@ def calculate_solid_mesh(n_mesh_solid = 40):
     return solid_mesh
 
 
+# 32 40
+# 64 80
+# 128 160
 n_mesh_fluid = 128
 n_mesh_solid = 160
 
