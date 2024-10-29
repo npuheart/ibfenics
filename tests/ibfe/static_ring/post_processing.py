@@ -1,33 +1,15 @@
 
 
-# double pressure_analytical(const double3& x) {
-#     double p0      = 0.0;
-#     double mu      = 1.0;
-#     double R       = 0.25;
-#     double w       = 0.0625;
-#     double r       = std::sqrt((x.x - 0.5) * (x.x - 0.5) + (x.y - 0.5) * (x.y - 0.5)); // 计算到圆心的距离
-#     double s2      = r - 0.25;
-#     double result  = p0 - (mu / (w * R)) * s2 - 0.5 * (mu / (w * R)) * s2 * s2;
-#     double result2 = p0 - (mu / R) - 0.5 * (mu * w / R);
-#     result > 0 ? result = 0 : result = result;
-#     result < result2 ? result = result2 : result = result;
-#     return result;
-# }
-
 import numpy as np
-from fenics import UserExpression
+from fenics import assemble, dx, UserExpression, Function, interpolate, inner
 
 class PressureExact(UserExpression):
-    #
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-    #
     def eval(self, values, x):
         values[0] = self.fun(x[0], x[1])
-    #
     def value_shape(self):
         return ()
-    #
     def fun(self, x, y):
         p0      = 0.0
         mu      = 1.0
@@ -42,22 +24,7 @@ class PressureExact(UserExpression):
         return result
 
 
-# from fenics import UnitSquareMesh, FunctionSpace, Function, File
-# from local_mesh import solid_mesh
-
-# print(f"solid_mesh.id(): {solid_mesh.id()}")
-
-# mesh = UnitSquareMesh(64,64)
-# V = FunctionSpace(solid_mesh,"P",1)
-# f = Function(V)
-
-
 pressure_exact = PressureExact()
-
-from fenics import assemble, dx, Expression, Function, interpolate, inner
-import numpy as np
-
-
 max_function = lambda f: np.max(f.vector()[:])
 min_function = lambda f: np.min(f.vector()[:])
 max_abs_function = lambda f: np.max(np.abs(f.vector()[:]))
@@ -86,3 +53,4 @@ def calculate_error_u(u):
 
 
 __all__ = ["calculate_error_u", "calculate_error_p"]
+

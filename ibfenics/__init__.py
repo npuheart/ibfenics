@@ -8,7 +8,8 @@
 
 import numpy
 from .io import *
-from .IU import IU,UserIU
+from .IU import IU, UserIU
+from .plot import plot_multiple_lines_1
 from .cpp import __version__
 from .mesh import *
 from .interaction import *
