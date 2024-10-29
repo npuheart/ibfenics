@@ -58,6 +58,8 @@ from fenics import assemble, dx, Expression, Function, interpolate, inner
 import numpy as np
 
 
+max_function = lambda f: np.max(f.vector()[:])
+min_function = lambda f: np.min(f.vector()[:])
 max_abs_function = lambda f: np.max(np.abs(f.vector()[:]))
 min_abs_function = lambda f: np.min(np.abs(f.vector()[:]))
 
@@ -73,6 +75,7 @@ def calculate_error_p(p0):
     norm_1 = assemble(abs(p0_ - p1_)*dx)
     p0_.vector()[:] = p0_.vector()[:] - p1_.vector()[:]
     norm_infinity = max_abs_function(p0_)
+    print(f"p0: {min_function(p0_)}")
     return norm_1, norm_2, norm_infinity
 
 def calculate_error_u(u):

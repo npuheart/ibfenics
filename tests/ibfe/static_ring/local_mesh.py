@@ -13,8 +13,8 @@ def calculate_solid_mesh(n_mesh_solid = 40):
 # 32 40
 # 64 80
 # 128 160
-n_mesh_fluid = 128
-n_mesh_solid = 160
+n_mesh_fluid = 32
+n_mesh_solid = 40
 
 solid_mesh = calculate_solid_mesh(n_mesh_solid)
 order_velocity = 2
