@@ -16,7 +16,7 @@ from mshr import *
 from fenics import *
 
 from ibfenics.nssolver import TaylorHoodSolver
-from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters
+from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters, write_excel
 
 from ref_coordinates import FiberForce
 from local_mesh import *
@@ -136,7 +136,7 @@ for n in range(1, num_steps+1):
     # step 5. interpolate force from solid to fluid
     ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
     # step 6. update variables and save to file.
-    # output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
+    output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     t = n*dt
     result = assemble(inner(u0, u0)*dx)
     print(f"{t:.2e}, {result:.2e}")

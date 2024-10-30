@@ -72,9 +72,14 @@ class TimeManager:
         self.step_interval = max(int( total_steps / fps_m_time ), 1)
     def should_output(self, current_step):
         # 判断当前步是否是输出步
-        if current_step > self.total_steps - 1:
+        if current_step > self.total_steps:
             raise ValueError("当前步数超过总步数。")
         if current_step % int(self.step_interval) == 0:
+            return True
+        # 额外输出的步数：0,1,total_steps-1,total_steps, 保证一开始和最后都有输出。
+        if current_step == 1:
+            return True
+        if current_step == self.total_steps:
             return True
         if current_step == self.total_steps - 1:
             return True

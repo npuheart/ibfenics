@@ -12,6 +12,7 @@ from .SAVTaylorHoodSolver import TaylorHoodSolver_1 as TaylorHoodSolver_1
 from .SAVTaylorHoodSolver import TaylorHoodSolver_2 as TaylorHoodSolver_2
 from .SAVTaylorHoodSolver import modified_energy, CAL_SAV_2
 from .TaylorHoodSolverBDF2 import TaylorHoodSolverBDF2
+from .IPCSSolver import IPCSSolver
 
 
 
@@ -27,6 +28,7 @@ __name__ = "ibfenics.nssolver"
 
 __all__ = [
     'TaylorHoodSolver'    ,
+    'IPCSSolver'          ,
     'TaylorHoodSolver_1'  ,
     'TaylorHoodSolver_2'  ,
     'modified_energy'     ,
