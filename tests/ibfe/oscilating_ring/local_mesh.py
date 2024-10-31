@@ -2,7 +2,10 @@ from ibfenics import Interaction
 from dolfin import *
 from mshr import *
 import numpy as np
-   
+
+from local_parameters import *
+
+
 def advance_disp_bdf2(disp, disp_, velocity, dt):
     Vs = disp.function_space()
     temp_disp = Function(Vs)
@@ -18,21 +21,19 @@ def calculate_volume(X):
     print("体积：", volume_J)
     return volume_J
 
-rho = 1.0
-n_mesh_fluid = 32
-n_mesh_solid = 40
-nu_s = 1.0/0.0625 
+def calculate_solid_mesh(n_mesh_solid):
+    circle_outer = Circle(Point(0.5,0.5), 0.25+0.0625)
+    circle_inner = Circle(Point(0.5,0.5), 0.25)
+    solid_mesh   = generate_mesh(circle_outer-circle_inner, n_mesh_solid)
+    return solid_mesh
 
-order_velocity = 2
-order_pressure = 1
-order_displacement = 1
+
+solid_mesh = calculate_solid_mesh(n_mesh_solid)
+
 
 orders       = [order_velocity, order_pressure, order_displacement]
 seperations  = [n_mesh_fluid, n_mesh_fluid]
 box_points   = [Point(0,0), Point(1, 1)]
-circle_outer = Circle(Point(0.5,0.5), 0.25)
-circle_inner = Circle(Point(0.5,0.5), 0.25-0.0625)
-solid_mesh   = generate_mesh(circle_outer-circle_inner, n_mesh_solid)
 interaction  = Interaction(box_points, seperations, solid_mesh, orders)
 
 fluid_mesh          = interaction.fluid_mesh

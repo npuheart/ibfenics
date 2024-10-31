@@ -11,31 +11,12 @@
 import os
 import numpy as np
 from loguru import logger
-
 from mshr import *
 from fenics import *
-
 from ibfenics.nssolver import TaylorHoodSolver
 from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters, write_excel
-
-
 from local_mesh import *
 
-
-# Define time parameters
-T = 1.0
-dt = 1/8000
-num_steps = int(T/dt)
-time_manager = TimeManager(T, num_steps, 20)
-
-# Define fluid parameters
-nu = 0.001
-
-# Define stablization parameters
-alpha = 10.0*dt
-stab  = True
-delta = 0.1
-SAV   = 1.0
 
 def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
@@ -49,9 +30,8 @@ def calculate_fluid_boundary_conditions(W):
     bcp = [bcp_1]
     return bcu, bcp
 
-# TODO: Define solid constituitive model
+# Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
-    # Define variational problem for solid solver
     F = grad(disp)
     P = nu_s*(F-inv(F).T)
     F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
@@ -61,9 +41,9 @@ def calculate_constituitive_model(disp, vs, us):
     return A2, L2
 
 def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
-    print(f"{n}")
+    logger.info(f"time: {t}, step: {n}")
     if time_manager.should_output(n):
-        print(f"{n}: output...")
+        logger.info(f"output...")
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
         file_fluid.write(f, t)
@@ -95,37 +75,32 @@ vs = TestFunction(Vs)
 A2, L2 = calculate_constituitive_model(disp, vs, us)
 
 # Define output path
-
+file_log_name   = unique_filename(os.path.basename(__file__), "note", "/info.log")
 file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_excel_name = unique_filename(os.path.basename(__file__), "note", "/volume.xlsx")
-file_log_name   = unique_filename(os.path.basename(__file__), "note", "/info.log")
 file_parameters_name   = unique_filename(os.path.basename(__file__), "note", "/parameters.json")
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
 logger.add(file_log_name)
-logger.info(file_solid_name)
-logger.info(file_fluid_name)
-logger.info(file_excel_name)
-write_paramters(file_parameters_name, beta=1)
-
-
+logger.info(f"file_solid_name: {file_solid_name}, file_fluid_name: {file_fluid_name}")
+logger.info(f"file_excel_name: {file_excel_name}, file_log_name: {file_log_name}")
 logger.info(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
 logger.info(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
 logger.info("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
-logger.info(f"dt {dt}, num_steps {num_steps}")
 logger.info(f"fluid_mesh.num_cells() {fluid_mesh.num_cells()}, Vp.dim() {Vp.dim()}, Vf.dim() {Vf.dim()}")
 logger.info(f"solid_mesh.num_cells() {solid_mesh.num_cells()}, Vs.dim() {Vs.dim()}")
-logger.info(f"nu_s {nu_s}")
-
+write_paramters(
+    file_parameters_name, 
+    T = T, dt = dt, num_steps = num_steps, rho = rho, 
+    nu = nu, alpha = alpha, stab = stab, delta = delta, 
+    SAV = SAV, nu_s = nu_s)
 
 t = dt
+time_manager = TimeManager(T, num_steps, 20)
 volume_list = []
-En = 0.0 # elastic energy
 for n in range(1, num_steps+1):
-    # En = elastic_energy(disp)+ assemble(0.5*rho*inner(u0, u0)*dx)
     # step 1. calculate velocity and pressure
-    # 计算流体的速度和压力
     navier_stokes_solver.update(u0, p0)
     u1, p1 = navier_stokes_solver.solve(bcu, bcp)
     u0.assign(u1)
@@ -145,7 +120,6 @@ for n in range(1, num_steps+1):
     output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     volume_list.append(calculate_volume(disp))
     t = n*dt
-    print(t)
 
 write_excel(volume_list, file_excel_name)
 
