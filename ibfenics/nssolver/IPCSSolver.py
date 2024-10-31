@@ -10,7 +10,6 @@
 # 20241030, a wrapper for the IPCS solver, a solver for the N-S equations
 
 from dolfin import *
-from mshr import *
 
 class IPCSSolver:
     def __init__(self, u_n, p_n, f, dt, nu,rho=1.0, stab=False, alpha=0.1, conv=True, bdry=None, bc_Neumann=None, bcu = None, bcp = None):
@@ -34,7 +33,7 @@ class IPCSSolver:
         # Define expressions used in variational forms
         U  = 0.5*(u_n + u)
         n  = FacetNormal(mesh)
-        f  = Constant((0, 0))
+        # f  = Constant((0, 0))
         k  = Constant(dt)
         nu = Constant(nu)
         rho = Constant(rho)
@@ -84,7 +83,7 @@ class IPCSSolver:
         self.A1 = A1
         self.A2 = A2
         self.A3 = A3
-                
+
 
     def update(self, un, pn):
         self.u_n.assign(un)

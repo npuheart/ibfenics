@@ -13,7 +13,8 @@ import numpy as np
 from loguru import logger
 from mshr import *
 from fenics import *
-from ibfenics.nssolver import TaylorHoodSolver
+# from ibfenics.nssolver import TaylorHoodSolver
+from ibfenics.nssolver import IPCSSolver
 from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters, write_excel
 from local_mesh import *
 
@@ -22,10 +23,10 @@ def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
 
 # Define boundary conditions for fluid solver
-def calculate_fluid_boundary_conditions(W):
-    bcu_1 = DirichletBC(W.sub(0), Constant((0,0)), "near(x[1],1.0)")
-    bcu_2 = DirichletBC(W.sub(0), Constant((0,0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)")
-    bcp_1 = DirichletBC(W.sub(1), Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
+def calculate_fluid_boundary_conditions(V, P):
+    bcu_1 = DirichletBC(V, Constant((0,0)), "near(x[1],1.0)")
+    bcu_2 = DirichletBC(V, Constant((0,0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)")
+    bcp_1 = DirichletBC(P, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
     bcu = [bcu_1, bcu_2]
     bcp = [bcp_1]
     return bcu, bcp
@@ -35,7 +36,7 @@ def calculate_constituitive_model(disp, vs, us):
     F = grad(disp)
     # P = nu_s*(F-inv(F).T)
     J = det(F)
-    P = nu_s*(F)+2*(J-1)*J*inv(F).T*1000.0
+    P = nu_s*(F)+2*(J-1)*J*inv(F).T
     F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
     a2 = lhs(F2)
     L2 = rhs(F2)
@@ -68,8 +69,10 @@ disp.interpolate(InitialDisplacement())
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
-navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
-bcu, bcp = calculate_fluid_boundary_conditions(navier_stokes_solver.W)
+bcu, bcp = calculate_fluid_boundary_conditions(u0.function_space(), p0.function_space())
+navier_stokes_solver = IPCSSolver(u0, p0, f, dt, nu, bcp=bcp, bcu=bcu, stab=stab, alpha=alpha)
+# navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
+# bcu, bcp = calculate_fluid_boundary_conditions(navier_stokes_solver.W)
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
@@ -103,10 +106,13 @@ time_manager = TimeManager(T, num_steps, 20)
 volume_list = []
 for n in range(1, num_steps+1):
     # step 1. calculate velocity and pressure
-    navier_stokes_solver.update(u0, p0)
-    u1, p1 = navier_stokes_solver.solve(bcu, bcp)
-    u0.assign(u1)
-    p0.assign(p1)
+    un, pn = navier_stokes_solver.solve(bcu, bcp)
+    navier_stokes_solver.update(un, pn)
+    logger.info(f"u max:{un.vector().max()}")
+    # navier_stokes_solver.update(u0, p0)
+    # u1, p1 = navier_stokes_solver.solve(bcu, bcp)
+    # u0.assign(u1)
+    # p0.assign(p1)
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
