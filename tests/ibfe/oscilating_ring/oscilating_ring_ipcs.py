@@ -14,7 +14,7 @@ from loguru import logger
 from mshr import *
 from fenics import *
 # from ibfenics.nssolver import TaylorHoodSolver
-from ibfenics.nssolver import IPCSSolver
+from ibfenics.nssolver import ChorinSolver
 from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters, write_excel
 from local_mesh import *
 
@@ -34,9 +34,7 @@ def calculate_fluid_boundary_conditions(V, P):
 # Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
     F = grad(disp)
-    # P = nu_s*(F-inv(F).T)
-    J = det(F)
-    P = nu_s*(F)+2*(J-1)*J*inv(F).T
+    P = nu_s*(F-inv(F).T)
     F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
     a2 = lhs(F2)
     L2 = rhs(F2)
@@ -57,9 +55,9 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
 
 # Create functions for fluid
 u0 =   Function(Vf,   name="velocity")
-u0_1 = Function(Vf_1, name="velocity 1st order")
+# u0_1 = Function(Vf_1, name="velocity 1st order")
 p0 =   Function(Vp,   name="pressure")
-f =    Function(Vf_1, name="force")
+f =    Function(Vf, name="force")
 
 # Create functions for solid
 velocity = Function(Vs, name="velocity")
@@ -70,7 +68,7 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
 bcu, bcp = calculate_fluid_boundary_conditions(u0.function_space(), p0.function_space())
-navier_stokes_solver = IPCSSolver(u0, p0, f, dt, nu, bcp=bcp, bcu=bcu, stab=stab, alpha=alpha)
+navier_stokes_solver = ChorinSolver(u0, p0, f, dt, nu, bcp=bcp, bcu=bcu, stab=stab, alpha=alpha)
 # navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
 # bcu, bcp = calculate_fluid_boundary_conditions(navier_stokes_solver.W)
 
@@ -114,8 +112,10 @@ for n in range(1, num_steps+1):
     # u0.assign(u1)
     # p0.assign(p1)
     # step 2. interpolate velocity from fluid to solid
-    u0_1 = project(u0, Vf_1)
-    ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
+    # u0_1 = project(u0, Vf_1)
+    print(assemble(div(u0)*dx))
+    ib_interpolation.fluid_to_solid(u0._cpp_object, velocity._cpp_object)
+    print(assemble(div(velocity)*dx))
     # step 3. calculate disp for solid and update current gauss points and dof points
     advance_disp_be(disp, velocity, dt)
     ib_interpolation.evaluate_current_points(disp._cpp_object)

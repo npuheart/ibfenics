@@ -1,6 +1,6 @@
 # Define time parameters
-T = 1.0
-dt = 1/400
+T = 1.2
+dt = 1/1600
 num_steps = int(T/dt)
 
 # Define fluid parameters
@@ -17,7 +17,7 @@ SAV   = 1.0
 # 64 80
 # 128 160
 n_mesh_fluid = 64
-n_mesh_solid = 80
+n_mesh_solid = 160
 nu_s = 1.0/0.0625 
 order_velocity = 2
 order_pressure = 1

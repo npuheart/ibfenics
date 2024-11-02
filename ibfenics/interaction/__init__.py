@@ -5,6 +5,6 @@
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 # email : ibfenics@pengfeima.cn
 
-from .Interaction import Interaction
+from .Interaction import Interaction, Interaction2
 
-__all__ = ['Interaction']
+__all__ = ['Interaction', 'Interaction2']

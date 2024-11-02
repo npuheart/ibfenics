@@ -13,7 +13,6 @@
 #pragma once
 #include <iostream>
 #include <dolfin.h>
-// #include "kernel.h"
 
 #include "spatial/kernel_helper.h"
 #include "spatial/kernel_expression.h"
@@ -57,8 +56,6 @@ class FunctorInterpolate {
 public:
     void operator()(GridState& grid_state, Particle& particle, const Index& base_node, T wij, T dwijdxi, T dwijdxj) const
     {
-        // particle.ux += grid_state.x * wij * grid_state.w / dx / dy;
-        // particle.uy += grid_state.y * wij * grid_state.w / dx / dy;
         particle.u1 += grid_state.x * wij;
         particle.u2 += grid_state.y * wij;
     }
@@ -83,10 +80,8 @@ public:
     T dx, dy;
     void operator()(GridState& grid_state, Particle& particle, const Index& base_node, T wij, T dwijdxi, T dwijdxj) const
     {
-		// grid_state.x      += particle.u1 * particle.w / dx / dy * wij;
 		grid_state.du1[0] += particle.u1 * particle.w / dx / dy * dwijdxi;
 		grid_state.du1[1] += particle.u1 * particle.w / dx / dy * dwijdxj;
-		// printf("du0 : %f\n", grid_state.du1[1]);
     }
 };
 
@@ -129,7 +124,6 @@ public:
 		// TODO : 如果是二阶元，此处需要修改.
 		nx = order * dims[0] + 1;
 		ny = order * dims[1] + 1;
-		// printf("nx : %d, ny : %d\n", nx, ny);
 
 		/// TODO : check x1-x0> DOLFIN_EPS, y1-y0> DOLFIN_EPS
 		x0 = points[0].x();
@@ -139,15 +133,18 @@ public:
 
 		dx = (x1 - x0) / static_cast<double>(dims[0]) / order;
 		dy = (y1 - y0) / static_cast<double>(dims[1]) / order;
-		printf("dx : %f, dy : %f\n", dx, dy);
+		printf("order : %ld, dx : %f, dy : %f\n", order, dx, dy);
 	}
 
-	void distribution(std::vector<double2> &data_to, const std::vector<Particle<double>> &data_from, const std::vector<Particle<double>> &coordinates) const
+	void distribution(
+		std::vector<double2> &data_to, 
+		const std::vector<Particle<double>> &data_from, 
+		const std::vector<Particle<double>> &coordinates) const
 	{
 		// assert(data_from.size() == coordinates.size());
 		constexpr size_t dim = 2;
-		constexpr size_t kernel_width_x = 3;
-		constexpr size_t kernel_width_y = 3;
+		constexpr size_t kernel_width_x = 4;
+		constexpr size_t kernel_width_y = 4;
 
 		using MyGrid 	= Grid<double2>;
     	using PV 		= PlaceValue<octal_to_decimal<kernel_width_x,kernel_width_y>()>;
@@ -178,8 +175,8 @@ public:
 	{
 		// assert(data_from.size() == coordinates.size());
 		constexpr size_t dim = 2;
-		constexpr size_t kernel_width_x = 3;
-		constexpr size_t kernel_width_y = 3;
+		constexpr size_t kernel_width_x = 4;
+		constexpr size_t kernel_width_y = 4;
 
 		using MyGrid 	= Grid<double2>;
     	using PV 		= PlaceValue<octal_to_decimal<kernel_width_x,kernel_width_y>()>;
@@ -208,8 +205,8 @@ public:
 	{
 		// assert(data_to.size() == coordinates.size());
 		constexpr size_t dim = 2;
-		constexpr size_t kernel_width_x = 3;
-		constexpr size_t kernel_width_y = 3;
+		constexpr size_t kernel_width_x = 4;
+		constexpr size_t kernel_width_y = 4;
 
 		using MyGrid 		= Grid<double2>;
     	using PV 		  	= PlaceValue<octal_to_decimal<kernel_width_x,kernel_width_y>()>;
@@ -246,7 +243,7 @@ public:
 		auto mesh = coordinates.function_space()->mesh();
 		auto dofmap = coordinates.function_space()->dofmap();
 
-		/// get the element of function space
+		/// Get The element of function space
 		auto element = coordinates.function_space()->element();
 		auto value_size = coordinates.value_size();
 		auto global_size = coordinates.function_space()->dim();
@@ -257,17 +254,17 @@ public:
 
 		for (dolfin::CellIterator e(*mesh_ptr); !e.end(); ++e)
 		{
-			// step 1 : get coordinates of cell dofs
+			// Step 1 : get coordinates of cell dofs
 			Cell cell(*mesh, e->global_index());
 			std::vector<double> coordinate_dofs;
 			cell.get_coordinate_dofs(coordinate_dofs);
 			boost::multi_array<double, 2> coordinates;
 			element->tabulate_dof_coordinates(coordinates, coordinate_dofs, cell);
 
-			// step 2 : get the dof map
+			// Step 2 : get the dof map
 			auto cell_dofmap = dofmap->cell_dofs(cell.index());
 
-			// iterate dof_coordinates of the cell.
+			// Step 3 : iterate dof_coordinates of the cell
 			for (size_t k = 0; k < cell_dofmap.size() / value_size; k++)
 			{
 				Point point(coordinates[k][0], coordinates[k][1]);

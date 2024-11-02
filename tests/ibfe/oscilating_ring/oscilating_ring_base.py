@@ -33,9 +33,7 @@ def calculate_fluid_boundary_conditions(W):
 # Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
     F = grad(disp)
-    # P = nu_s*(F-inv(F).T)
-    J = det(F)
-    P = nu_s*(F)+2*(J-1)*J*inv(F).T*1000.0
+    P = nu_s*(F-inv(F).T)
     F2 = inner(P, grad(vs))*dx + inner(us, vs)*dx
     a2 = lhs(F2)
     L2 = rhs(F2)

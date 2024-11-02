@@ -42,6 +42,7 @@ public:
     size_t i, j, k;
 };
 
+// Index{1,2,3}
 // // 默认模板，处理不匹配的情况
 // template <size_t dim, typename Enable>
 // class Index

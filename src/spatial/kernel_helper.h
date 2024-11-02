@@ -147,21 +147,18 @@ struct IBKernel
         // printf("X0        : %6.1f %6.1f\n", X0[0], X0[1]);
 
         if constexpr (dim == 1){
-            evaluate_kernel_bspline<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0]);
+            evaluate_kernel_peskin<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0]);
         }
         if constexpr (dim == 2)
         { 
-            evaluate_kernel_bspline<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0],             &dw[0]);
-            evaluate_kernel_bspline<T, PlaceValue::_1>(X0[1]-base_node[1], &w[PlaceValue::_0],&dw[PlaceValue::_0]);
-            // for (size_t i =0; i < PlaceValue::_sum; i++){
-            //     printf("dw: %f\n",dw[i]);
-            // }
+            evaluate_kernel_peskin<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0],             &dw[0]);
+            evaluate_kernel_peskin<T, PlaceValue::_1>(X0[1]-base_node[1], &w[PlaceValue::_0],&dw[PlaceValue::_0]);
         }
         if constexpr (dim == 3)
         {
-            evaluate_kernel_bspline<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0]);
-            evaluate_kernel_bspline<T, PlaceValue::_1>(X0[1]-base_node[1], &w[PlaceValue::_0]);
-            evaluate_kernel_bspline<T, PlaceValue::_2>(X0[2]-base_node[2], &w[PlaceValue::_0 + PlaceValue::_1]);
+            evaluate_kernel_peskin<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0]);
+            evaluate_kernel_peskin<T, PlaceValue::_1>(X0[1]-base_node[1], &w[PlaceValue::_0]);
+            evaluate_kernel_peskin<T, PlaceValue::_2>(X0[2]-base_node[2], &w[PlaceValue::_0 + PlaceValue::_1]);
         }
     }
 };
