@@ -3,6 +3,14 @@ from fenics import VectorFunctionSpace, FunctionSpace, Point
 from fenics import DirichletBC, Expression, Constant
 import numpy as np
 
+# Parameters
+nv = 0.025
+T = 5.0
+num_steps = 5000
+dt = T / num_steps
+rho = 1.0
+
+
 # Create mesh
 domain = Rectangle(Point(-0.5, -0.5), Point(1.0, 0.5))
 fluid_mesh = generate_mesh(domain, 64)
@@ -10,7 +18,6 @@ fluid_mesh = generate_mesh(domain, 64)
 # Define function spaces
 V = VectorFunctionSpace(fluid_mesh, "P", 2)
 Q = FunctionSpace(fluid_mesh, "P", 1)
-nv = 0.025
 
 
 def calculate_fluid_boundary_conditions(V, Q):
@@ -28,19 +35,15 @@ def calculate_fluid_boundary_conditions(V, Q):
 
     # Define boundary conditions
     bcu_inflow = DirichletBC(V, flow_velocity, all_boundary)
-    bcp_1 = DirichletBC(
-        W.sub(1), Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
-    )
+    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
     bcu = [bcu_inflow]
     bcp = [bcp_1]
     return bcu, bcp
 
 
-def calculate_fluid_boundary_conditions_sav(W):
-    bcu_3 = DirichletBC(W.sub(0), Constant((0, 0)), "on_boundary")
-    bcp_1 = DirichletBC(
-        W.sub(1), Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
-    )
+def calculate_fluid_boundary_conditions_sav(V, Q):
+    bcu_3 = DirichletBC(V, Constant((0, 0)), "on_boundary")
+    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
     bcus_2 = [bcu_3]
     bcps_2 = [bcp_1]
     return bcus_2, bcps_2
@@ -53,4 +56,8 @@ __all__ = [
     "calculate_fluid_boundary_conditions",
     "calculate_fluid_boundary_conditions_sav",
     "nv",
+    "T",
+    "num_steps",
+    "dt",
+    "rho",
 ]

@@ -84,23 +84,7 @@ def calculate_SAV_2(u0, u1, u2, E_hyp, dt, nu, delta, qn):
     return solution[0]
 
 
-def CAL_SAV_2(
-    En=0.1,
-    delta=0.1,
-    dt=0.1,
-    alpha=0.1,
-    h=0.1,
-    mu=0.1,
-    un=0.1,
-    u1=0.1,
-    u2=0.1,
-    qn=0.1,
-    N=0.1,
-    w=0.1,
-    p1=0.1,
-    p2=0.1,
-    rho=1.0,
-):
+def CAL_SAV_2(En, delta, dt, alpha, h, mu, un, u1, u2, qn, N, w, p1, p2, rho):
     _1 = 2.0 / dt * (En + delta)
     _2 = (alpha * h + mu) * inner(grad(u2), grad(u2)) * dx
     _3 = 2.0 * qn * np.sqrt(En + delta) / dt
@@ -128,14 +112,25 @@ qn = 1.0
 _ = 0
 
 
+
+def construct_function_space(u0, p0):
+    mesh = u0.function_space().mesh()
+    element1 = u0.function_space()._ufl_element
+    element2 = p0.function_space()._ufl_element
+    TH = element1 * element2
+    W = FunctionSpace(mesh, TH)
+    return W
+
+def construct_function_space_bc(u0, p0):
+    W = construct_function_space(u0, p0)
+    return W.sub(0), W.sub(1)
+
+
+
 class TaylorHoodSolver_1:
     def __init__(self, u0, p0, dt, nu, stab=False, alpha=0.1):
         # Reconstruct element space
-        mesh = u0.function_space().mesh()
-        element1 = u0.function_space()._ufl_element
-        element2 = p0.function_space()._ufl_element
-        TH = element1 * element2
-        W = FunctionSpace(mesh, TH)
+        W = construct_function_space(u0, p0)
 
         # Define variables
         (u, p) = TrialFunctions(W)
@@ -173,12 +168,7 @@ class TaylorHoodSolver_1:
 class TaylorHoodSolver_2:
     def __init__(self, u0, p0, f, dt, nu, stab=False, alpha=0.1, conv=True):
         # Reconstruct element space
-        mesh = u0.function_space().mesh()
-        element1 = u0.function_space()._ufl_element
-        element2 = p0.function_space()._ufl_element
-        TH = element1 * element2
-        W = FunctionSpace(mesh, TH)
-
+        W = construct_function_space(u0, p0)
         # Define variables
         (u, p) = TrialFunctions(W)
         (v, q) = TestFunctions(W)

@@ -2,7 +2,7 @@ import os
 from loguru import logger
 from fenics import *
 from local_mesh import *
-from ibfenics.nssolver import SAVTaylorHoodSolverBDF2
+from ibfenics.nssolver import SAVTaylorHoodSolver
 from ibfenics.io import (
     unique_filename,
     create_xdmf_file,
@@ -10,29 +10,29 @@ from ibfenics.io import (
     write_paramters,
     write_excel,
 )
+stab = False
+alpha = 0.1
+conv=True
 
 
-TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
-TaylorHoodSolverBDF2_2 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2
-modified_energy = SAVTaylorHoodSolverBDF2.modified_energy
-# calculate_SAV_2        = SAVTaylorHoodSolverBDF2.calculate_SAV_2
-calculate_SAV = SAVTaylorHoodSolverBDF2.calculate_SAV
-
-T = 5.0
-num_steps = 5000
-dt = T / num_steps
-mu = nv
-rho = 1.0
+TaylorHoodSolver_1 = SAVTaylorHoodSolver.TaylorHoodSolver_1
+TaylorHoodSolver_2 = SAVTaylorHoodSolver.TaylorHoodSolver_2
+modified_energy = SAVTaylorHoodSolver.modified_energy
+CAL_SAV = SAVTaylorHoodSolver.CAL_SAV_2
+construct_function_space_bc = SAVTaylorHoodSolver.construct_function_space_bc
 
 u0 = Function(V, name="velocity")
 p0 = Function(Q, name="pressure")
 f0 = Function(V, name="force")
 
 time_manager = TimeManager(T, num_steps, 20)
-bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-navier_stokes_solver_1 = TaylorHoodSolverBDF2_1(u0, u0, p0, dt, nv)
-navier_stokes_solver_2 = TaylorHoodSolverBDF2_2(u0, u0, p0, f0, dt, nv)
-W = navier_stokes_solver_1.W
+
+V, Q = construct_function_space_bc(u0, p0)
+bcus_1, bcps_1 = calculate_fluid_boundary_conditions(V, Q)
+bcus_2, bcps_2 = calculate_fluid_boundary_conditions_sav(V, Q)
+navier_stokes_solver_1 = TaylorHoodSolver_1(u0, p0, dt, nv, stab=stab, alpha=alpha)
+navier_stokes_solver_2 = TaylorHoodSolver_2(u0, p0, f0, dt, nv, stab=stab, alpha=alpha, conv=conv)
+
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
 
@@ -40,9 +40,20 @@ t = 0
 for n in range(num_steps):
 
     t += dt
-    un, pn = fluid_solver.solve(bcu, bcp)
-    fluid_solver.update(un, pn)
-    logger.info("u max:{0}", un.vector().max())
+    # un, pn = fluid_solver.solve(bcu, bcp)
+    # fluid_solver.update(un, pn)
+
+    navier_stokes_solver_1.update(u0, p0)
+    navier_stokes_solver_2.update(u0, p0)
+    u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
+    u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
+    # SAV = CAL_SAV(En, delta, dt, alpha, h, nu, u0, u1, u2, qn, N, w, p1, p2, rho)
+    SAV = 1.0
+    u0.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
+    p0.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
+
+    logger.info("u max:    {0}", u0.vector().max())
+    logger.info("u l2 norm:{0}", u0.vector().norm("l2"))
     if time_manager.should_output(n):
         logger.info(f"t = {t}")
         file_fluid.write(u0, t)
