@@ -15,11 +15,11 @@ order_pressure = 1
 order_displacement = 1
 n_mesh = 64
 n_solid_mesh = 160
-solid_mesh = generate_mesh(Circle(Point(0.6,0.5), 0.2), n_solid_mesh)
+solid_mesh = generate_mesh(Circle(Point(0.6, 0.5), 0.2), n_solid_mesh)
 print("Fluid mesh: ", n_mesh, "Solid mesh: ", solid_mesh.num_entities(2), "cells")
 orders = [order_velocity, order_pressure, order_displacement]
-points = [Point(0,0), Point(1, 1)]
-seperations = [n_mesh,n_mesh]
+points = [Point(0, 0), Point(1, 1)]
+seperations = [n_mesh, n_mesh]
 interaction = Interaction2(points, seperations, solid_mesh, orders)
 
 ib_interpolation = interaction.ib_interpolation
@@ -29,8 +29,12 @@ Vp = interaction.Vp
 
 
 # 测试 Interpolation 和 Distribution
-F = interpolate(Expression(("-sin(x[0])*cos(x[1])","cos(x[0])*sin(x[1])"),degree=2), Vs)
-f = interpolate(Expression(("-sin(x[0])*cos(x[1])","cos(x[0])*sin(x[1])"),degree=2), Vf)
+F = interpolate(
+    Expression(("-sin(x[0])*cos(x[1])", "cos(x[0])*sin(x[1])"), degree=2), Vs
+)
+f = interpolate(
+    Expression(("-sin(x[0])*cos(x[1])", "cos(x[0])*sin(x[1])"), degree=2), Vf
+)
 
 EF = Function(Vf)
 If = Function(Vs)

@@ -6,11 +6,11 @@
 #
 # email : ibfenics@pengfeima.cn
 #
-# brief : 检查文件创建文件夹，生成唯一文件名. 创建日志文件. 
+# brief : 检查文件创建文件夹，生成唯一文件名. 创建日志文件.
 
 
 import os
-import ibfenics.io 
+import ibfenics.io
 from loguru import logger
 from ibfenics.io import unique_filename
 

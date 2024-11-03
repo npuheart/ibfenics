@@ -1,7 +1,6 @@
 import ibfenics
 
-iu = ibfenics.UserIU(g=1,cm=1)
-
+iu = ibfenics.UserIU(g=1, cm=1)
 
 
 time_manager = ibfenics.io.TimeManager(1, 100, 20)
