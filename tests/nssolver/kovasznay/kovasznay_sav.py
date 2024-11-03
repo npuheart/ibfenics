@@ -6,7 +6,7 @@ from ibfenics.nssolver import IPCSSolver
 from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters, write_excel
 
 T = 5.0            
-num_steps = 5000
+num_steps = 50
 dt = T / num_steps  
 mu = nv     
 rho = 1.0         
