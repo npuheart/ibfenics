@@ -18,6 +18,7 @@ import json
 
 output_path = "data/large/"
 
+
 def check_path(path):
     if not os.path.exists(path):
         os.makedirs(path)
@@ -25,37 +26,45 @@ def check_path(path):
     else:
         print(f"{path} 文件夹已存在。")
 
+
 def unique_filename(current_file_name, tag, extension):
     check_path(output_path)
-    note =  os.path.splitext(current_file_name)[0]
-    file_id = f"{output_path}{note}/{tag}/" + datetime.now().strftime('%Y%m%d-%H%M%S') +  extension
+    note = os.path.splitext(current_file_name)[0]
+    file_id = (
+        f"{output_path}{note}/{tag}/"
+        + datetime.now().strftime("%Y%m%d-%H%M%S")
+        + extension
+    )
     return file_id
+
 
 def create_xdmf_file(mpi_comm, filename):
     file = XDMFFile(mpi_comm, filename)
-    file.parameters['rewrite_function_mesh'] = False
+    file.parameters["rewrite_function_mesh"] = False
     file.parameters["functions_share_mesh"] = True
     file.parameters["flush_output"] = True
     return file
 
+
 def send_to_xiaomi(desp):
     # pip install serverchan-sdk
     sdk_key = "sctp1508t8kbmtrb5kat2nsazwhmqy2"
-    from serverchan_sdk import sc_send; 
-    response = sc_send(
-        sdk_key, "ibfenics log", desp, {"tags": "ibfenics"})
-    
+    from serverchan_sdk import sc_send
+
+    response = sc_send(sdk_key, "ibfenics log", desp, {"tags": "ibfenics"})
+
     return response
 
 
 # 指定要保存的文件名和表单名称
-def write_excel(volume_list,excel_file1,sheet_name = 'v'):
+def write_excel(volume_list, excel_file1, sheet_name="v"):
     df = pd.DataFrame(volume_list)
     df.to_excel(excel_file1, sheet_name=sheet_name, index=False)
 
+
 def write_paramters(filename, **params):
     params = params or {}
-    with open(filename, 'w', encoding='utf-8') as f:
+    with open(filename, "w", encoding="utf-8") as f:
         json.dump(params, f, ensure_ascii=False, indent=4)
 
 
@@ -69,7 +78,8 @@ class TimeManager:
         self.fps = fps
         self.time_per_step = total_time / total_steps
         fps_m_time = max(fps * total_time, 1)
-        self.step_interval = max(int( total_steps / fps_m_time ), 1)
+        self.step_interval = max(int(total_steps / fps_m_time), 1)
+
     def should_output(self, current_step):
         # 判断当前步是否是输出步
         if current_step > self.total_steps:
@@ -86,65 +96,77 @@ class TimeManager:
         return False
 
 
-def write_mesh(_mesh, _domains, boundary,mesh_size, mesh_name, mesh_path):
+def write_mesh(_mesh, _domains, boundary, mesh_size, mesh_name, mesh_path):
     # output mesh
-    mesh_file = XDMFFile(mesh_path+mesh_name+"_"+str(mesh_size)+".xdmf")
+    mesh_file = XDMFFile(mesh_path + mesh_name + "_" + str(mesh_size) + ".xdmf")
     mesh_file.write(_mesh)
     mesh_file.close()
 
     # output domains
-    domains_file = XDMFFile(mesh_path+mesh_name+"_"+str(mesh_size)+"_domains.xdmf")
+    domains_file = XDMFFile(
+        mesh_path + mesh_name + "_" + str(mesh_size) + "_domains.xdmf"
+    )
     domains_file.write(_domains)
     domains_file.close()
 
     # output domains xml
-    File(mesh_path+mesh_name+"_"+str(mesh_size)+"_domains.xml") << _domains
+    File(mesh_path + mesh_name + "_" + str(mesh_size) + "_domains.xml") << _domains
 
     # output boundaries xml
-    domains_file = XDMFFile(mesh_path+mesh_name+"_"+str(mesh_size)+"_boundaries.xdmf")
+    domains_file = XDMFFile(
+        mesh_path + mesh_name + "_" + str(mesh_size) + "_boundaries.xdmf"
+    )
     domains_file.write(boundary)
     domains_file.close()
-    File(mesh_path+mesh_name+"_"+str(mesh_size)+"_boundaries.xml") << boundary
+    File(mesh_path + mesh_name + "_" + str(mesh_size) + "_boundaries.xml") << boundary
 
 
-def write_bg_mesh(L,H,mesh_size, mesh_name, mesh_path):
-    _domain = Rectangle(Point(0,0), Point(L,H))
-    _mesh = generate_mesh(_domain,mesh_size)
-    
+def write_bg_mesh(L, H, mesh_size, mesh_name, mesh_path):
+    _domain = Rectangle(Point(0, 0), Point(L, H))
+    _mesh = generate_mesh(_domain, mesh_size)
+
     # output boundaries
     class Boundary_1(SubDomain):
         def inside(self, x, on_boundary):
-            return x[0]<DOLFIN_EPS_LARGE and on_boundary
+            return x[0] < DOLFIN_EPS_LARGE and on_boundary
 
     class Boundary_4(SubDomain):
         def inside(self, x, on_boundary):
-            return x[0]>L*(1.0 - DOLFIN_EPS_LARGE) and on_boundary
+            return x[0] > L * (1.0 - DOLFIN_EPS_LARGE) and on_boundary
 
     class Boundary_2(SubDomain):
         def inside(self, x, on_boundary):
-            return x[1]<DOLFIN_EPS_LARGE and on_boundary
+            return x[1] < DOLFIN_EPS_LARGE and on_boundary
 
     class Boundary_3(SubDomain):
         def inside(self, x, on_boundary):
-            return x[1]>H*(1.0 - DOLFIN_EPS_LARGE) and on_boundary
+            return x[1] > H * (1.0 - DOLFIN_EPS_LARGE) and on_boundary
 
     boundary = MeshFunction("size_t", _mesh, 1)
     Boundary_1().mark(boundary, 1)
     Boundary_2().mark(boundary, 2)
     Boundary_3().mark(boundary, 3)
     Boundary_4().mark(boundary, 4)
-    
+
     # output mesh
-    mesh_file = XDMFFile(mesh_path+mesh_name+"_bg_"+str(mesh_size)+".xdmf")
+    mesh_file = XDMFFile(mesh_path + mesh_name + "_bg_" + str(mesh_size) + ".xdmf")
     mesh_file.write(_mesh)
     mesh_file.close()
-    
-    domains_file = XDMFFile(mesh_path+mesh_name+"_bg_"+str(mesh_size)+"_boundaries.xdmf")
+
+    domains_file = XDMFFile(
+        mesh_path + mesh_name + "_bg_" + str(mesh_size) + "_boundaries.xdmf"
+    )
     domains_file.write(boundary)
     domains_file.close()
-    File(mesh_path+mesh_name+"_bg_"+str(mesh_size)+"_boundaries.xml") << boundary
+    File(
+        mesh_path + mesh_name + "_bg_" + str(mesh_size) + "_boundaries.xml"
+    ) << boundary
 
 
-
-__all__ = ['unique_filename', 'create_xdmf_file', 'write_excel', 'write_bg_mesh', 'write_mesh']
-
+__all__ = [
+    "unique_filename",
+    "create_xdmf_file",
+    "write_excel",
+    "write_bg_mesh",
+    "write_mesh",
+]

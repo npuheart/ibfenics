@@ -145,10 +145,10 @@ setup(
     packages=[
         "ibfenics",
         "npuheart",
-        "ibfenics.mesh", 
-        "ibfenics.nssolver", 
-        "ibfenics.interaction"
-        ],
+        "ibfenics.mesh",
+        "ibfenics.nssolver",
+        "ibfenics.interaction",
+    ],
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.7",

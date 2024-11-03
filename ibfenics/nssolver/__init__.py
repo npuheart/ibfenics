@@ -16,10 +16,8 @@ from .IPCSSolver import IPCSSolver
 from .ChorinSolver import ChorinSolver
 
 
-
-
 class SAVTaylorHoodSolverBDF2:
-    from .SAVTaylorHoodSolverBDF2 import TaylorHoodSolverBDF2_1 
+    from .SAVTaylorHoodSolverBDF2 import TaylorHoodSolverBDF2_1
     from .SAVTaylorHoodSolverBDF2 import TaylorHoodSolverBDF2_2
     from .SAVTaylorHoodSolverBDF2 import modified_energy
     from .SAVTaylorHoodSolverBDF2 import calculate_SAV
@@ -28,16 +26,14 @@ class SAVTaylorHoodSolverBDF2:
 __name__ = "ibfenics.nssolver"
 
 __all__ = [
-    'TaylorHoodSolver'    ,
-    'IPCSSolver'          ,
-    'ChorinSolver'        ,
-    'TaylorHoodSolver_1'  ,
-    'TaylorHoodSolver_2'  ,
-    'modified_energy'     ,
-    'CAL_SAV_2'               ,
-    'TaylorHoodSolverBDF2'    ,
-    'SAVTaylorHoodSolverBDF2' ,
-    "__version__"
+    "TaylorHoodSolver",
+    "IPCSSolver",
+    "ChorinSolver",
+    "TaylorHoodSolver_1",
+    "TaylorHoodSolver_2",
+    "modified_energy",
+    "CAL_SAV_2",
+    "TaylorHoodSolverBDF2",
+    "SAVTaylorHoodSolverBDF2",
+    "__version__",
 ]
-
-

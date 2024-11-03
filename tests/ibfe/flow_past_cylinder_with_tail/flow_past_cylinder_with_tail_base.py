@@ -19,13 +19,15 @@ from ibfenics import Interaction
 from ibfenics.nssolver import TaylorHoodSolver
 from ibfenics.io import unique_filename, create_xdmf_file, write_excel
 
+
 def advance_disp_be(disp, velocity, dt):
-    disp.vector()[:] = velocity.vector()[:]*dt + disp.vector()[:]
+    disp.vector()[:] = velocity.vector()[:] * dt + disp.vector()[:]
+
 
 # Define time parameters
 T = 10.0
-dt = 1/8000
-num_steps = int(T/dt)
+dt = 1 / 8000
+num_steps = int(T / dt)
 
 # Define fluid parameters
 rho = 1.0
@@ -33,14 +35,14 @@ nu = 0.001
 n_mesh_fluid = 32
 
 # Define solid parameters
-nu_s = 1.0/0.0625 
+nu_s = 1.0 / 0.0625
 n_mesh_solid = 40
 
 # Define stablization parameters
-alpha = 1.0*dt
-stab  = False
+alpha = 1.0 * dt
+stab = False
 delta = 0.1
-SAV   = 1.0
+SAV = 1.0
 
 # Define finite element parameters
 order_velocity = 2
@@ -48,23 +50,23 @@ order_pressure = 1
 order_displacement = 1
 
 # Define spatial discretizations
-orders       = [order_velocity, order_pressure, order_displacement]
-seperations  = [n_mesh_fluid, n_mesh_fluid]
-box_points   = [Point(0,0), Point(1, 1)]
+orders = [order_velocity, order_pressure, order_displacement]
+seperations = [n_mesh_fluid, n_mesh_fluid]
+box_points = [Point(0, 0), Point(1, 1)]
 solid_mesh = Mesh()
 with XDMFFile(os.path.expanduser("~") + "/mesh/benchmark/beam_80.xdmf") as xdmf:
     xdmf.read(solid_mesh)
 
-solid_mesh   = generate_mesh(circle_outer-circle_inner, n_mesh_solid)
-interaction  = Interaction(box_points, seperations, solid_mesh, orders)
+solid_mesh = generate_mesh(circle_outer - circle_inner, n_mesh_solid)
+interaction = Interaction(box_points, seperations, solid_mesh, orders)
 
-fluid_mesh          = interaction.fluid_mesh
-ib_mesh             = interaction.ib_mesh
-ib_interpolation    = interaction.ib_interpolation
-Vs                  = interaction.Vs
-Vf                  = interaction.Vf
-Vf_1                = interaction.Vf_1
-Vp                  = interaction.Vp
+fluid_mesh = interaction.fluid_mesh
+ib_mesh = interaction.ib_mesh
+ib_interpolation = interaction.ib_interpolation
+Vs = interaction.Vs
+Vf = interaction.Vf
+Vf_1 = interaction.Vf_1
+Vp = interaction.Vp
 
 print(f"solid_mesh.hmax() {solid_mesh.hmax()}, hmin() {solid_mesh.hmin()}")
 print(f"fluid_mesh.hmax() {fluid_mesh.hmax()}, hmin() {fluid_mesh.hmin()}")
@@ -177,4 +179,3 @@ print("solid fluid mesh ratio(>2) = ", fluid_mesh.hmin() / solid_mesh.hmax())
 #     print(t)
 
 # write_excel(volume_list, file_excel_name)
-

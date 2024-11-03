@@ -11,8 +11,24 @@
 
 from dolfin import *
 
+
 class ChorinSolver:
-    def __init__(self, u0, p0, f, dt, nu,rho=1.0, stab=False, alpha=0.1, conv=True, bdry=None, bc_Neumann=None, bcu = None, bcp = None):
+    def __init__(
+        self,
+        u0,
+        p0,
+        f,
+        dt,
+        nu,
+        rho=1.0,
+        stab=False,
+        alpha=0.1,
+        conv=True,
+        bdry=None,
+        bc_Neumann=None,
+        bcu=None,
+        bcp=None,
+    ):
         # Reconstruct element space
         mesh = u0.function_space().mesh()
         V = u0.function_space()
@@ -24,28 +40,32 @@ class ChorinSolver:
         p = TrialFunction(Q)
         q = TestFunction(Q)
 
-        # Define functions for solutions at previous and current time steps    
+        # Define functions for solutions at previous and current time steps
         # u0 = Function(V)
         u1 = Function(V)
         p1 = Function(Q)
 
-        k  = Constant(dt)
+        k = Constant(dt)
         nu = Constant(nu)
         rho = Constant(rho)
 
         # Tentative velocity step
-        F1 = (1/k)*inner(u - u0, v)*dx + inner(grad(u0)*u0, v)*dx + \
-            nu*inner(grad(u), grad(v))*dx - inner(f, v)*dx
+        F1 = (
+            (1 / k) * inner(u - u0, v) * dx
+            + inner(grad(u0) * u0, v) * dx
+            + nu * inner(grad(u), grad(v)) * dx
+            - inner(f, v) * dx
+        )
         a1 = lhs(F1)
         L1 = rhs(F1)
 
         # Pressure update
-        a2 = inner(grad(p), grad(q))*dx
-        L2 = -(1/k)*div(u1)*q*dx
+        a2 = inner(grad(p), grad(q)) * dx
+        L2 = -(1 / k) * div(u1) * q * dx
 
         # Velocity update
-        a3 = inner(u, v)*dx
-        L3 = inner(u1, v)*dx - k*inner(grad(p1), v)*dx
+        a3 = inner(u, v) * dx
+        L3 = inner(u1, v) * dx - k * inner(grad(p1), v) * dx
 
         # Assemble matrices
         A1 = assemble(a1)
@@ -60,17 +80,15 @@ class ChorinSolver:
         self.p0 = p0
         self.u1 = u1
         self.p1 = p1
-        
+
         self.L1 = L1
         self.L2 = L2
         self.L3 = L3
         self.A1 = A1
         self.A2 = A2
         self.A3 = A3
-        
+
         self.prec = "amg" if has_krylov_solver_preconditioner("amg") else "default"
-
-
 
     def update(self, u0, p0):
         self.u0.assign(u0)
@@ -94,4 +112,3 @@ class ChorinSolver:
         solve(self.A3, self.u1.vector(), b3, "bicgstab", "default")
         # print(assemble(div(self.u1)*dx))
         return self.u1, self.p1
-

@@ -7,4 +7,4 @@
 
 from .Interaction import Interaction, Interaction2
 
-__all__ = ['Interaction', 'Interaction2']
+__all__ = ["Interaction", "Interaction2"]
