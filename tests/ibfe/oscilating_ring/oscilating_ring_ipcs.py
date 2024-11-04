@@ -96,7 +96,7 @@ file_log_name = unique_filename(os.path.basename(__file__), "note", "/info.log")
 file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_excel_name = unique_filename(os.path.basename(__file__), "note", "/volume.xlsx")
-file_parameters_name = unique_filename(
+file_param_name = unique_filename(
     os.path.basename(__file__), "note", "/parameters.json"
 )
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
@@ -112,7 +112,7 @@ logger.info(
 )
 logger.info(f"solid_mesh.num_cells() {solid_mesh.num_cells()}, Vs.dim() {Vs.dim()}")
 write_paramters(
-    file_parameters_name,
+    file_param_name,
     T=T,
     dt=dt,
     num_steps=num_steps,

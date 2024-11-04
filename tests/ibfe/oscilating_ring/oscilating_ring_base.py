@@ -23,6 +23,7 @@ from ibfenics.io import (
 )
 from local_mesh import *
 
+
 construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 
@@ -54,9 +55,8 @@ def calculate_constituitive_model(disp, vs, us):
 
 
 def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
-    logger.info(f"time: {t}, step: {n}")
     if time_manager.should_output(n):
-        logger.info(f"output...")
+        logger.info(f"time: {t}, step: {n}, output...")
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
         file_fluid.write(f, t)
@@ -93,7 +93,7 @@ file_log_name = unique_filename(os.path.basename(__file__), str(dt), "/info.log"
 file_solid_name = unique_filename(os.path.basename(__file__), str(dt), "/solid.xdmf")
 file_fluid_name = unique_filename(os.path.basename(__file__), str(dt), "/fluid.xdmf")
 file_excel_name = unique_filename(os.path.basename(__file__), str(dt), "/volume.xlsx")
-file_parameters_name = unique_filename(
+file_param_name = unique_filename(
     os.path.basename(__file__), str(dt), "/parameters.json"
 )
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
@@ -109,7 +109,7 @@ logger.info(
 )
 logger.info(f"solid_mesh.num_cells() {solid_mesh.num_cells()}, Vs.dim() {Vs.dim()}")
 write_paramters(
-    file_parameters_name,
+    file_param_name,
     T=T,
     dt=dt,
     num_steps=num_steps,
@@ -133,6 +133,9 @@ for n in range(1, num_steps + 1):
     # u0.assign(u1)
     # p0.assign(p1)
     navier_stokes_solver.update(u1, p1)
+    logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
+    logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
+    logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)

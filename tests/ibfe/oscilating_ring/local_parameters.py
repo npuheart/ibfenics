@@ -9,6 +9,7 @@ nu = 0.001
 
 # Define stablization parameters
 alpha = 10.0 * dt
+conv = True
 stab = True
 delta = 0.1
 SAV = 1.0
@@ -18,7 +19,7 @@ SAV = 1.0
 # 128 160
 n_mesh_fluid = 64
 n_mesh_solid = 160
-nu_s = 1.0*1.0 / 0.0625
+nu_s = 1.0 * 1.0 / 0.0625
 order_velocity = 2
 order_pressure = 1
 order_displacement = 1
