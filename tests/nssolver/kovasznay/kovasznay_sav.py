@@ -10,9 +10,10 @@ from ibfenics.io import (
     write_paramters,
     write_excel,
 )
+
 stab = False
 alpha = 0.1
-conv=True
+conv = True
 
 
 TaylorHoodSolver_1 = SAVTaylorHoodSolver.TaylorHoodSolver_1
@@ -31,18 +32,16 @@ V, Q = construct_function_space_bc(u0, p0)
 bcus_1, bcps_1 = calculate_fluid_boundary_conditions(V, Q)
 bcus_2, bcps_2 = calculate_fluid_boundary_conditions_sav(V, Q)
 navier_stokes_solver_1 = TaylorHoodSolver_1(u0, p0, dt, nv, stab=stab, alpha=alpha)
-navier_stokes_solver_2 = TaylorHoodSolver_2(u0, p0, f0, dt, nv, stab=stab, alpha=alpha, conv=conv)
+navier_stokes_solver_2 = TaylorHoodSolver_2(
+    u0, p0, f0, dt, nv, stab=stab, alpha=alpha, conv=conv
+)
 
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
 
 t = 0
 for n in range(num_steps):
-
     t += dt
-    # un, pn = fluid_solver.solve(bcu, bcp)
-    # fluid_solver.update(un, pn)
-
     navier_stokes_solver_1.update(u0, p0)
     navier_stokes_solver_2.update(u0, p0)
     u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)

@@ -7,7 +7,6 @@
 # email : ibfenics@pengfeima.cn
 
 
-
 from .TaylorHoodSolver import TaylorHoodSolver
 from .TaylorHoodSolverBDF2 import TaylorHoodSolverBDF2
 from .IPCSSolver import IPCSSolver
@@ -24,7 +23,10 @@ class SAVTaylorHoodSolver:
     from .SAVTaylorHoodSolver import TaylorHoodSolver_1 as TaylorHoodSolver_1
     from .SAVTaylorHoodSolver import TaylorHoodSolver_2 as TaylorHoodSolver_2
     from .SAVTaylorHoodSolver import modified_energy, CAL_SAV_2
-    from .SAVTaylorHoodSolver import construct_function_space, construct_function_space_bc
+    from .SAVTaylorHoodSolver import (
+        construct_function_space,
+        construct_function_space_bc,
+    )
 
 
 __name__ = "ibfenics.nssolver"

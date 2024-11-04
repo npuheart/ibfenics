@@ -112,7 +112,6 @@ qn = 1.0
 _ = 0
 
 
-
 def construct_function_space(u0, p0):
     mesh = u0.function_space().mesh()
     element1 = u0.function_space()._ufl_element
@@ -121,10 +120,10 @@ def construct_function_space(u0, p0):
     W = FunctionSpace(mesh, TH)
     return W
 
+
 def construct_function_space_bc(u0, p0):
     W = construct_function_space(u0, p0)
     return W.sub(0), W.sub(1)
-
 
 
 class TaylorHoodSolver_1:
