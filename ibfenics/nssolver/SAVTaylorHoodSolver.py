@@ -129,14 +129,16 @@ def construct_function_space_bc(u0, p0):
 class TaylorHoodSolver_1:
     def __init__(self, u0, p0, dt, nu, stab=False, alpha=0.1):
         # Reconstruct element space
+        mesh = u0.function_space().mesh()
         W = construct_function_space(u0, p0)
 
         # Define variables
         (u, p) = TrialFunctions(W)
         (v, q) = TestFunctions(W)
         k = Constant(dt)
+        N = FacetNormal(mesh)
         self.w_ = Function(W)
-        self.un, self.pn = Function(W).split(True)
+        self.un, self.pn = u0, p0
 
         # Define variational problem
         F = (
@@ -167,13 +169,16 @@ class TaylorHoodSolver_1:
 class TaylorHoodSolver_2:
     def __init__(self, u0, p0, f, dt, nu, stab=False, alpha=0.1, conv=True):
         # Reconstruct element space
+        mesh = u0.function_space().mesh()
         W = construct_function_space(u0, p0)
+
         # Define variables
         (u, p) = TrialFunctions(W)
         (v, q) = TestFunctions(W)
         k = Constant(dt)
+        N = FacetNormal(mesh)
         self.w_ = Function(W)
-        self.un, self.pn = Function(W).split(True)
+        self.un, self.pn = u0, p0
 
         # Define variational problem
         F = (

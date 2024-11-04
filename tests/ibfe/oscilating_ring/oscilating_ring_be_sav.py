@@ -44,9 +44,7 @@ def calculate_fluid_boundary_conditions(V, Q):
     bcu_2 = DirichletBC(
         V, Constant((0, 0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)"
     )
-    bcp_1 = DirichletBC(
-       Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
-    )
+    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
     bcu = [bcu_1, bcu_2]
     bcp = [bcp_1]
     return bcu, bcp
@@ -54,9 +52,7 @@ def calculate_fluid_boundary_conditions(V, Q):
 
 def calculate_fluid_boundary_conditions_sav(V, Q):
     bcu_1 = DirichletBC(V, Constant((0, 0)), "on_boundary")
-    bcp_1 = DirichletBC(
-        Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
-    )
+    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
     bcu = [bcu_1]
     bcp = [bcp_1]
     return bcu, bcp
@@ -104,7 +100,8 @@ bcus_1, bcps_1 = calculate_fluid_boundary_conditions(V, Q)
 bcus_2, bcps_2 = calculate_fluid_boundary_conditions_sav(V, Q)
 navier_stokes_solver_1 = TaylorHoodSolver_1(u0, p0, dt, nu, stab=stab, alpha=alpha)
 navier_stokes_solver_2 = TaylorHoodSolver_2(
-    u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv)
+    u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv
+)
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
@@ -112,12 +109,12 @@ vs = TestFunction(Vs)
 A2, L2 = calculate_constituitive_model(disp, vs, us)
 
 # Define output path
-file_log_name = unique_filename(os.path.basename(__file__), "note", "/info.log")
-file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
-file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
-file_excel_name = unique_filename(os.path.basename(__file__), "note", "/volume.xlsx")
+file_log_name = unique_filename(os.path.basename(__file__), str(dt), "/info.log")
+file_solid_name = unique_filename(os.path.basename(__file__), str(dt), "/solid.xdmf")
+file_fluid_name = unique_filename(os.path.basename(__file__), str(dt), "/fluid.xdmf")
+file_excel_name = unique_filename(os.path.basename(__file__), str(dt), "/volume.xlsx")
 file_parameters_name = unique_filename(
-    os.path.basename(__file__), "note", "/parameters.json"
+    os.path.basename(__file__), str(dt), "/parameters.json"
 )
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)

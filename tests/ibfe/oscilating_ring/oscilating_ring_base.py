@@ -22,6 +22,7 @@ from ibfenics.io import (
     write_excel,
 )
 from local_mesh import *
+
 construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 
@@ -35,9 +36,7 @@ def calculate_fluid_boundary_conditions(V, Q):
     bcu_2 = DirichletBC(
         V, Constant((0, 0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)"
     )
-    bcp_1 = DirichletBC(
-       Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
-    )
+    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
     bcu = [bcu_1, bcu_2]
     bcp = [bcp_1]
     return bcu, bcp

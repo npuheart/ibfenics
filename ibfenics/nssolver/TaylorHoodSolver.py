@@ -16,7 +16,7 @@ class TaylorHoodSolver:
     def construct_function_space_bc(u0, p0):
         W = TaylorHoodSolver.construct_function_space(u0, p0)
         return W.sub(0), W.sub(1)
-    
+
     @staticmethod
     def construct_function_space(u0, p0):
         mesh = u0.function_space().mesh()
@@ -25,7 +25,7 @@ class TaylorHoodSolver:
         TH = element1 * element2
         W = FunctionSpace(mesh, TH)
         return W
-    
+
     def __init__(
         self,
         u0,
