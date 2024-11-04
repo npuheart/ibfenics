@@ -12,6 +12,20 @@ import numpy as np
 
 
 class TaylorHoodSolver:
+    @staticmethod
+    def construct_function_space_bc(u0, p0):
+        W = TaylorHoodSolver.construct_function_space(u0, p0)
+        return W.sub(0), W.sub(1)
+    
+    @staticmethod
+    def construct_function_space(u0, p0):
+        mesh = u0.function_space().mesh()
+        element1 = u0.function_space()._ufl_element
+        element2 = p0.function_space()._ufl_element
+        TH = element1 * element2
+        W = FunctionSpace(mesh, TH)
+        return W
+    
     def __init__(
         self,
         u0,
@@ -27,10 +41,7 @@ class TaylorHoodSolver:
     ):
         # Reconstruct element space
         mesh = u0.function_space().mesh()
-        element1 = u0.function_space()._ufl_element
-        element2 = p0.function_space()._ufl_element
-        TH = element1 * element2
-        W = FunctionSpace(mesh, TH)
+        W = TaylorHoodSolver.construct_function_space(u0, p0)
 
         # Define variables
         (u, p) = TrialFunctions(W)
@@ -38,7 +49,7 @@ class TaylorHoodSolver:
         k = Constant(dt)
         N = FacetNormal(mesh)
         self.w_ = Function(W)
-        self.un, self.pn = Function(W).split(True)
+        self.un, self.pn = u0, p0
 
         if bdry is not None:
             ds = Measure("ds", domain=mesh, subdomain_data=bdry)

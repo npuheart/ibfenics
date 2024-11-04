@@ -1,8 +1,8 @@
-0.0.6 [2024-10-20]
+0.0.6 [2024-11-04]
 - 圆柱绕流
 - test 没有固体, 只有直管
 - test_1 固体为 circle beam (IB)
-- TODO 
+- 重构流体求解器的代码, 添加函数construct_function_space_bc
 
 0.0.5 [2024-10-8]
 - TODO: 流体求解器增加投影算法和IPCS算法

@@ -22,6 +22,7 @@ from ibfenics.io import (
     write_excel,
 )
 from local_mesh import *
+construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 
 def advance_disp_be(disp, velocity, dt):
@@ -29,13 +30,13 @@ def advance_disp_be(disp, velocity, dt):
 
 
 # Define boundary conditions for fluid solver
-def calculate_fluid_boundary_conditions(W):
-    bcu_1 = DirichletBC(W.sub(0), Constant((0, 0)), "near(x[1],1.0)")
+def calculate_fluid_boundary_conditions(V, Q):
+    bcu_1 = DirichletBC(V, Constant((0, 0)), "near(x[1],1.0)")
     bcu_2 = DirichletBC(
-        W.sub(0), Constant((0, 0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)"
+        V, Constant((0, 0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)"
     )
     bcp_1 = DirichletBC(
-        W.sub(1), Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
+       Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
     )
     bcu = [bcu_1, bcu_2]
     bcp = [bcp_1]
@@ -79,8 +80,9 @@ disp.interpolate(InitialDisplacement())
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
+V, Q = construct_function_space_bc(u0, p0)
+bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
 navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
-bcu, bcp = calculate_fluid_boundary_conditions(navier_stokes_solver.W)
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
@@ -88,12 +90,12 @@ vs = TestFunction(Vs)
 A2, L2 = calculate_constituitive_model(disp, vs, us)
 
 # Define output path
-file_log_name = unique_filename(os.path.basename(__file__), "note", "/info.log")
-file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
-file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
-file_excel_name = unique_filename(os.path.basename(__file__), "note", "/volume.xlsx")
+file_log_name = unique_filename(os.path.basename(__file__), str(dt), "/info.log")
+file_solid_name = unique_filename(os.path.basename(__file__), str(dt), "/solid.xdmf")
+file_fluid_name = unique_filename(os.path.basename(__file__), str(dt), "/fluid.xdmf")
+file_excel_name = unique_filename(os.path.basename(__file__), str(dt), "/volume.xlsx")
 file_parameters_name = unique_filename(
-    os.path.basename(__file__), "note", "/parameters.json"
+    os.path.basename(__file__), str(dt), "/parameters.json"
 )
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
@@ -128,10 +130,10 @@ time_manager = TimeManager(T, num_steps, 20)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
-    navier_stokes_solver.update(u0, p0)
     u1, p1 = navier_stokes_solver.solve(bcu, bcp)
-    u0.assign(u1)
-    p0.assign(p1)
+    # u0.assign(u1)
+    # p0.assign(p1)
+    navier_stokes_solver.update(u1, p1)
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)

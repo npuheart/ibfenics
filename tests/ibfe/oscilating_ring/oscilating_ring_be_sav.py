@@ -98,7 +98,7 @@ force = Function(Vs, name="force")
 disp.interpolate(InitialDisplacement())
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
-# Define interpolation object and fluid solver object
+# Define fluid solver object
 V, Q = construct_function_space_bc(u0, p0)
 bcus_1, bcps_1 = calculate_fluid_boundary_conditions(V, Q)
 bcus_2, bcps_2 = calculate_fluid_boundary_conditions_sav(V, Q)
