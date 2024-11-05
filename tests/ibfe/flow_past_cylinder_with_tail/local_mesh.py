@@ -20,6 +20,8 @@ def calculate_volume(X):
 marker_circle = 1
 marker_beam = 2
 mesh_path = os.path.expanduser("~") + "/mesh/benchmark/circle_beam/"
+
+
 def calculate_solid_mesh(n_mesh_solid):
     solid_mesh = Mesh()
     with XDMFFile(mesh_path + "circle_beam_40.xdmf") as xdmf:
@@ -71,7 +73,6 @@ def calculate_fluid_boundary_conditions(V, Q):
     bcus = [bcu_inflow, bcu_walls, bcu_cylinder]
     bcps = [bcp_outflow]
     return bcus, bcps
-
 
 
 if __name__ == "__main__":

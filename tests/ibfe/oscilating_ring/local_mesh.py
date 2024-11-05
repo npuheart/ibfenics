@@ -55,6 +55,7 @@ Vp = interaction.Vp
 def kinematic_energy(u):
     return assemble(0.5 * inner(u, u) * dx)
 
+
 def total_energy(disp, u):
     pass
 

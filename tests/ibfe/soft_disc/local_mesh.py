@@ -56,4 +56,3 @@ def calculate_fluid_boundary_conditions(V, Q):
     bcu = [noslip, upflow]
     bcp = [pinpoint]
     return bcu, bcp
-

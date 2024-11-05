@@ -23,10 +23,10 @@ h = 0.02 * IU.m
 
 origin = Point(0.0 * IU.m, 0.0 * IU.m)  # point O
 center = Point(0.5 * IU.m, 0.5 * IU.m)  # point C
-beam_1_point_1 = Point(center.x() + r + l, center.y()+r) 
-beam_1_point_2 = Point(center.x() - r - l, center.y()-r) 
-beam_2_point_1 = Point(center.x() + r, center.y()+l+r) 
-beam_2_point_2 = Point(center.x() - r, center.y()-l-r) 
+beam_1_point_1 = Point(center.x() + r + l, center.y() + r)
+beam_1_point_2 = Point(center.x() - r - l, center.y() - r)
+beam_2_point_1 = Point(center.x() + r, center.y() + l + r)
+beam_2_point_2 = Point(center.x() - r, center.y() - l - r)
 
 _domain_1 = Rectangle(beam_1_point_1, beam_1_point_2)
 _domain_2 = Rectangle(beam_2_point_1, beam_2_point_2)

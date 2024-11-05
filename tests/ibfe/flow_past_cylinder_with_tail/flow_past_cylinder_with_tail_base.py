@@ -27,7 +27,6 @@ from local_mesh import *
 construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 
-
 # Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
     # Define trial and test functions for solid solver
@@ -44,7 +43,7 @@ def calculate_constituitive_model(disp, vs, us):
     a2 = lhs(F2)
     L2 = rhs(F2)
     A2 = assemble(a2)
-    return A2, L2 
+    return A2, L2
 
 
 def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
@@ -56,7 +55,6 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
         file_solid.write(disp, t)
         file_solid.write(force, t)
         file_solid.write(velocity, t)
-
 
 
 # Create functions for fluid
@@ -115,9 +113,9 @@ write_paramters(
     SAV=SAV,
     n_mesh_fluid=n_mesh_fluid,
     n_mesh_solid=n_mesh_solid,
-    beta_s = beta_s,
-    kappa_stab = kappa_stab,
-    G_s = G_s
+    beta_s=beta_s,
+    kappa_stab=kappa_stab,
+    G_s=G_s,
 )
 
 t = dt

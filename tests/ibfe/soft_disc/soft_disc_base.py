@@ -27,7 +27,6 @@ from local_mesh import *
 construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 
-
 # Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
     F = grad(disp)
