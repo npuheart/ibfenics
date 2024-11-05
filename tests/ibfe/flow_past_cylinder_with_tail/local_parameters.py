@@ -3,7 +3,7 @@
 
 # Define time parameters
 T = 12.0
-dt = 1 / 100000
+dt = 1/8000
 num_steps = int(T / dt)
 
 # Define fluid parameters
@@ -11,9 +11,9 @@ rho = 1.0
 nu = 0.001
 
 # Define solid parameters
-beta_s = 1e5
-kappa_stab = 1e5
-G_s = 1000.0
+beta_s = 1e6
+kappa_stab = 0.0
+G_s = 32
 
 # Define stablization parameters
 alpha = 10.0 * dt
