@@ -52,6 +52,13 @@ Vf_1 = interaction.Vf_1
 Vp = interaction.Vp
 
 
+def kinematic_energy(u):
+    return assemble(0.5 * inner(u, u) * dx)
+
+def total_energy(disp, u):
+    pass
+
+
 class InitialDisplacement(UserExpression):
     def eval(self, value, x):
         R = 0.25

@@ -26,11 +26,6 @@ from local_mesh import *
 
 construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
-
-def advance_disp_be(disp, velocity, dt):
-    disp.vector()[:] = velocity.vector()[:] * dt + disp.vector()[:]
-
-
 # Define boundary conditions for fluid solver
 def calculate_fluid_boundary_conditions(V, Q):
     bcu_1 = DirichletBC(V, Constant((0, 0)), "near(x[1],1.0)")
@@ -136,6 +131,7 @@ for n in range(1, num_steps + 1):
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
+    logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
