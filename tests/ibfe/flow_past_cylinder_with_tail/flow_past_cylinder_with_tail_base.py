@@ -30,13 +30,21 @@ construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 # Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
+    # Define trial and test functions for solid solver
+    X0 = SpatialCoordinate(solid_mesh)
+    # Define neo-Hookean material
     F = grad(disp)
-    P = nu_s * (F - inv(F).T)
-    F2 = inner(P, grad(vs)) * dx + inner(us, vs) * dx
+    I3 = det(F) * det(F)
+    P = G_s / 2.0 * (F - inv(F).T) + kappa_stab * ln(I3) * inv(F).T
+    F2 = inner(P, grad(vs)) * ddx + inner(us, vs) * ddx
+    # # Define stablization term
+    # F2 += kappa_stab * inner(grad(us), grad(vs)) * ddx
+    # Define constraints for cylinder
+    F2 += beta_s * inner((disp - X0), vs) * ddx(subdomain_id=marker_circle)
     a2 = lhs(F2)
     L2 = rhs(F2)
     A2 = assemble(a2)
-    return A2, L2
+    return A2, L2 
 
 
 def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
@@ -105,13 +113,15 @@ write_paramters(
     stab=stab,
     delta=delta,
     SAV=SAV,
-    nu_s=nu_s,
     n_mesh_fluid=n_mesh_fluid,
     n_mesh_solid=n_mesh_solid,
+    beta_s = beta_s,
+    kappa_stab = kappa_stab,
+    G_s = G_s
 )
 
 t = dt
-time_manager = TimeManager(T, num_steps, 20)
+time_manager = TimeManager(T, num_steps, 1000)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure

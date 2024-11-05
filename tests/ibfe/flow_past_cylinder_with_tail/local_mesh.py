@@ -16,10 +16,6 @@ def calculate_volume(X):
     print("体积：", volume_J)
     return volume_J
 
-# if __name__ == "__main__":
-#     File("bdry.pvd") << bdry
-#     File("domains.pvd") << domains
-#     File("solid_mesh.pvd") << solid_mesh
 
 marker_circle = 1
 marker_beam = 2
@@ -32,9 +28,9 @@ def calculate_solid_mesh(n_mesh_solid):
 
 
 solid_mesh = calculate_solid_mesh(n_mesh_solid)
-# bdry = MeshFunction("size_t", solid_mesh, mesh_path + "circle_beam_40_boundaries.xml")
-# domains = MeshFunction("size_t", solid_mesh, mesh_path + "circle_beam_40_domains.xml")
-# dx = Measure("dx")(subdomain_data=domains)
+bdry = MeshFunction("size_t", solid_mesh, mesh_path + "circle_beam_40_boundaries.xml")
+domains = MeshFunction("size_t", solid_mesh, mesh_path + "circle_beam_40_domains.xml")
+ddx = Measure("dx")(subdomain_data=domains)
 
 
 orders = [order_velocity, order_pressure, order_displacement]
@@ -76,3 +72,9 @@ def calculate_fluid_boundary_conditions(V, Q):
     bcps = [bcp_outflow]
     return bcus, bcps
 
+
+
+if __name__ == "__main__":
+    File("bdry.pvd") << bdry
+    File("domains.pvd") << domains
+    File("solid_mesh.pvd") << solid_mesh

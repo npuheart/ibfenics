@@ -1,6 +1,9 @@
+# # Standard units
+# units = UserIU(g=0.001, cm=0.01)
+
 # Define time parameters
-T = 12
-dt = 1 / 1000
+T = 12.0
+dt = 1 / 100000
 num_steps = int(T / dt)
 
 # Define fluid parameters
@@ -8,7 +11,9 @@ rho = 1.0
 nu = 0.001
 
 # Define solid parameters
-
+beta_s = 1e5
+kappa_stab = 1e5
+G_s = 1000.0
 
 # Define stablization parameters
 alpha = 10.0 * dt
@@ -22,7 +27,6 @@ SAV = 1.0
 # 128 160
 n_mesh_fluid = 32
 n_mesh_solid = 40
-nu_s = 1.0 / 0.0625
 order_velocity = 2
 order_pressure = 1
 order_displacement = 1
