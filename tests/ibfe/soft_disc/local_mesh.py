@@ -46,7 +46,7 @@ def total_energy(disp, u):
     pass
 
 
-initial_disp = Expression(("0.0", "0.0"), degree=1)
+initial_disp = Expression(("x[0]", "x[1]"), degree=1)
 
 # Define boundary conditions for fluid solver
 def calculate_fluid_boundary_conditions(V, Q):
