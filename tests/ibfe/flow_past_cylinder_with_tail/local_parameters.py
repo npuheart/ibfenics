@@ -3,7 +3,7 @@
 
 # Define time parameters
 T = 12.0
-dt = 1/8000
+dt = 1 / 8000
 num_steps = int(T / dt)
 
 # Define fluid parameters
