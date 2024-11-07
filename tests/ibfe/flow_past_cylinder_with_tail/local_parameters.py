@@ -9,6 +9,7 @@ num_steps = int(T / dt)
 # Define fluid parameters
 rho = 1.0
 nu = 0.001
+U_bar = 2.0
 
 # Define solid parameters
 beta_s = 1e6

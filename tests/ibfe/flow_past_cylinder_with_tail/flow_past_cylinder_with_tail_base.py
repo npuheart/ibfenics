@@ -116,6 +116,7 @@ write_paramters(
     beta_s=beta_s,
     kappa_stab=kappa_stab,
     G_s=G_s,
+    U_bar = U_bar,
 )
 
 t = dt

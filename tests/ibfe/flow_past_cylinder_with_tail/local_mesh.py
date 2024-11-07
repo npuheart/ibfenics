@@ -37,7 +37,7 @@ ddx = Measure("dx")(subdomain_data=domains)
 
 orders = [order_velocity, order_pressure, order_displacement]
 seperations = [n_mesh_fluid * 6, n_mesh_fluid]
-box_points = [Point(0, 0), Point(2.2, 0.41)]
+box_points = [Point(0, 0), Point(2.46, 0.41)]
 interaction = Interaction(box_points, seperations, solid_mesh, orders)
 
 fluid_mesh = interaction.fluid_mesh
@@ -62,11 +62,11 @@ initial_disp = Expression(("x[0]", "x[1]"), degree=1)
 # Define boundary conditions for fluid solver
 def calculate_fluid_boundary_conditions(V, Q):
     inflow = "near(x[0], 0)"
-    outflow = "near(x[0], 2.2)"
+    outflow = "near(x[0], 2.46)"
     walls = "near(x[1], 0) || near(x[1], 0.41)"
     cylinder = "on_boundary && x[0]>0.1 && x[0]<0.3 && x[1]>0.1 && x[1]<0.3"
-    inflow_profile = ("4.0*1.5*x[1]*(0.41 - x[1]) / pow(0.41, 2)", "0")
-    bcu_inflow = DirichletBC(V, Expression(inflow_profile, degree=2), inflow)
+    inflow_profile = Expression(("4.0*1.5*x[1]*(0.41 - x[1]) / pow(0.41, 2)*U_bar", "0"),degree=2,U_bar=U_bar)
+    bcu_inflow = DirichletBC(V, inflow_profile, inflow)
     bcu_walls = DirichletBC(V, Constant((0, 0)), walls)
     bcu_cylinder = DirichletBC(V, Constant((0, 0)), cylinder)
     bcp_outflow = DirichletBC(Q, Constant(0), outflow)
