@@ -3,7 +3,7 @@
 
 # Define time parameters
 T = 12.0
-dt = 1 / 8000
+dt = 1 / 16000
 num_steps = int(T / dt)
 
 # Define fluid parameters
@@ -12,9 +12,9 @@ nu = 0.001
 U_bar = 2.0
 
 # Define solid parameters
-beta_s = 1e6
-kappa_stab = 0.0
-G_s = 32
+beta_s = 1e7
+kappa_stab = 1e3
+G_s = 128
 
 # Define stablization parameters
 alpha = 10.0 * dt
@@ -26,8 +26,8 @@ SAV = 1.0
 # 32 40
 # 64 80
 # 128 160
-n_mesh_fluid = 32
-n_mesh_solid = 40
+n_mesh_fluid = 64
+n_mesh_solid = 80
 order_velocity = 2
 order_pressure = 1
 order_displacement = 1

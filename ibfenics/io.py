@@ -61,6 +61,17 @@ def write_excel(volume_list, excel_file1, sheet_name="v"):
     df = pd.DataFrame(volume_list)
     df.to_excel(excel_file1, sheet_name=sheet_name, index=False)
 
+"""
+data_list = [ {'no': [3, 2, 5]}, {'Price': [3, 2, 5]}]
+write_excel_sheets(data_list, "e.xlsx", ["a","b"])
+"""
+def write_excel_sheets(data_list, excel_file1, sheet_names):
+    assert len(data_list) == len(sheet_names)
+    dfs = [pd.DataFrame(data) for data in data_list]
+    with pd.ExcelWriter(excel_file1) as writer:
+        for df, sheet_name in zip(dfs, sheet_names):
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+
 
 def write_paramters(filename, **params):
     params = params or {}

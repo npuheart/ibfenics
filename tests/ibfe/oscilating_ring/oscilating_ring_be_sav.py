@@ -29,11 +29,6 @@ modified_energy = SAVTaylorHoodSolver.modified_energy
 CAL_SAV = SAVTaylorHoodSolver.CAL_SAV_2
 construct_function_space_bc = SAVTaylorHoodSolver.construct_function_space_bc
 
-
-def advance_disp_be(disp, velocity, dt):
-    disp.vector()[:] = velocity.vector()[:] * dt + disp.vector()[:]
-
-
 # Define boundary conditions for fluid solver
 def calculate_fluid_boundary_conditions(V, Q):
     bcu_1 = DirichletBC(V, Constant((0, 0)), "near(x[1],1.0)")

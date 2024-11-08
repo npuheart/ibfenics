@@ -17,6 +17,10 @@ class SAVTaylorHoodSolverBDF2:
     from .SAVTaylorHoodSolverBDF2 import TaylorHoodSolverBDF2_1
     from .SAVTaylorHoodSolverBDF2 import TaylorHoodSolverBDF2_2
     from .SAVTaylorHoodSolverBDF2 import modified_energy, calculate_SAV
+    from .SAVTaylorHoodSolverBDF2 import (
+        construct_function_space,
+        construct_function_space_bc,
+    )
 
 
 class SAVTaylorHoodSolver:

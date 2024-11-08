@@ -1,3 +1,11 @@
+# Copyright (C) 2024 Pengfei Ma
+#
+# This file is part of ibfenics (https://github.com/npuheart/ibfenics)
+#
+# SPDX-License-Identifier:    LGPL-3.0-or-later
+#
+# email : ibfenics@pengfeima.cn
+
 from dolfin import *
 from mshr import *
 import numpy as np
@@ -90,22 +98,36 @@ def calculate_SAV_2(
     return S
 
 
+
+
+def construct_function_space(u0, p0):
+    mesh = u0.function_space().mesh()
+    element1 = u0.function_space()._ufl_element
+    element2 = p0.function_space()._ufl_element
+    TH = element1 * element2
+    W = FunctionSpace(mesh, TH)
+    return W
+
+
+def construct_function_space_bc(u0, p0):
+    W = construct_function_space(u0, p0)
+    return W.sub(0), W.sub(1)
+
+
 class TaylorHoodSolverBDF2_1:
     def __init__(self, u0_, u0, p0, dt, nu, stab=False, alpha=0.1):
         # Reconstruct element space
         mesh = u0.function_space().mesh()
-        element1 = u0.function_space()._ufl_element
-        element2 = p0.function_space()._ufl_element
-        TH = element1 * element2
-        W = FunctionSpace(mesh, TH)
+        W = construct_function_space(u0, p0)
 
         # Define variables
         (u, p) = TrialFunctions(W)
         (v, q) = TestFunctions(W)
         k = Constant(dt)
+        N = FacetNormal(mesh)
         self.w_ = Function(W)
-        self.un, self.pn = Function(W).split(True)
-        self.un_, self.pn_ = Function(W).split(True)
+        self.un_, self.un, self.pn = u0_, u0, p0
+        
 
         # dt approximation
         du_dt = (3.0 * u - 4.0 * self.un + self.un_) / (2.0 * k)
@@ -114,7 +136,9 @@ class TaylorHoodSolverBDF2_1:
 
         # Define variational problem
         F = (
-            inner(du_dt, v) * dx + nu * inner(grad(u), grad(v)) * dx - div(v) * p * dx
+            inner(du_dt, v) * dx
+            + nu * inner(grad(u), grad(v)) * dx
+            - div(v) * p * dx
         )  # - inner(f, v)*dx
         if stab:
             F += alpha * inner(grad(u - self.un), grad(v)) * dx  # 稳定项
@@ -139,18 +163,16 @@ class TaylorHoodSolverBDF2_1:
 
 
 class TaylorHoodSolverBDF2_2:
-    def __init__(self, u0_, u0, p0, f, dt, nu, stab=False, alpha=0.1):
+    def __init__(self, u0_, u0, p0, f, dt, nu, stab=False, alpha=0.1, conv=True):
         # Reconstruct element space
         mesh = u0.function_space().mesh()
-        element1 = u0.function_space()._ufl_element
-        element2 = p0.function_space()._ufl_element
-        TH = element1 * element2
-        W = FunctionSpace(mesh, TH)
+        W = construct_function_space(u0, p0)
 
         # Define variables
         (u, p) = TrialFunctions(W)
         (v, q) = TestFunctions(W)
         k = Constant(dt)
+        N = FacetNormal(mesh)
         self.w_ = Function(W)
         self.un, self.pn = Function(W).split(True)
         self.un_, self.pn_ = Function(W).split(True)
@@ -166,16 +188,19 @@ class TaylorHoodSolverBDF2_2:
             + nu * inner(grad(u), grad(v)) * dx
             + div(v) * p * dx
             - inner(f, v) * dx
-            + inner(u_grad_u, v) * dx
+            
         )
+
+        if conv:
+            F += inner(u_grad_u, v) * dx
+
         if stab:
             F += alpha * inner(grad(u), grad(v)) * dx  # 稳定项
+
         F += q * div(u) * dx
         a = lhs(F)
-        self.W = W
         self.A = assemble(a)
         self.L = rhs(F)
-        self.un.assign(u0_)
 
     def update(self, un, pn):
         self.un_.assign(self.un)  # u_{n-1} = u_n
