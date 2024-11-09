@@ -71,7 +71,7 @@ f = Function(Vf_1, name="force")
 velocity = Function(Vs, name="velocity")
 disp = Function(Vs, name="displacement")
 force = Function(Vs, name="force")
-disp.interpolate(InitialDisplacement())
+disp.interpolate(initial_disp)
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
