@@ -65,7 +65,9 @@ def calculate_fluid_boundary_conditions(V, Q):
     outflow = "near(x[0], 2.46)"
     walls = "near(x[1], 0) || near(x[1], 0.41)"
     cylinder = "on_boundary && x[0]>0.1 && x[0]<0.3 && x[1]>0.1 && x[1]<0.3"
-    inflow_profile = Expression(("4.0*1.5*x[1]*(0.41 - x[1]) / pow(0.41, 2)*U_bar", "0"),degree=2,U_bar=U_bar)
+    inflow_profile = Expression(
+        ("4.0*1.5*x[1]*(0.41 - x[1]) / pow(0.41, 2)*U_bar", "0"), degree=2, U_bar=U_bar
+    )
     bcu_inflow = DirichletBC(V, inflow_profile, inflow)
     bcu_walls = DirichletBC(V, Constant((0, 0)), walls)
     bcu_cylinder = DirichletBC(V, Constant((0, 0)), cylinder)

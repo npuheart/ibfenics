@@ -9,7 +9,7 @@ nu = 0.001
 
 # Define stablization parameters
 alpha = 10.0 * dt
-conv = True
+conv = False
 stab = False
 delta = 0.1
 SAV = 1.0

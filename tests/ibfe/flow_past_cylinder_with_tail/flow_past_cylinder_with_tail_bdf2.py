@@ -27,6 +27,7 @@ from local_mesh import *
 
 construct_function_space_bc = TaylorHoodSolverBDF2.construct_function_space_bc
 
+
 def calculate_fluid_boundary_conditions_sav(V, Q):
     bcu_1 = DirichletBC(V, Constant((0, 0)), "on_boundary")
     bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
@@ -59,7 +60,7 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
         logger.info(f"time: {t}, step: {n}, output...")
         vorticity = project(u0[0].dx(1) - u0[1].dx(0), p0.function_space())
         vorticity.rename("vorticity", "vorticity")
-        # 
+        #
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
         file_fluid.write(vorticity, t)
@@ -86,7 +87,9 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 # Define fluid solver object
 V, Q = construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-navier_stokes_solver = TaylorHoodSolverBDF2(u0_, u0, p0, f, dt, nu, stab=stab, alpha=alpha)
+navier_stokes_solver = TaylorHoodSolverBDF2(
+    u0_, u0, p0, f, dt, nu, stab=stab, alpha=alpha
+)
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
@@ -129,7 +132,7 @@ write_paramters(
     beta_s=beta_s,
     kappa_stab=kappa_stab,
     G_s=G_s,
-    U_bar = U_bar,
+    U_bar=U_bar,
 )
 
 t = dt
@@ -161,10 +164,13 @@ for n in range(1, num_steps + 1):
     # step 6. update variables and save to file.
     output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     volume_list.append(calculate_volume(disp))
-    end_disp_x.append(disp(0.6,0.2)[0])
-    end_disp_y.append(disp(0.6,0.2)[1])
+    end_disp_x.append(disp(0.6, 0.2)[0])
+    end_disp_y.append(disp(0.6, 0.2)[1])
     logger.info("end_disp_x : {}, end_disp_y : {}.", end_disp_x[-1], end_disp_y[-1])
     t = n * dt
 
-write_excel_sheets([volume_list, end_disp_x, end_disp_y], file_excel_name, ["volume", "end_disp_x", "end_disp_y"])
-
+write_excel_sheets(
+    [volume_list, end_disp_x, end_disp_y],
+    file_excel_name,
+    ["volume", "end_disp_x", "end_disp_y"],
+)

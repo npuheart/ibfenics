@@ -63,7 +63,6 @@ class TaylorHoodSolverBDF2:
             - inner(f, v) * dx
         )
 
-
         if conv:
             u_hat = 2.0 * self.un - self.un_
             u_grad_u = grad(u_hat) * u_hat

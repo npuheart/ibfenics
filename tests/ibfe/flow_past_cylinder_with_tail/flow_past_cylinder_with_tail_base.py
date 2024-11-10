@@ -52,7 +52,7 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
         logger.info(f"time: {t}, step: {n}, output...")
         vorticity = project(u0[0].dx(1) - u0[1].dx(0), p0.function_space())
         vorticity.rename("vorticity", "vorticity")
-        # 
+        #
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
         file_fluid.write(vorticity, t)
@@ -60,7 +60,6 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
         file_solid.write(disp, t)
         file_solid.write(force, t)
         file_solid.write(velocity, t)
-
 
 
 # Create functions for fluid
@@ -122,7 +121,7 @@ write_paramters(
     beta_s=beta_s,
     kappa_stab=kappa_stab,
     G_s=G_s,
-    U_bar = U_bar,
+    U_bar=U_bar,
 )
 
 t = dt
@@ -154,10 +153,13 @@ for n in range(1, num_steps + 1):
     # step 6. update variables and save to file.
     output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     volume_list.append(calculate_volume(disp))
-    end_disp_x.append(disp(0.6,0.2)[0])
-    end_disp_y.append(disp(0.6,0.2)[1])
+    end_disp_x.append(disp(0.6, 0.2)[0])
+    end_disp_y.append(disp(0.6, 0.2)[1])
     logger.info("end_disp_x : {}, end_disp_y : {}.", end_disp_x[-1], end_disp_y[-1])
     t = n * dt
 
-write_excel_sheets([volume_list, end_disp_x, end_disp_y], file_excel_name, ["volume", "end_disp_x", "end_disp_y"])
-
+write_excel_sheets(
+    [volume_list, end_disp_x, end_disp_y],
+    file_excel_name,
+    ["volume", "end_disp_x", "end_disp_y"],
+)

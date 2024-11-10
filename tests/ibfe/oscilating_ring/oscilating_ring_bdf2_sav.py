@@ -24,10 +24,10 @@ from ibfenics.io import (
 )
 from local_mesh import *
 
-TaylorHoodSolverBDF2_1      = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
-TaylorHoodSolverBDF2_2      = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2
-modified_energy             = SAVTaylorHoodSolverBDF2.modified_energy
-calculate_SAV               = SAVTaylorHoodSolverBDF2.calculate_SAV
+TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
+TaylorHoodSolverBDF2_2 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2
+modified_energy = SAVTaylorHoodSolverBDF2.modified_energy
+calculate_SAV = SAVTaylorHoodSolverBDF2.calculate_SAV
 construct_function_space_bc = SAVTaylorHoodSolverBDF2.construct_function_space_bc
 
 # Define boundary conditions for fluid solver
@@ -90,7 +90,9 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 V, Q = construct_function_space_bc(u0, p0)
 bcus_1, bcps_1 = calculate_fluid_boundary_conditions(V, Q)
 bcus_2, bcps_2 = calculate_fluid_boundary_conditions_sav(V, Q)
-navier_stokes_solver_1 = TaylorHoodSolverBDF2_1(u0_, u0, p0, dt, nu, stab=stab, alpha=alpha)
+navier_stokes_solver_1 = TaylorHoodSolverBDF2_1(
+    u0_, u0, p0, dt, nu, stab=stab, alpha=alpha
+)
 navier_stokes_solver_2 = TaylorHoodSolverBDF2_2(
     u0_, u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv
 )
@@ -144,10 +146,13 @@ for n in range(1, num_steps + 1):
     SAV = 1.0
     u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
     u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
-    u0.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
-    p0.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
-    navier_stokes_solver_1.update(u0, p0)
-    navier_stokes_solver_2.update(u0, p0)
+    u1.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
+    p1.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
+
+    navier_stokes_solver_1.update(u1, p1)
+    # navier_stokes_solver_2.update(u1, p1)
+    logger.info(f"u1.vector().norm('l2') {u1.vector().norm('l2')}")
+    logger.info(f"u2.vector().norm('l2') {u2.vector().norm('l2')}")
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
