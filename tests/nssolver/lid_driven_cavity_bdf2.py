@@ -1,6 +1,6 @@
 # WARNING: To be modified!
 import json
-from ibfenics import TaylorHoodSolverBDF2
+from ibfenics1 import TaylorHoodSolverBDF2
 from fenics import *
 from mshr import *
 import numpy as np

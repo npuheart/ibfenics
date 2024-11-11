@@ -1,5 +1,5 @@
 from fenics import *
-from ibfenics.cpp import IBMesh, IBInterpolation
+from ibfenics1.cpp import IBMesh, IBInterpolation
 
 
 class Interaction:

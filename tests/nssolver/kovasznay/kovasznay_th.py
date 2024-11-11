@@ -2,8 +2,8 @@ import os
 from loguru import logger
 from fenics import *
 from local_mesh import *
-from ibfenics.nssolver import TaylorHoodSolver
-from ibfenics.io import (
+from ibfenics1.nssolver import TaylorHoodSolver
+from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
     TimeManager,

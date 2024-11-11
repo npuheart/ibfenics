@@ -1,5 +1,5 @@
 import os
-from ibfenics import Interaction
+from ibfenics1 import Interaction
 from dolfin import *
 from mshr import *
 import numpy as np

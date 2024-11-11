@@ -3,7 +3,7 @@ from plot import plot_multiple_lines_1
 
 
 def read_first_column(path_excel):
-    path_root = "/home/fenics/ibfenics/data/large/"
+    path_root = "/home/fenics/ibfenics1/data/large/"
     df = pd.read_excel(path_root + path_excel)
     return df.iloc[:, 0].tolist()
 

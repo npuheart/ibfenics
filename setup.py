@@ -1,10 +1,10 @@
 # Copyright (C) 2024 Pengfei Ma
 #
-# This file is part of ibfenics (https://github.com/npuheart/ibfenics)
+# This file is part of ibfenics1 (https://github.com/npuheart/ibfenics1)
 #
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 #
-# email : ibfenics@pengfeima.cn
+# email : ibfenics1@pengfeima.cn
 
 import os
 import re
@@ -134,20 +134,20 @@ class CMakeBuild(build_ext):
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="npuheart-ibfenics",
+    name="npuheart-ibfenics1",
     version="0.0.6",
     author="Ma Pengfei",
-    author_email="ibfenics@pengfeima.cn",
+    author_email="ibfenics1@pengfeima.cn",
     description="IB-FEniCS project using pybind11",
     long_description="This is an implementation of the immersed boundary method in FEniCS",
-    ext_modules=[CMakeExtension("ibfenics.cpp")],
+    ext_modules=[CMakeExtension("ibfenics1.cpp")],
     cmdclass={"build_ext": CMakeBuild},
     packages=[
-        "ibfenics",
+        "ibfenics1",
         "npuheart",
-        "ibfenics.mesh",
-        "ibfenics.nssolver",
-        "ibfenics.interaction",
+        "ibfenics1.mesh",
+        "ibfenics1.nssolver",
+        "ibfenics1.interaction",
     ],
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},

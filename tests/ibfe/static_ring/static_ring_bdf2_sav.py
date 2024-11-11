@@ -1,10 +1,10 @@
 # Copyright (C) 2024 Pengfei Ma
 #
-# This file is part of ibfenics (https://github.com/npuheart/ibfenics)
+# This file is part of ibfenics1 (https://github.com/npuheart/ibfenics1)
 #
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 #
-# email : ibfenics@pengfeima.cn
+# email : ibfenics1@pengfeima.cn
 #
 # brief : 测试IBFE方法的正确性
 
@@ -15,8 +15,8 @@ from loguru import logger
 from mshr import *
 from fenics import *
 
-from ibfenics.nssolver import SAVTaylorHoodSolverBDF2
-from ibfenics.io import unique_filename, create_xdmf_file, TimeManager, write_paramters
+from ibfenics1.nssolver import SAVTaylorHoodSolverBDF2
+from ibfenics1.io import unique_filename, create_xdmf_file, TimeManager, write_paramters
 
 TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
 TaylorHoodSolverBDF2_2 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2

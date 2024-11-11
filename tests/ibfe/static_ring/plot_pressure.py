@@ -33,7 +33,7 @@ for filename in filenames:
 
 coordinate_x_s = [coordinate_x for i in range(len(pressures))]
 
-from ibfenics.plot import plot_multiple_lines_1
+from ibfenics1.plot import plot_multiple_lines_1
 
 plot_multiple_lines_1(
     coordinate_x_s,

@@ -1,11 +1,11 @@
-from ibfenics.io import (
+from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
     write_excel,
     write_bg_mesh,
     write_mesh,
 )
-from ibfenics.IU import IU
+from ibfenics1.IU import IU
 from dolfin import *
 from mshr import *
 import os

@@ -1,6 +1,6 @@
 from fenics import *
 from mshr import *
-from ibfenics import Interaction
+from ibfenics1 import Interaction
 
 
 def calculate_solid_mesh(n_mesh_solid=40):

@@ -1,10 +1,10 @@
 # Copyright (C) 2024 Pengfei Ma
 #
-# This file is part of ibfenics (https://github.com/npuheart/ibfenics)
+# This file is part of ibfenics1 (https://github.com/npuheart/ibfenics1)
 #
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 #
-# email : ibfenics@pengfeima.cn
+# email : ibfenics1@pengfeima.cn
 #
 # brief : 简单测试 Taylor-Hood 元求解NS方程的正确性(圆柱绕流问题)
 
@@ -13,8 +13,8 @@ from loguru import logger
 import numpy as np
 from fenics import *
 from mshr import *
-from ibfenics.nssolver import TaylorHoodSolver
-from ibfenics.io import unique_filename, create_xdmf_file
+from ibfenics1.nssolver import TaylorHoodSolver
+from ibfenics1.io import unique_filename, create_xdmf_file
 
 note = "lid_driven_cavity"
 file_fluid_name = unique_filename(os.path.basename(__file__), note, "/fluid.xdmf")
