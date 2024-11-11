@@ -13,8 +13,8 @@ U_bar = 2.0
 
 # Define solid parameters
 beta_s = 1e7
-kappa_stab = 100.0
-G_s = 512
+kappa_stab = 100000.0
+G_s = 1000
 
 # Define stablization parameters
 alpha = 1.0 * dt

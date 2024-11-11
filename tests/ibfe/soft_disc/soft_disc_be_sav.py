@@ -20,6 +20,7 @@ from ibfenics1.io import (
     TimeManager,
     write_paramters,
     write_excel,
+    write_excel_sheets,
 )
 from local_mesh import *
 
