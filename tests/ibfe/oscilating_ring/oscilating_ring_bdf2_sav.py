@@ -150,7 +150,6 @@ for n in range(1, num_steps + 1):
     p1.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
 
     navier_stokes_solver_1.update(u1, p1)
-    # navier_stokes_solver_2.update(u1, p1)
     logger.info(f"u1.vector().norm('l2') {u1.vector().norm('l2')}")
     logger.info(f"u2.vector().norm('l2') {u2.vector().norm('l2')}")
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")

@@ -84,3 +84,6 @@ class InitialDisplacement(UserExpression):
 
     def value_shape(self):
         return (2,)
+
+
+initial_disp = InitialDisplacement()

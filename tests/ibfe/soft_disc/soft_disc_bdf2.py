@@ -20,6 +20,7 @@ from ibfenics.io import (
     TimeManager,
     write_paramters,
     write_excel,
+    write_excel_sheets,
 )
 from local_mesh import *
 
@@ -78,7 +79,7 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 V, Q = construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
 navier_stokes_solver = TaylorHoodSolverBDF2(
-    u0_, u0, p0, f, dt, nu, stab=stab, alpha=alpha
+    u0_, u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv
 )
 
 # Define trial and test functions for solid solver
