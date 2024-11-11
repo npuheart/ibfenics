@@ -30,6 +30,7 @@ modified_energy = SAVTaylorHoodSolverBDF2.modified_energy
 calculate_SAV = SAVTaylorHoodSolverBDF2.calculate_SAV
 construct_function_space_bc = SAVTaylorHoodSolverBDF2.construct_function_space_bc
 
+
 def calculate_fluid_boundary_conditions_sav(V, Q):
     bcu_1 = DirichletBC(V, Constant((0, 0)), "on_boundary")
     bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")

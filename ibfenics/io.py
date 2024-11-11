@@ -66,8 +66,6 @@ def write_excel(volume_list, excel_file1, sheet_name="v"):
 data_list = [ {'no': [3, 2, 5]}, {'Price': [3, 2, 5]}]
 write_excel_sheets(data_list, "e.xlsx", ["a","b"])
 """
-
-
 def write_excel_sheets(data_list, excel_file1, sheet_names):
     assert len(data_list) == len(sheet_names)
     dfs = [pd.DataFrame(data) for data in data_list]

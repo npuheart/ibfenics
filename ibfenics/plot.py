@@ -17,6 +17,7 @@ def plot_multiple_lines_1(
     yticks=None,
     ncol=1,
     legends=None,
+    ylog=False
 ):
     """
     Plot multiple lines from a list of lists.
@@ -79,6 +80,8 @@ def plot_multiple_lines_1(
     # legend = plt.legend(ncol=ncol)
     if legends:
         plt.legend(legends)
+    else:
+        plt.legend()
 
     if title:
         plt.title(title)
@@ -102,6 +105,11 @@ def plot_multiple_lines_1(
 
     # 使用 bbox_extra_artists 包含图例
     # bbox_extra_artists=(legend,), bbox_inches='tight')
+
+    # 设置y轴为对数坐标
+    if ylog:
+        ax = plt.gca()
+        ax.set_yscale("log")
 
     # 保存图像
     plt.savefig("figure-" + title + ".png", dpi=300)
