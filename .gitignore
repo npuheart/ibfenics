@@ -20,5 +20,6 @@ data/large
 *.vti
 *.xml.gz
 
+*.csv
 
 nohup.out

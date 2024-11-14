@@ -86,19 +86,20 @@ def calculate_SAV_2(u0, u1, u2, E_hyp, dt, nu, delta, qn):
 
 def CAL_SAV_2(En, delta, dt, alpha, h, mu, un, u1, u2, qn, N, w, p1, p2, rho):
     _1 = 2.0 / dt * (En + delta)
-    _2 = (alpha * h + mu) * inner(grad(u2), grad(u2)) * dx
+    _2 = assemble((alpha * h + mu) * inner(grad(u2), grad(u2)) * dx)
     _3 = 2.0 * qn * np.sqrt(En + delta) / dt
-    _4 = (alpha * h + mu) * inner(grad(u1), grad(u2)) * dx
-    _5 = alpha * h * inner(grad(un), grad(u2)) * dx
-    _6 = mu * inner(dot(N, grad(u2)), w) * ds
-    _7 = inner(N, w) * p2 * ds
-    _8 = alpha * h * inner(N * grad(u2), w) * ds
-    _9 = (alpha * h + mu) * inner(grad(u1), grad(u1)) * dx
-    _10 = alpha * h * inner(grad(un), grad(u1)) * dx
-    _11 = mu * inner(N * grad(u1), w) * ds
-    _12 = inner(N, w) * p1 * ds
-    _13 = alpha * h * inner(N * grad(u1 - un), w) * ds
-    _14 = 0.5 * rho * inner(N * grad(u1) * inner(w, w)) * ds
+    _4 = assemble((alpha * h + mu) * inner(grad(u1), grad(u2)) * dx)
+    _5 = assemble(alpha * h * inner(grad(un), grad(u2)) * dx)
+    _6 = assemble(mu * inner(dot(N, grad(u2)), w) * ds)
+    _7 = assemble(inner(N, w) * p2 * ds)
+    _8 = assemble(alpha * h * inner(dot(N , grad(u2)), w) * ds)
+    _9 = assemble((alpha * h + mu) * inner(grad(u1), grad(u1)) * dx)
+    _10 = assemble(alpha * h * inner(grad(un), grad(u1)) * dx)
+    _11 = assemble(mu * inner(dot(N ,grad(u1)), w) * ds)
+    _12 = assemble(inner(N, w) * p1 * ds)
+    _13 = assemble(alpha * h * inner(dot(N ,grad(u1 - un)), w) * ds)
+    # _14 = 0.5 * rho * inner(N * grad(u1) * inner(w, w)) * ds
+    _14 = 0.0
 
     A = _1 + _2
     B = -_3 + 2.0 * _4 - _5 - _6 + _7 - _8

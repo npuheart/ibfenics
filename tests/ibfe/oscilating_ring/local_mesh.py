@@ -50,7 +50,7 @@ Vs = interaction.Vs
 Vf = interaction.Vf
 Vf_1 = interaction.Vf_1
 Vp = interaction.Vp
-
+N = FacetNormal(fluid_mesh)
 
 def kinematic_energy(u):
     return assemble(0.5 * inner(u, u) * dx)

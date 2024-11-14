@@ -140,9 +140,11 @@ time_manager = TimeManager(T, num_steps, 20)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
-    SAV = 1.0
+    En = 1.0
+    qn = 1.0
     u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
     u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
+    SAV = CAL_SAV(En, delta, dt, alpha, h, nu, u0, u1, u2, qn, N, Function(Vf), p1, p2, rho)
     u0.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
     p0.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
     navier_stokes_solver_1.update(u0, p0)

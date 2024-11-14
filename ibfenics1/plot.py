@@ -64,10 +64,9 @@ def plot_multiple_lines_1(
             plt.plot(
                 time[i],
                 data[i],
-                marker="o",
+                # marker="o",
                 color=colors[i],
                 linestyle=linestyles[i],
-                label=labels[i],
             )
         elif types[i] == "dots":
             plt.scatter(time[i], data[i], color=colors[i], label=labels[i])
@@ -81,8 +80,6 @@ def plot_multiple_lines_1(
     # legend = plt.legend(ncol=ncol)
     if legends:
         plt.legend(legends)
-    else:
-        plt.legend()
 
     if title:
         plt.title(title)
