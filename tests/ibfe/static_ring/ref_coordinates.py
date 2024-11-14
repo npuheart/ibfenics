@@ -28,27 +28,7 @@ class FiberForce(UserExpression):
 
     def fun(self, X0, X1):
         R, gamma = self.R, self.gamma
-
-        def f(s2):
-            a = X0 - 0.5
-            b = X1 - 0.5
-            c = R + s2
-            d = R + s2 + gamma
-            return 1 - (a / c) ** 2 - (b / d) ** 2
-
-        initial_guess = 0.03
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")  # 记录所有警告
-            # solution = fsolve(equation, 1.0)
-            s2, info, ier, msg = fsolve(f, initial_guess, full_output=True, maxfev=100)
-            # print(f"info: {info}, ier: {ier}, msg: {msg}")
-
-            # 检查是否捕获到警告
-            if w:
-                for warning in w:
-                    print(f"捕获到警告: {warning.message}")
-
+        s2 = sqrt((X0-0.5)*(X0-0.5) + (X1-0.5)*(X1-0.5))-R
         s1 = np.arccos((X0 - 0.5) / (R + s2)) * R
         s1 = 1.0 if np.isnan(s1) else s1  # arccos(?) = nan when ? > 1
         s1 = 2.0 * np.pi * R - s1 if X1 < 0.5 else s1

@@ -48,6 +48,18 @@ def calculate_fluid_boundary_conditions_sav(V, Q):
     bcps_2 = [bcp_1]
     return bcus_2, bcps_2
 
+def extract_pressure_x(u0,x,y,n=10):
+    p_list = []
+    x_list = []
+    for i in range(n):
+        # print(x[0] + (x[1]-x[0])*i/(n-1))
+        yy = 0.5*(y[0] + y[1])
+        xx = x[0] + (x[1]-x[0])*i/(n-1)
+        # print(p0(xx,yy))
+        x_list.append(xx)
+        p_list.append(u0(xx,yy)[0])
+    
+    return x_list,p_list 
 
 __all__ = [
     "V",
@@ -60,4 +72,5 @@ __all__ = [
     "num_steps",
     "dt",
     "rho",
+    "extract_pressure_x",
 ]

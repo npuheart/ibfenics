@@ -35,6 +35,7 @@ def unique_filename(current_file_name, tag, extension):
         + datetime.now().strftime("%Y%m%d-%H%M%S")
         + extension
     )
+    check_path(f"{output_path}{note}/{tag}/" + datetime.now().strftime("%Y%m%d-%H%M%S"))
     return file_id
 
 

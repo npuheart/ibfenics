@@ -11,10 +11,8 @@
 import os
 import numpy as np
 from loguru import logger
-
 from mshr import *
 from fenics import *
-
 from ibfenics1.nssolver import TaylorHoodSolver
 from ibfenics1.io import (
     unique_filename,
@@ -29,8 +27,8 @@ from local_mesh import *
 from post_processing import *
 
 # Define time parameters
-T = 0.0000005
-dt = 0.0000001
+T = 0.5
+dt = 0.001
 num_steps = int(T / dt)
 time_manager = TimeManager(T, num_steps, 20)
 

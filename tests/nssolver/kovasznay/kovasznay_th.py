@@ -9,6 +9,7 @@ from ibfenics1.io import (
     TimeManager,
     write_paramters,
     write_excel,
+    write_excel_sheets,
 )
 
 u0 = Function(V, name="velocity")
@@ -19,11 +20,19 @@ time_manager = TimeManager(T, num_steps, 20)
 V, Q = TaylorHoodSolver.construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
 fluid_solver = TaylorHoodSolver(u0, p0, f0, dt, nv)
+
+file_xlsx_name = unique_filename(
+    os.path.basename(__file__), "note", "/results.xlsx"
+)
+file_json_name = unique_filename(
+    os.path.basename(__file__), "note", "/results.json"
+)
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
 
 t = 0
-for n in range(num_steps):
+# for n in range(num_steps):
+for n in range(1):
 
     t += dt
     un, pn = fluid_solver.solve(bcu, bcp)
@@ -34,3 +43,10 @@ for n in range(num_steps):
         logger.info(f"t = {t}")
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
+
+
+x_list, p_list = extract_pressure_x(p0, [-0.5,1.0],[-0.5,0.5], n=100)
+write_paramters(file_json_name, dt=dt, num_steps=num_steps)
+data_list = [ {'p_list': p_list}, {'x_list': x_list}]
+print(data_list)
+write_excel_sheets(data_list, file_xlsx_name, ["p","x"])

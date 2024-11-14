@@ -109,7 +109,7 @@ def plot_multiple_lines_1(
     if ylog:
         ax.set_yscale("log")
 
-    ax.set_aspect(0.5)
+    # ax.set_aspect(0.5)
 
     # 保存图像
     plt.savefig("figure-" + title + ".png", dpi=300)
