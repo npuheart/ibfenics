@@ -9,7 +9,6 @@ excel_file_s = [
     '/home/fenics/ibfenics/data/large/lid_driven_cavity_ipcs/note/20241114-223116/results_x.xlsx',
     '/home/fenics/ibfenics/data/large/lid_driven_cavity_ipcs/note/20241114-223128/results_x.xlsx',
     '/home/fenics/ibfenics/data/large/lid_driven_cavity_ipcs/note/20241114-223255/results_x.xlsx',
-    # '/home/fenics/ibfenics/data/large/lid_driven_cavity_ipcs/note/20241114-222812/results_x.xlsx',
     ]
 
 x_list_s = []

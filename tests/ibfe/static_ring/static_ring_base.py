@@ -22,13 +22,13 @@ from ibfenics1.io import (
     write_excel,
 )
 
-from ref_coordinates import FiberForce
+from ref_coordinates import fiber_force
 from local_mesh import *
 from post_processing import *
 
 # Define time parameters
-T = 0.5
-dt = 0.001
+T = 10
+dt = 0.01
 num_steps = int(T / dt)
 time_manager = TimeManager(T, num_steps, 20)
 
@@ -56,14 +56,13 @@ def calculate_fluid_boundary_conditions(W):
         W.sub(1), Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise"
     )
     bcu = [bcu_1, bcu_2]
-    bcp = [bcp_1]
+    bcp = []
     return bcu, bcp
 
 
 # TODO: Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
-    fiber_force = FiberForce()
-    F2 = -inner(fiber_force, vs) * dx + inner(us, vs) * dx
+    F2 = -inner(fiber_force(disp, 0.25, 1.0, 0.0625), vs) * dx + inner(us, vs) * dx
     a2 = lhs(F2)
     L2 = rhs(F2)
     A2 = assemble(a2)

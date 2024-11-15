@@ -56,4 +56,4 @@ def calculate_error_u(u):
     return norm_1, norm_2, norm_infinity
 
 
-__all__ = ["calculate_error_u", "calculate_error_p"]
+__all__ = ["calculate_error_u", "calculate_error_p", "PressureExact"]

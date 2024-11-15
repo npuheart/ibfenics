@@ -35,6 +35,15 @@ class FiberForce(UserExpression):
         return s1, s2
 
 
+def fiber_force(disp, R, mu, omega):
+    s2 = sqrt((disp[1]-0.5)*(disp[1]-0.5) + (disp[0]-0.5)*(disp[0]-0.5))-R
+    s1_temp = R*acos((disp[0]-0.5)/(R+s2))
+    s1 = conditional(le(disp[1], 0.5), 2*pi*R - s1_temp, s1_temp)
+    r = as_vector((-cos(s1/R), -sin(s1/R)))
+    G = mu/omega*(1+s2)/R*r
+    return G
+
+
 if __name__ == "__main__":
     V = VectorFunctionSpace(solid_mesh, "CG", 1)
     velocity_inlet = FiberForce()
