@@ -9,12 +9,15 @@ def read_first_column(path_excel):
 
 
 path_excel_s = [
-    "soft_disc_base/0.005/20241110-230541/volume.xlsx",
-    "soft_disc_bdf2_sav/0.005/20241110-225536/volume.xlsx",
-    "soft_disc_base/0.005/20241110-230541/volume.xlsx",
-    "soft_disc_bdf2_sav/0.005/20241110-225536/volume.xlsx",
-    "soft_disc_base/0.005/20241110-230541/volume.xlsx",
-    "soft_disc_bdf2_sav/0.005/20241110-225536/volume.xlsx",
+    "soft_disc_base/0.00125/20241111-211650/volume.xlsx",
+    "soft_disc_bdf2/0.00125/20241111-211213/volume.xlsx",
+    "soft_disc_bdf2_sav/0.00125/20241111-211150/volume.xlsx"
+    # "soft_disc_base/0.005/20241110-230541/volume.xlsx",
+    # "soft_disc_bdf2_sav/0.005/20241110-225536/volume.xlsx",
+    # "soft_disc_base/0.005/20241110-230541/volume.xlsx",
+    # "soft_disc_bdf2_sav/0.005/20241110-225536/volume.xlsx",
+    # "soft_disc_base/0.005/20241110-230541/volume.xlsx",
+    # "soft_disc_bdf2_sav/0.005/20241110-225536/volume.xlsx",
 ]
 volume_list_s = [read_first_column(path_excel) for path_excel in path_excel_s]
 volume_0 = volume_list_s[0][0]
