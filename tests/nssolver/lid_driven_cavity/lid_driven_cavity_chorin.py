@@ -2,7 +2,7 @@ import os
 from loguru import logger
 from fenics import *
 from local_mesh import *
-from ibfenics1.nssolver import IPCSSolver
+from ibfenics1.nssolver import ChorinSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
@@ -18,7 +18,7 @@ f0 = Function(V, name="force")
 
 time_manager = TimeManager(T, num_steps, 20)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-fluid_solver = IPCSSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=False)
+fluid_solver = ChorinSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=False)
 file_xlsx_name_x = unique_filename(
     os.path.basename(__file__), "note", "/results_x.xlsx"
 )
@@ -43,7 +43,7 @@ for n in range(1):
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
 
-
+File("p.pvd") << p0
 
 u_list_x, v_list_x, p_list_x, y_list_x = extract_over_mid_x(u0, p0, [0.0,1.0],[0.0,1.0], n=100)
 u_list_y, v_list_y, p_list_y, x_list_y = extract_over_mid_y(u0, p0, [0.0,1.0],[0.0,1.0], n=100)

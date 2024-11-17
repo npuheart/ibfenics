@@ -4,7 +4,7 @@ from fenics import DirichletBC, Expression, Constant
 import numpy as np
 
 # Parameters
-nv = 0.001
+nv = 1.0
 T = 0.5
 num_steps = 100
 dt = T / num_steps

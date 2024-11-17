@@ -2,7 +2,7 @@ import os
 from loguru import logger
 from fenics import *
 from local_mesh import *
-from ibfenics1.nssolver import IPCSSolver
+from ibfenics1.nssolver import TaylorHoodSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
@@ -17,8 +17,9 @@ p0 = Function(Q, name="pressure")
 f0 = Function(V, name="force")
 
 time_manager = TimeManager(T, num_steps, 20)
+V, Q = TaylorHoodSolver.construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-fluid_solver = IPCSSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=False)
+fluid_solver = TaylorHoodSolver(u0, p0, f0, dt, nv, stab=False, alpha=0.1, conv=False)
 file_xlsx_name_x = unique_filename(
     os.path.basename(__file__), "note", "/results_x.xlsx"
 )
