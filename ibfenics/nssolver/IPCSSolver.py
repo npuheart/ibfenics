@@ -13,6 +13,11 @@ from dolfin import *
 
 
 class IPCSSolver:
+    @staticmethod
+    def construct_function_space_bc(u_n, p_n):
+        V = u_n.function_space()
+        Q = p_n.function_space()
+        return V,Q
     def __init__(
         self,
         u_n,

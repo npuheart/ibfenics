@@ -11,6 +11,7 @@ from .TaylorHoodSolver import TaylorHoodSolver
 from .TaylorHoodSolverBDF2 import TaylorHoodSolverBDF2
 from .IPCSSolver import IPCSSolver
 from .ChorinSolver import ChorinSolver
+from .ProjectSolver import ProjectSolver
 
 
 class SAVTaylorHoodSolverBDF2:
@@ -38,6 +39,7 @@ __all__ = [
     "ChorinSolver",
     "SAVTaylorHoodSolver",
     "SAVTaylorHoodSolverBDF2",
+    "ProjectSolver",
     "__version__",
     "__name__",
 ]
