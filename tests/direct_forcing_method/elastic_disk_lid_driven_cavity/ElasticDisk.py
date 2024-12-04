@@ -1,8 +1,9 @@
 from fenics import *
+from local_parameters import dt
 
 class ElasticDisk:
-    eta = 0.05*400
-    kappa = 0.01*400*400
+    eta = 0.05/dt
+    kappa = 0.01/dt/dt
     def __init__(self, W, dt, nu_s, rho):
         self.W = W
         self.xi = Function(W)

@@ -39,7 +39,7 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
         file_solid.write(velocity, t)
 
 def sigma(u,p):
-    return 2*nu*sym(grad(u))-p*Identity(len(u))
+    return 2*nu*sym(grad(u))#-p*Identity(len(u))
 
 # Create functions for fluid
 u0 = Function(Vf, name="velocity")
@@ -103,7 +103,7 @@ write_paramters(
 )
 
 t = dt
-time_manager = TimeManager(T, num_steps, 1000)
+time_manager = TimeManager(T, num_steps, 20)
 elastic_disk = ElasticDisk(Vs, dt, nu_s, rho)
 volume_list = []
 for n in range(1, num_steps + 1):
