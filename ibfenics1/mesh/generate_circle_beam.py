@@ -13,7 +13,7 @@ import os
 mesh_index = 9999
 mesh_name = "circle_beam"
 mesh_path = os.path.expanduser("~") + "/mesh/benchmark/circle_beam/"
-mesh_size = 80
+mesh_size = 160
 
 L = 2.5 * IU.m
 H = 0.41 * IU.m

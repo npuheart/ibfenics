@@ -59,15 +59,16 @@ def total_energy(disp, u):
 
 initial_disp = Expression(("x[0]", "x[1]"), degree=1)
 
+inflow_profile = Expression(
+    ("6.0*x[1]*(0.41 - x[1])/0.41/0.41 *(t < 2.0? 0.5*(1.0-cos(0.5*pi*t)):1.0)", "0"), degree=2, U_bar=U_bar, t = 0.0, pi=np.pi
+)
+
 # Define boundary conditions for fluid solver
 def calculate_fluid_boundary_conditions(V, Q):
     inflow = "near(x[0], 0)"
     outflow = "near(x[0], 2.46)"
     walls = "near(x[1], 0) || near(x[1], 0.41)"
     cylinder = "on_boundary && x[0]>0.1 && x[0]<0.3 && x[1]>0.1 && x[1]<0.3"
-    inflow_profile = Expression(
-        ("4.0*1.5*x[1]*(0.41 - x[1]) / pow(0.41, 2)*U_bar", "0"), degree=2, U_bar=U_bar
-    )
     bcu_inflow = DirichletBC(V, inflow_profile, inflow)
     bcu_walls = DirichletBC(V, Constant((0, 0)), walls)
     bcu_cylinder = DirichletBC(V, Constant((0, 0)), cylinder)

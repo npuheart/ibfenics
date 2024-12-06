@@ -6,46 +6,40 @@
 #
 # email : ibfenics1@pengfeima.cn
 #
-# brief : 测试IBFE方法的正确性
+# brief : flow past cylinder with tail
 
 import os
 import numpy as np
 from loguru import logger
 from mshr import *
 from fenics import *
-from ibfenics1.nssolver import ChorinSolver
+from ibfenics1.nssolver import IPCSSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
     TimeManager,
     write_paramters,
     write_excel,
+    write_excel_sheets,
 )
 from local_mesh import *
 
 
 
 
-# Define boundary conditions for fluid solver
-def calculate_fluid_boundary_conditions(V, Q):
-    bcu_1 = DirichletBC(V, Constant((0, 0)), "near(x[1],1.0)")
-    bcu_2 = DirichletBC(
-        V, Constant((0, 0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)"
-    )
-    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
-    bcu = [bcu_1, bcu_2]
-    bcp = [bcp_1]
-    return bcu, bcp
-
-
 # Define solid constituitive model
 def calculate_constituitive_model(disp, vs, us):
+    # Define trial and test functions for solid solver
+    X0 = SpatialCoordinate(solid_mesh)
+    # Define neo-Hookean material
     F = grad(disp)
-    # P = nu_s*(F-inv(F).T)
-    J = det(F)
-    P = nu_s * (F)
-    # +2*(J-1)*J*inv(F).T
-    F2 = inner(P, grad(vs)) * dx + inner(us, vs) * dx
+    I3 = det(F) * det(F)
+    P = G_s * (F - inv(F).T) + kappa_stab * ln(I3) * inv(F).T
+    F2 = inner(P, grad(vs)) * ddx + inner(us, vs) * ddx
+    # # Define stablization term
+    # F2 += kappa_stab * inner(grad(us), grad(vs)) * ddx
+    # Define constraints for cylinder
+    F2 += beta_s * inner((disp - X0), vs) * ddx(subdomain_id=marker_circle)
     a2 = lhs(F2)
     L2 = rhs(F2)
     A2 = assemble(a2)
@@ -55,8 +49,12 @@ def calculate_constituitive_model(disp, vs, us):
 def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
     if time_manager.should_output(n):
         logger.info(f"time: {t}, step: {n}, output...")
+        vorticity = project(u0[0].dx(1) - u0[1].dx(0), p0.function_space())
+        vorticity.rename("vorticity", "vorticity")
+        #
         file_fluid.write(u0, t)
         file_fluid.write(p0, t)
+        file_fluid.write(vorticity, t)
         file_fluid.write(f, t)
         file_solid.write(disp, t)
         file_solid.write(force, t)
@@ -73,15 +71,17 @@ f = Function(Vf_1, name="force")
 velocity = Function(Vs, name="velocity")
 disp = Function(Vs, name="displacement")
 force = Function(Vs, name="force")
-disp.interpolate(InitialDisplacement())
+disp.interpolate(initial_disp)
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
+# V, Q = construct_function_space_bc(u0, p0)
+# bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
+# navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
 bcu, bcp = calculate_fluid_boundary_conditions(u0.function_space(), p0.function_space())
-navier_stokes_solver = ChorinSolver(
+navier_stokes_solver = IPCSSolver(
     u0, p0, f, dt, nu, bcp=bcp, bcu=bcu, stab=stab, alpha=alpha
 )
-
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
 vs = TestFunction(Vs)
@@ -116,25 +116,32 @@ write_paramters(
     nu=nu,
     alpha=alpha,
     stab=stab,
-    conv=conv,
     delta=delta,
     SAV=SAV,
-    nu_s=nu_s,
     n_mesh_fluid=n_mesh_fluid,
     n_mesh_solid=n_mesh_solid,
+    beta_s=beta_s,
+    kappa_stab=kappa_stab,
+    G_s=G_s,
+    U_bar=U_bar,
 )
 
 t = dt
-time_manager = TimeManager(T, num_steps, 20)
+time_manager = TimeManager(T, num_steps, 1000)
 volume_list = []
+end_disp_x = []
+end_disp_y = []
 for n in range(1, num_steps + 1):
+    inflow_profile.t = t
     # step 1. calculate velocity and pressure
-    un, pn = navier_stokes_solver.solve(bcu, bcp)
-    navier_stokes_solver.update(un, pn)
+    u1, p1 = navier_stokes_solver.solve(bcu, bcp)
+    # u0.assign(u1)
+    # p0.assign(p1)
+    navier_stokes_solver.update(u1, p1)
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
-    logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
+    # logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
@@ -149,6 +156,13 @@ for n in range(1, num_steps + 1):
     # step 6. update variables and save to file.
     output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     volume_list.append(calculate_volume(disp))
+    end_disp_x.append(disp(0.6, 0.2)[0])
+    end_disp_y.append(disp(0.6, 0.2)[1])
+    logger.info("end_disp_x : {}, end_disp_y : {}.", end_disp_x[-1], end_disp_y[-1])
     t = n * dt
 
-write_excel(volume_list, file_excel_name)
+write_excel_sheets(
+    [volume_list, end_disp_x, end_disp_y],
+    file_excel_name,
+    ["volume", "end_disp_x", "end_disp_y"],
+)

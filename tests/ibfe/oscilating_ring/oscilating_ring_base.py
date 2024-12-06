@@ -126,8 +126,6 @@ volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
     u1, p1 = navier_stokes_solver.solve(bcu, bcp)
-    # u0.assign(u1)
-    # p0.assign(p1)
     navier_stokes_solver.update(u1, p1)
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
