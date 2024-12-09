@@ -60,7 +60,7 @@ def total_energy(disp, u):
 initial_disp = Expression(("x[0]", "x[1]"), degree=1)
 
 inflow_profile = Expression(
-    ("6.0*x[1]*(0.41 - x[1])/0.41/0.41 *(t < 2.0? 0.5*(1.0-cos(0.5*pi*t)):1.0)", "0"), degree=2, U_bar=U_bar, t = 0.0, pi=np.pi
+    ("6.0*U_bar*x[1]*(0.41 - x[1])/0.41/0.41 *(t < 2.0? 0.5*(1.0-cos(0.5*pi*t)):1.0)", "0"), degree=2, U_bar=U_bar, t = 0.0, pi=np.pi
 )
 
 # Define boundary conditions for fluid solver
