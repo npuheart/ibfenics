@@ -129,8 +129,10 @@ for n in range(1, num_steps + 1):
     navier_stokes_solver.update(u1, p1)
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
-    logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
-    logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
+    logger.info(f"f.vector().norm('l2')  {f.vector().norm('l2')}")
+    logger.info(f"kinematic_energy(u0)   {kinematic_energy(u0)}")
+    logger.info(f"total_energy(u0)       {total_energy(u1, disp)}")
+    logger.info(f"R                      {np.sqrt(total_energy(u1, disp)+delta)}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)

@@ -57,7 +57,7 @@ def plot_multiple_lines_1(
         print(basic_colors)
         print(len(data))
         colors = [basic_colors[i] for i in range(len(data))]
-
+    
     # TODO: labels, types, 的列表长度要和data一样长
     for i in range(len(data)):
         if types[i] == "lines":
@@ -79,7 +79,7 @@ def plot_multiple_lines_1(
     # legend = plt.legend()
     # legend = plt.legend(ncol=ncol)
     if legends:
-        plt.legend(legends)
+        plt.legend(legends,loc='upper right')
 
     if title:
         plt.title(title)
@@ -109,8 +109,11 @@ def plot_multiple_lines_1(
     if ylog:
         ax.set_yscale("log")
 
-    # ax.set_aspect(0.5)
+    # ax.set_aspect(1.1)
+    # ax.set_aspect(1.0/(ylim[1]-ylim[0]))
+    
 
     # 保存图像
-    plt.savefig("figure-" + title + ".png", dpi=300)
+    plt.savefig("figure.png",  bbox_inches='tight', dpi=300)
+    plt.savefig("figure.svg",  bbox_inches='tight')
     plt.close()

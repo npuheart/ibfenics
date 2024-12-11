@@ -28,7 +28,6 @@ TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
 TaylorHoodSolverBDF2_2 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2
 modified_energy = SAVTaylorHoodSolverBDF2.modified_energy
 calculate_SAV = SAVTaylorHoodSolverBDF2.calculate_SAV
-CAL_SAV = SAVTaylorHoodSolverBDF2.CAL_SAV_2
 construct_function_space_bc = SAVTaylorHoodSolverBDF2.construct_function_space_bc
 
 # Define boundary conditions for fluid solver
@@ -141,15 +140,13 @@ write_paramters(
 
 t = dt
 time_manager = TimeManager(T, num_steps, 20)
-qn = np.sqrt(total_energy(u0, disp)+delta)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
-    En = total_energy(u0, disp)
+    SAV = 1.0
     u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
     u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
     u1.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
-    CAL_SAV(En,)
     p1.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
 
     navier_stokes_solver_1.update(u1, p1)

@@ -87,18 +87,3 @@ class InitialDisplacement(UserExpression):
 
 
 initial_disp = InitialDisplacement()
-
-
-# P = nu_s * (F - inv(F).T)
-def total_energy(u, disp=None):
-    def kinematic_energy(u):
-        return assemble(0.5 * inner(u, u) * dx)
-    def potential_energy(disp):
-        F = grad(disp)
-        tr_C = tr(F.T * F)
-        J = det(F)
-        return assemble(0.5*nu_s*(tr_C -J) * dx)
-    if disp is None:
-        return kinematic_energy(u)
-    else:
-        return kinematic_energy(u) + potential_energy(disp)

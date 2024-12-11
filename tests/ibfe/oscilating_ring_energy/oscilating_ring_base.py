@@ -13,23 +13,18 @@ import numpy as np
 from loguru import logger
 from mshr import *
 from fenics import *
-from ibfenics1.nssolver import SAVTaylorHoodSolverBDF2
+from ibfenics1.nssolver import TaylorHoodSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
     TimeManager,
     write_paramters,
     write_excel,
-    write_excel_sheets,
 )
 from local_mesh import *
 
-TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
-TaylorHoodSolverBDF2_2 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2
-modified_energy = SAVTaylorHoodSolverBDF2.modified_energy
-calculate_SAV = SAVTaylorHoodSolverBDF2.calculate_SAV
-CAL_SAV = SAVTaylorHoodSolverBDF2.CAL_SAV_2
-construct_function_space_bc = SAVTaylorHoodSolverBDF2.construct_function_space_bc
+
+construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 # Define boundary conditions for fluid solver
 def calculate_fluid_boundary_conditions(V, Q):
@@ -39,14 +34,6 @@ def calculate_fluid_boundary_conditions(V, Q):
     )
     bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
     bcu = [bcu_1, bcu_2]
-    bcp = [bcp_1]
-    return bcu, bcp
-
-
-def calculate_fluid_boundary_conditions_sav(V, Q):
-    bcu_1 = DirichletBC(V, Constant((0, 0)), "on_boundary")
-    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
-    bcu = [bcu_1]
     bcp = [bcp_1]
     return bcu, bcp
 
@@ -74,7 +61,6 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
 
 
 # Create functions for fluid
-u0_ = Function(Vf, name="velocity_")
 u0 = Function(Vf, name="velocity")
 u0_1 = Function(Vf_1, name="velocity 1st order")
 p0 = Function(Vp, name="pressure")
@@ -89,14 +75,8 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
 V, Q = construct_function_space_bc(u0, p0)
-bcus_1, bcps_1 = calculate_fluid_boundary_conditions(V, Q)
-bcus_2, bcps_2 = calculate_fluid_boundary_conditions_sav(V, Q)
-navier_stokes_solver_1 = TaylorHoodSolverBDF2_1(
-    u0_, u0, p0, dt, nu, stab=stab, alpha=alpha
-)
-navier_stokes_solver_2 = TaylorHoodSolverBDF2_2(
-    u0_, u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv
-)
+bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
+navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
@@ -132,6 +112,7 @@ write_paramters(
     nu=nu,
     alpha=alpha,
     stab=stab,
+    conv=conv,
     delta=delta,
     SAV=SAV,
     nu_s=nu_s,
@@ -141,20 +122,11 @@ write_paramters(
 
 t = dt
 time_manager = TimeManager(T, num_steps, 20)
-qn = np.sqrt(total_energy(u0, disp)+delta)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
-    En = total_energy(u0, disp)
-    u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
-    u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
-    u1.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
-    CAL_SAV(En,)
-    p1.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
-
-    navier_stokes_solver_1.update(u1, p1)
-    logger.info(f"u1.vector().norm('l2') {u1.vector().norm('l2')}")
-    logger.info(f"u2.vector().norm('l2') {u2.vector().norm('l2')}")
+    u1, p1 = navier_stokes_solver.solve(bcu, bcp)
+    navier_stokes_solver.update(u1, p1)
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")

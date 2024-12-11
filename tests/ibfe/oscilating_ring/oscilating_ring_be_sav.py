@@ -137,14 +137,22 @@ write_paramters(
 
 t = dt
 time_manager = TimeManager(T, num_steps, 20)
+qn = np.sqrt(total_energy(u0, disp)+delta)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
-    En = 1.0
-    qn = 1.0
+    En = total_energy(u0, disp)
     u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
     u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
     SAV = CAL_SAV(En, delta, dt, alpha, h, nu, u0, u1, u2, qn, N, Function(Vf), p1, p2, rho)
+    S = CAL_SAV(total_energy(u1, disp), delta, dt, alpha, h, nu, u0, u1, u2, qn, FacetNormal(fluid_mesh), Function(Vf), p1, p2, rho)
+    R = np.sqrt(total_energy(u1, disp)+delta)
+    Q = S*R
+    qn = Q
+    SAV = S
+    logger.info(f"S                      {S}")
+    logger.info(f"R                      {R}")
+    logger.info(f"Q                      {Q}")
     u0.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
     p0.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
     navier_stokes_solver_1.update(u0, p0)
@@ -153,6 +161,8 @@ for n in range(1, num_steps + 1):
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
     logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
+    logger.info(f"total_energy(u0)       {total_energy(u1, disp)}")
+
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
