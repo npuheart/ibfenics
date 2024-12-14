@@ -20,7 +20,6 @@ from ibfenics1.io import (
     TimeManager,
     write_paramters,
     write_excel,
-    write_excel_sheets,
 )
 from local_mesh import *
 
@@ -116,6 +115,7 @@ write_paramters(
     nu=nu,
     alpha=alpha,
     stab=stab,
+    conv=conv,
     delta=delta,
     SAV=SAV,
     nu_s=nu_s,

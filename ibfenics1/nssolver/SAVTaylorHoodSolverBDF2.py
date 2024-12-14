@@ -9,52 +9,6 @@
 from dolfin import *
 from mshr import *
 import numpy as np
-from scipy.optimize import fsolve
-
-
-def energy(u, E_hyp, rho):
-    return 0.5 * rho * assemble(inner(u, u) * dx) + E_hyp
-
-
-def modified_energy(u, E_hyp, rho, delta):
-    tmp = energy(u, E_hyp, rho) + delta  # + 弹性势能
-    return tmp
-
-
-def SAV_X1(un, u1, u2, E_hyp, dt, mu, delta, rho):
-    return 2.0 / dt * modified_energy(un, E_hyp, rho, delta) + mu * assemble(
-        inner(grad(u2), grad(u2)) * dx
-    )
-
-
-def SAV_X2(un, u1, u2, E_hyp, dt, mu, delta, rho, qn):
-    return -2.0 * qn / dt * np.sqrt(
-        modified_energy(un, E_hyp, rho, delta)
-    ) + 2.0 * mu * assemble(inner(grad(u1), grad(u2)) * dx)
-
-
-def SAV_X3(un, u1, u2, E_hyp, dt, mu, delta, rho):
-    return mu * assemble(inner(grad(u1), grad(u1)) * dx)
-
-
-def calculate_SAV(u0, u1, u2, E, dt, nu, delta, qn):
-    X1 = SAV_X1(u0, u1, u2, E, dt, nu, delta, 1.0)
-    X2 = SAV_X2(u0, u1, u2, E, dt, nu, delta, 1.0, qn)
-    X3 = SAV_X3(u0, u1, u2, E, dt, nu, delta, 1.0)
-    # 定义目标函数
-    def func(x):
-        return X1 * x * x + X2 * x + X3
-
-    # 使用 fsolve 求解
-    # initial_guess = 1.0  # 初始猜测值
-    # solution = fsolve(func, initial_guess)
-    # print(f"解是: {solution[0]}")
-    # return solution[0]
-    # 直接求解
-    S = (-X2 + np.sqrt(X2 * X2 - 4.0 * X1 * X3)) / (2 * X1)
-    if np.isnan(S):
-        S = -X2 / 2.0 / X1
-    return S
 
 
 def calculate_SAV_2(
@@ -70,7 +24,7 @@ def calculate_SAV_2(
         * assemble(inner(3.0 * grad(u1) - 4.0 * grad(un) + grad(unm1), grad(u2)) * dx)
     )
     _5 = 3.0 * alpha * h * assemble(inner(grad(u2), grad(u1)) * dx)
-    _6 = mu * assemble(inner(dot(n, grad(u2)), unp1) * ds)
+    _6 = mu * assemble(inner(dot(n, grad(u2)),  unp1) * ds)
     _7 = assemble(inner(n, u2) * p2 * ds)
     _8 = 3.0 * alpha * h * assemble(inner(dot(n, grad(u2)), unp1) * ds)
     _9 = mu * assemble(inner(grad(u1), grad(u1)) * dx)

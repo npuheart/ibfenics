@@ -70,13 +70,13 @@ f = Function(Vf_1, name="force")
 velocity = Function(Vs, name="velocity")
 disp = Function(Vs, name="displacement")
 force = Function(Vs, name="force")
-disp.interpolate(InitialDisplacement())
+disp.interpolate(initial_disp)
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
 V, Q = construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
+navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv)
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)

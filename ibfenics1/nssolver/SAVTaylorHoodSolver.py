@@ -91,20 +91,28 @@ def CAL_SAV_2(En, delta, dt, alpha, h, mu, un, u1, u2, qn, N, w, p1, p2, rho):
     _3 = 2.0 * qn * np.sqrt(En + delta) / dt
     _4 = assemble((alpha * h + mu) * inner(grad(u1), grad(u2)) * dx)
     _5 = assemble(alpha * h * inner(grad(un), grad(u2)) * dx)
-    _6 = assemble(mu * inner(dot(N, grad(u2)), w) * ds)
-    _7 = assemble(inner(N, w) * p2 * ds)
-    _8 = assemble(alpha * h * inner(dot(N , grad(u2)), w) * ds)
+    # _6 = assemble(mu * inner(dot(N, grad(u2)), w) * ds)
+    # _7 = assemble(inner(N, w) * p2 * ds)
+    # _8 = assemble(alpha * h * inner(dot(N , grad(u2)), w) * ds)
+    _6 = 0.0
+    _7 = 0.0
+    _8 = 0.0
     _9 = assemble((alpha * h + mu) * inner(grad(u1), grad(u1)) * dx)
     _10 = assemble(alpha * h * inner(grad(un), grad(u1)) * dx)
-    _11 = assemble(mu * inner(dot(N ,grad(u1)), w) * ds)
-    _12 = assemble(inner(N, w) * p1 * ds)
-    _13 = assemble(alpha * h * inner(dot(N ,grad(u1 - un)), w) * ds)
-    # _14 = 0.5 * rho * inner(N , u1) * inner(w, w) * ds
+    # _11 = assemble(mu * inner(dot(N ,grad(u1)), w) * ds)
+    # _12 = assemble(inner(N, w) * p1 * ds)
+    # _13 = assemble(alpha * h * inner(dot(N ,grad(u1 - un)), w) * ds)
+    # _14 = assemble(0.5 * rho * inner(N , w) * inner(w, w) * ds)
+    _11 = 0.0
+    _12 = 0.0
+    _13 = 0.0
     _14 = 0.0
 
     A = _1 + _2
     B = -_3 + 2.0 * _4 - _5 - _6 + _7 - _8
     C = _9 - _10 - _11 + _12 - _13 - _14
+    print(f"_1: {_1}, _2: {_2}, _3: {_3}, _4: {_4}, _5: {_5}, _6: {_6}, _7: {_7}, _8: {_8}, _9: {_9}, _10: {_10}, _11: {_11}, _12: {_12}, _13: {_13}, _14: {_14}")
+    print(f"A: {A}, B: {B}, C: {C}")
 
     S = (-B + np.sqrt(B * B - 4.0 * A * C)) / (2.0 * A)
     return S

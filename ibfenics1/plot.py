@@ -115,5 +115,5 @@ def plot_multiple_lines_1(
 
     # 保存图像
     plt.savefig("figure.png",  bbox_inches='tight', dpi=300)
-    plt.savefig("figure.svg",  bbox_inches='tight')
+    plt.savefig("figure.pdf",  bbox_inches='tight')
     plt.close()

@@ -65,7 +65,7 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 # Define fluid solver object
 V, Q = construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha)
+navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv)
 
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
@@ -101,6 +101,7 @@ write_paramters(
     nu=nu,
     alpha=alpha,
     stab=stab,
+    conv=conv,
     delta=delta,
     SAV=SAV,
     nu_s=nu_s,
@@ -114,14 +115,13 @@ volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
     u1, p1 = navier_stokes_solver.solve(bcu, bcp)
-    # u0.assign(u1)
-    # p0.assign(p1)
     navier_stokes_solver.update(u1, p1)
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
-    logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
-    logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
-    logger.info(f"total_energy(u0)       {total_energy(u0, disp)}")
+    logger.info(f"f.vector().norm('l2')  {f.vector().norm('l2')}")
+    logger.info(f"kinematic_energy(u0)   {kinematic_energy(u0)}")
+    logger.info(f"total_energy(u0)       {total_energy(u1, disp)}")
+    logger.info(f"R                      {np.sqrt(total_energy(u1, disp)+delta)}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)

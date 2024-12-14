@@ -1,6 +1,6 @@
 # Define time parameters
 T = 1.2
-dt = 1 / 100
+dt = 1 / 500
 num_steps = int(T / dt)
 
 # Define fluid parameters
@@ -10,7 +10,7 @@ nu = 0.001
 # Define stablization parameters
 alpha = 10.0 * dt
 conv = True
-stab = True
+stab = False
 delta = 0.1
 SAV = 1.0
 
