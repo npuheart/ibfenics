@@ -26,8 +26,7 @@ from local_mesh import *
 
 TaylorHoodSolverBDF2_1 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_1
 TaylorHoodSolverBDF2_2 = SAVTaylorHoodSolverBDF2.TaylorHoodSolverBDF2_2
-modified_energy = SAVTaylorHoodSolverBDF2.modified_energy
-calculate_SAV = SAVTaylorHoodSolverBDF2.calculate_SAV
+CAL_SAV = SAVTaylorHoodSolverBDF2.CAL_SAV_2
 construct_function_space_bc = SAVTaylorHoodSolverBDF2.construct_function_space_bc
 
 
@@ -71,8 +70,11 @@ f = Function(Vf_1, name="force")
 # Create functions for solid
 velocity = Function(Vs, name="velocity")
 disp = Function(Vs, name="displacement")
+disp_ = Function(Vs, name="displacement_")
 force = Function(Vs, name="force")
+disp_tilde = Function(Vs)
 disp.interpolate(initial_disp)
+disp_.interpolate(initial_disp)
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
@@ -89,7 +91,7 @@ navier_stokes_solver_2 = TaylorHoodSolverBDF2_2(
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
 vs = TestFunction(Vs)
-A2, L2 = calculate_constituitive_model(disp, vs, us)
+A2, L2 = calculate_constituitive_model(disp_tilde, vs, us)
 
 # Define output path
 file_log_name = unique_filename(os.path.basename(__file__), str(dt), "/info.log")
@@ -129,28 +131,40 @@ write_paramters(
 
 t = dt
 time_manager = TimeManager(T, num_steps, 20)
+qn = np.sqrt(total_energy(u0, disp)+delta)
+qnm1 = np.sqrt(total_energy(u0, disp)+delta)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure
-    SAV = 1.0
+    En = total_energy(u0, disp)
     u1, p1 = navier_stokes_solver_1.solve(bcus_1, bcps_1)
     u2, p2 = navier_stokes_solver_2.solve(bcus_2, bcps_2)
+    unp1 = u1
+    SAV = CAL_SAV(h, dt, nu, En, qn, qnm1, unp1, u0, u0_, u1, u2, p1, p2, delta, alpha, FacetNormal(fluid_mesh), rho)
+    S = SAV
+    R = np.sqrt(total_energy(u0, disp)+delta)
+    Q = S*R
+    qnm1 = qn
+    qn = Q
+    SAV = S
+    logger.info(f"S                      {S}")
+    logger.info(f"R                      {R}")
+    logger.info(f"Q                      {Q}")
     u1.vector()[:] = u1.vector()[:] + SAV * u2.vector()[:]
     p1.vector()[:] = p1.vector()[:] - SAV * p2.vector()[:]
-
     navier_stokes_solver_1.update(u1, p1)
-    logger.info(f"u1.vector().norm('l2') {u1.vector().norm('l2')}")
-    logger.info(f"u2.vector().norm('l2') {u2.vector().norm('l2')}")
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
     logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
+    logger.info(f"total_energy(u0)       {total_energy(u0, disp)}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
     # step 3. calculate disp for solid and update current gauss points and dof points
-    advance_disp_be(disp, velocity, dt)
-    ib_interpolation.evaluate_current_points(disp._cpp_object)
+    advance_disp_bdf2(disp, disp_, velocity, dt)
+    disp_tilde.vector()[:] = 2.0*disp.vector()[:] - disp_.vector()[:]
+    ib_interpolation.evaluate_current_points(disp_tilde._cpp_object)
     # step 4. calculate body force.
     b2 = assemble(L2)
     solve(A2, force.vector(), b2)

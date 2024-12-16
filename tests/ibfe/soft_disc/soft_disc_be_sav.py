@@ -30,17 +30,6 @@ modified_energy = SAVTaylorHoodSolver.modified_energy
 CAL_SAV = SAVTaylorHoodSolver.CAL_SAV_2
 construct_function_space_bc = SAVTaylorHoodSolver.construct_function_space_bc
 
-# # Define boundary conditions for fluid solver
-# def calculate_fluid_boundary_conditions(V, Q):
-#     bcu_1 = DirichletBC(V, Constant((0, 0)), "near(x[1],1.0)")
-#     bcu_2 = DirichletBC(
-#         V, Constant((0, 0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)"
-#     )
-#     bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
-#     bcu = [bcu_1, bcu_2]
-#     bcp = [bcp_1]
-#     return bcu, bcp
-
 
 def calculate_fluid_boundary_conditions_sav(V, Q):
     bcu_1 = DirichletBC(V, Constant((0, 0)), "on_boundary")
@@ -89,7 +78,9 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 V, Q = construct_function_space_bc(u0, p0)
 bcus_1, bcps_1 = calculate_fluid_boundary_conditions(V, Q)
 bcus_2, bcps_2 = calculate_fluid_boundary_conditions_sav(V, Q)
-navier_stokes_solver_1 = TaylorHoodSolver_1(u0, p0, dt, nu, stab=stab, alpha=alpha)
+navier_stokes_solver_1 = TaylorHoodSolver_1(
+    u0, p0, dt, nu, stab=stab, alpha=alpha
+)
 navier_stokes_solver_2 = TaylorHoodSolver_2(
     u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv
 )

@@ -11,7 +11,7 @@ from mshr import *
 import numpy as np
 
 
-def calculate_SAV_2(
+def CAL_SAV_2(
     h, dt, mu, En, qn, qnm1, unp1, un, unm1, u1, u2, p1, p2, delta, alpha, n, rho
 ):
     _0 = 3.0 / dt * (En + delta)

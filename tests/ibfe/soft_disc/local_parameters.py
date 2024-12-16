@@ -1,6 +1,6 @@
 # Define time parameters
 T = 12
-dt = 1 / 80
+dt = 1 / 40
 num_steps = int(T / dt)
 
 # Define fluid parameters

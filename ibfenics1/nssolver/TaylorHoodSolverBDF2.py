@@ -69,7 +69,7 @@ class TaylorHoodSolverBDF2:
             F += inner(u_grad_u, v) * dx
 
         if stab:
-            F += alpha * inner(grad(u - self.un), grad(v)) * dx  # 稳定项
+            F += alpha * inner(grad(3.0 * u - 4.0 * self.un + self.un_), grad(v)) * dx  # 稳定项
 
         F += q * div(u) * dx
         a = lhs(F)

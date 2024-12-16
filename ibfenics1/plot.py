@@ -18,6 +18,7 @@ def plot_multiple_lines_1(
     ncol=1,
     legends=None,
     ylog=False,
+    loc = 'upper right'
 ):
     """
     Plot multiple lines from a list of lists.
@@ -40,7 +41,7 @@ def plot_multiple_lines_1(
         "#1663A9",
     ]
     # basic_linestyles = [":",":",":","-","-","-","--","--","--"]
-    basic_linestyles = [":", "-.", "--", "-", "-", "-", "--", "--", "--"]
+    basic_linestyles = ["--",":", "-.", "--", "-", "-", "-",  "--", "--"]
     if not labels:
         labels = [f"Line {i+1}" for i in range(len(data))]
 
@@ -67,6 +68,7 @@ def plot_multiple_lines_1(
                 # marker="o",
                 color=colors[i],
                 linestyle=linestyles[i],
+                linewidth=2,
             )
         elif types[i] == "dots":
             plt.scatter(time[i], data[i], color=colors[i], label=labels[i])
@@ -79,7 +81,7 @@ def plot_multiple_lines_1(
     # legend = plt.legend()
     # legend = plt.legend(ncol=ncol)
     if legends:
-        plt.legend(legends,loc='upper right')
+        plt.legend(legends,loc=loc)
 
     if title:
         plt.title(title)

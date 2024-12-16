@@ -10,6 +10,14 @@ def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:] * dt + disp.vector()[:]
 
 
+def advance_disp_bdf2(disp, disp_, velocity, dt):
+    tmp = Function(disp.function_space())
+    tmp.vector()[:] = disp.vector()[:]
+    disp.vector()[:] = (2.0*velocity.vector()[:] * dt  + 4.0*disp.vector()[:] - disp_.vector()[:])/3.0
+    disp_.vector()[:] = tmp.vector()[:]
+
+
+
 def calculate_volume(X):
     volume_J = assemble(det(grad(X)) * dx)
     print("体积：", volume_J)
@@ -66,7 +74,7 @@ def total_energy(u, disp=None):
         F = grad(disp)
         tr_C = tr(F.T * F)
         J = det(F)
-        return assemble(0.5*nu_s*(tr_C -J) * dx)
+        return assemble(0.5*nu_s*(tr_C - 2) * dx)
     if disp is None:
         return kinematic_energy(u)
     else:
