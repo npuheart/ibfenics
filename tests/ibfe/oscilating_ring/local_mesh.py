@@ -6,20 +6,16 @@ import numpy as np
 from local_parameters import *
 
 
-def advance_disp_bdf2(disp, disp_, velocity, dt):
-    Vs = disp.function_space()
-    temp_disp = Function(Vs)
-    temp_disp.vector()[:] = (
-        velocity.vector()[:] * dt * 2.0 / 3.0
-        + 4.0 / 3.0 * disp.vector()[:]
-        - 1.0 / 3.0 * disp_.vector()[:]
-    )
-    disp_.vector()[:] = disp.vector()[:]
-    disp.vector()[:] = temp_disp.vector()[:]
-
-
 def advance_disp_be(disp, velocity, dt):
     disp.vector()[:] = velocity.vector()[:] * dt + disp.vector()[:]
+
+
+def advance_disp_bdf2(disp, disp_, velocity, dt):
+    tmp = Function(disp.function_space())
+    tmp.vector()[:] = disp.vector()[:]
+    disp.vector()[:] = (2.0*velocity.vector()[:] * dt +
+                        4.0*disp.vector()[:] - disp_.vector()[:])/3.0
+    disp_.vector()[:] = tmp.vector()[:]
 
 
 def calculate_volume(X):
@@ -51,6 +47,7 @@ Vf = interaction.Vf
 Vf_1 = interaction.Vf_1
 Vp = interaction.Vp
 N = FacetNormal(fluid_mesh)
+
 
 def kinematic_energy(u):
     return assemble(0.5 * inner(u, u) * dx)
@@ -88,16 +85,27 @@ class InitialDisplacement(UserExpression):
 
 initial_disp = InitialDisplacement()
 
+def calculate_fluid_boundary_conditions(V, Q):
+    noslip = DirichletBC(
+        V, (0, 0), "near(x[0],1) || near(x[0],0) || near(x[1],0)")
+    upflow = DirichletBC(V, (0, 0), "near(x[1],1)")
+    pinpoint = DirichletBC(Q, 0, "near(x[0],0) && near(x[1],0)", "pointwise")
+    bcu = [noslip, upflow]
+    bcp = [pinpoint]
+    return bcu, bcp
+
 
 # P = nu_s * (F - inv(F).T)
 def total_energy(u, disp=None):
     def kinematic_energy(u):
         return assemble(0.5 * inner(u, u) * dx)
+
     def potential_energy(disp):
         F = grad(disp)
         tr_C = tr(F.T * F)
         J = det(F)
-        return assemble(0.5*nu_s*(tr_C -J) * dx)
+        return assemble(0.5*nu_s*(tr_C - J) * dx)
+        # return assemble(0.5*nu_s*(tr_C - 2.0 - ln(J)) * dx)
     if disp is None:
         return kinematic_energy(u)
     else:

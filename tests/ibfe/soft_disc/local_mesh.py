@@ -13,9 +13,9 @@ def advance_disp_be(disp, velocity, dt):
 def advance_disp_bdf2(disp, disp_, velocity, dt):
     tmp = Function(disp.function_space())
     tmp.vector()[:] = disp.vector()[:]
-    disp.vector()[:] = (2.0*velocity.vector()[:] * dt  + 4.0*disp.vector()[:] - disp_.vector()[:])/3.0
+    disp.vector()[:] = (2.0*velocity.vector()[:] * dt +
+                        4.0*disp.vector()[:] - disp_.vector()[:])/3.0
     disp_.vector()[:] = tmp.vector()[:]
-
 
 
 def calculate_volume(X):
@@ -46,20 +46,11 @@ Vf_1 = interaction.Vf_1
 Vp = interaction.Vp
 N = FacetNormal(fluid_mesh)
 
-
-def kinematic_energy(u):
-    return assemble(0.5 * inner(u, u) * dx)
-
-
-def total_energy(disp, u):
-    pass
-
-
 initial_disp = Expression(("x[0]", "x[1]"), degree=1)
 
-# Define boundary conditions for fluid solver
 def calculate_fluid_boundary_conditions(V, Q):
-    noslip = DirichletBC(V, (0, 0), "near(x[0],1) || near(x[0],0) || near(x[1],0)")
+    noslip = DirichletBC(
+        V, (0, 0), "near(x[0],1) || near(x[0],0) || near(x[1],0)")
     upflow = DirichletBC(V, (1, 0), "near(x[1],1)")
     pinpoint = DirichletBC(Q, 0, "near(x[0],0) && near(x[1],0)", "pointwise")
     bcu = [noslip, upflow]
@@ -67,9 +58,11 @@ def calculate_fluid_boundary_conditions(V, Q):
     return bcu, bcp
 
 
+# P = nu_s * (F - inv(F).T)
 def total_energy(u, disp=None):
     def kinematic_energy(u):
         return assemble(0.5 * inner(u, u) * dx)
+
     def potential_energy(disp):
         F = grad(disp)
         tr_C = tr(F.T * F)

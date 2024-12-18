@@ -18,7 +18,9 @@ def plot_multiple_lines_1(
     ncol=1,
     legends=None,
     ylog=False,
-    loc = 'upper right'
+    loc = 'upper right',
+    aspect=None,
+    figname="figure",
 ):
     """
     Plot multiple lines from a list of lists.
@@ -111,11 +113,10 @@ def plot_multiple_lines_1(
     if ylog:
         ax.set_yscale("log")
 
-    # ax.set_aspect(1.1)
-    # ax.set_aspect(1.0/(ylim[1]-ylim[0]))
-    
+    if aspect:
+        ax.set_aspect(aspect)
 
     # 保存图像
-    plt.savefig("figure.png",  bbox_inches='tight', dpi=300)
-    plt.savefig("figure.pdf",  bbox_inches='tight')
+    plt.savefig(figname+".png",  bbox_inches='tight', dpi=300)
+    plt.savefig(figname+".pdf",  bbox_inches='tight')
     plt.close()

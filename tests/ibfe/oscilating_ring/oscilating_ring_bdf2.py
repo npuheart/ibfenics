@@ -20,22 +20,14 @@ from ibfenics1.io import (
     TimeManager,
     write_paramters,
     write_excel,
+    write_excel_sheets,
 )
 from local_mesh import *
 
 
 construct_function_space_bc = TaylorHoodSolverBDF2.construct_function_space_bc
 
-# Define boundary conditions for fluid solver
-def calculate_fluid_boundary_conditions(V, Q):
-    bcu_1 = DirichletBC(V, Constant((0, 0)), "near(x[1],1.0)")
-    bcu_2 = DirichletBC(
-        V, Constant((0, 0)), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)"
-    )
-    bcp_1 = DirichletBC(Q, Constant(0), "near(x[1],0.0) && near(x[0],0.0)", "pointwise")
-    bcu = [bcu_1, bcu_2]
-    bcp = [bcp_1]
-    return bcu, bcp
+
 
 
 # Define solid constituitive model
@@ -70,8 +62,11 @@ f = Function(Vf_1, name="force")
 # Create functions for solid
 velocity = Function(Vs, name="velocity")
 disp = Function(Vs, name="displacement")
+disp_ = Function(Vs, name="displacement_")
 force = Function(Vs, name="force")
+disp_tilde = Function(Vs)
 disp.interpolate(initial_disp)
+disp_.interpolate(initial_disp)
 ib_interpolation.evaluate_current_points(disp._cpp_object)
 
 # Define fluid solver object
@@ -84,7 +79,7 @@ navier_stokes_solver = TaylorHoodSolverBDF2(
 # Define trial and test functions for solid solver
 us = TrialFunction(Vs)
 vs = TestFunction(Vs)
-A2, L2 = calculate_constituitive_model(disp, vs, us)
+A2, L2 = calculate_constituitive_model(disp_tilde, vs, us)
 
 # Define output path
 file_log_name = unique_filename(os.path.basename(__file__), str(dt), "/info.log")
@@ -136,12 +131,14 @@ for n in range(1, num_steps + 1):
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
     logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
+    logger.info(f"total_energy(u0)       {total_energy(u0, disp)}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
     # step 3. calculate disp for solid and update current gauss points and dof points
-    advance_disp_be(disp, velocity, dt)
-    ib_interpolation.evaluate_current_points(disp._cpp_object)
+    advance_disp_bdf2(disp, disp_, velocity, dt)
+    disp_tilde.vector()[:] = 2.0*disp.vector()[:] - disp_.vector()[:]
+    ib_interpolation.evaluate_current_points(disp_tilde._cpp_object)
     # step 4. calculate body force.
     b2 = assemble(L2)
     solve(A2, force.vector(), b2)
@@ -150,6 +147,7 @@ for n in range(1, num_steps + 1):
     # step 6. update variables and save to file.
     output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     volume_list.append(calculate_volume(disp))
+    logger.info(f"volume: {calculate_volume(disp)}")
     t = n * dt
 
 write_excel(volume_list, file_excel_name)

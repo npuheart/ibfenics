@@ -110,6 +110,7 @@ write_paramters(
     nu=nu,
     alpha=alpha,
     stab=stab,
+    conv=conv,
     delta=delta,
     SAV=SAV,
     nu_s=nu_s,
@@ -129,7 +130,6 @@ for n in range(1, num_steps + 1):
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
-    logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
     logger.info(f"total_energy(u0)       {total_energy(u0, disp)}")
     # step 2. interpolate velocity from fluid to solid
     u0_1 = project(u0, Vf_1)

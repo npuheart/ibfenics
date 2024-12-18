@@ -119,7 +119,6 @@ for n in range(1, num_steps + 1):
     logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
     logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
     logger.info(f"f.vector().norm('l2')  {f.vector().norm('l2')}")
-    logger.info(f"kinematic_energy(u0)   {kinematic_energy(u0)}")
     logger.info(f"total_energy(u0)       {total_energy(u1, disp)}")
     logger.info(f"R                      {np.sqrt(total_energy(u1, disp)+delta)}")
     # step 2. interpolate velocity from fluid to solid
