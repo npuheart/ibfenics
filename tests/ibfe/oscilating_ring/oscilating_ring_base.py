@@ -1,10 +1,10 @@
 # Copyright (C) 2024 Pengfei Ma
 #
-# This file is part of ibfenics1 (https://github.com/npuheart/ibfenics1)
+# This file is part of ibfenics (https://github.com/npuheart/ibfenics)
 #
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 #
-# email : ibfenics1@pengfeima.cn
+# email : ibfenics@pengfeima.cn
 #
 # brief : 测试IBFE方法的正确性
 
@@ -22,8 +22,6 @@ from ibfenics1.io import (
     write_excel,
 )
 from local_mesh import *
-
-
 construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
 
 # Define boundary conditions for fluid solver
@@ -50,6 +48,7 @@ def calculate_constituitive_model(disp, vs, us):
 
 
 def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
+    disp.rename("displacement", "displacement")
     if time_manager.should_output(n):
         logger.info(f"time: {t}, step: {n}, output...")
         file_fluid.write(u0, t)
