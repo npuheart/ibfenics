@@ -1,4 +1,5 @@
 #include <dolfin.h>
+#include "main.h"
 #include "Poisson2D.h"
 using namespace dolfin;
 
@@ -28,14 +29,17 @@ private:
     std::vector<std::size_t> _facets;
 
 public:
-    // 找到边界的所有facet_id
+    // Find all id of facets on the given sub_domain
     FacetIntegration(const Mesh &mesh, const MeshFunction<std::size_t> &bdry, size_t sub_domain)
     {
         // Make sure we have the facet - cell connectivity
         const std::size_t D = mesh.topology().dim();
+        mesh.init(D - 1); // Is it neccessary ?
+        mesh.init(D);
         mesh.init(D - 1, D);
 
         // Build set of boundary facets
+        // TODO: find facets on the boundary
         dolfin_assert(_facets.empty());
         for (FacetIterator facet(mesh); !facet.end(); ++facet)
         {
@@ -49,100 +53,50 @@ public:
         // TODO: check if disp and force are on the same function space
         auto _function_space = disp->function_space();
         const Mesh &mesh = *_function_space->mesh();
+        const std::size_t D = mesh.topology().dim();
         const GenericDofMap &dofmap = *_function_space->dofmap();
         const FiniteElement &element = *_function_space->element();
         const ufc::finite_element &ufc_element = *element.ufc_element();
-        // std::shared_ptr<const ufc::finite_element> ufc_element = element.ufc_element();
-
-        // TODO: find facets on the boundary
-        // init_facets(mesh.mpi_comm());
-
-        const std::size_t D = mesh.topology().dim();
-        mesh.init(D - 1); // Is it neccessary ?
-        mesh.init(D);
-        mesh.init(D - 1, D);
 
         ufc::cell ufc_cell;
-        std::vector<double> coordinate_dofs;
-
         auto value_size = disp->value_size();
         auto space_dimension = element.space_dimension();
         std::vector<double> basis_values(value_size * space_dimension);
-
-        // double ref_vertices[12];
-        // double ref_vertex_basis_values[36];
-        // ufc_element.tabulate_reference_dof_coordinates(ref_vertices);
-        // ufc_element.evaluate_reference_basis(ref_vertex_basis_values, 3, ref_vertices);
-
-        // double ref_vertices[2] = {0.5, 0.5};
-        // double ref_vertex_basis_values[12];
-        // ufc_element.tabulate_reference_dof_coordinates(ref_vertices);
-        // ufc_element.evaluate_reference_basis(ref_vertex_basis_values, 1, ref_vertices);
-
-        // size_t cell_index = 10;
-        // const Cell cell(mesh, cell_index);
-        // const auto midpoint = cell.midpoint();
-        // printf("midpoint: %f, %f\n", midpoint[0], midpoint[1]);
-        // double ref_vertex_basis_values[12];
-        // ufc_element.evaluate_reference_basis(ref_vertex_basis_values, 1, midpoint.coordinates());
-
-        // double w[3];
-        // disp->restrict(w, element, cell, coordinate_dofs.data(), ufc_cell);
-
-        const std::size_t value_size_loc = 2;
         std::vector<double> coefficients(element.space_dimension());
-        printf("space_dimension: %ld\n", element.space_dimension());
 
-        // // Cell coordinates (re-allocated inside function for thread safety)
-        // std::vector<double> coordinate_dofs;
-        // dolfin_cell.get_coordinate_dofs(coordinate_dofs);
-
-        // // Restrict function to cell
-        // restrict(coefficients.data(), element, dolfin_cell,
-        //          coordinate_dofs.data(), ufc_cell);
-
-    // Get dofmap for cell
+        // NOTE:For a given cell
         size_t cell_index = 10;
+        const Cell cell(mesh, cell_index);
+        auto dofs = dofmap.cell_dofs(cell_index);
+        disp->vector()->get_local(coefficients.data(), dofs.size(), dofs.data());
 
-    // const GenericDofMap& dofmap = *_function_space->dofmap();
-    auto dofs = dofmap.cell_dofs(cell_index);
+        std::vector<double> vertex_coordinates(6);
+        cell.get_vertex_coordinates(vertex_coordinates);
 
-    // Note: We should have dofmap.max_element_dofs() == dofs.size() here.
-    // Pick values from vector(s)
-    disp->vector()->get_local(coefficients.data(), dofs.size(), dofs.data());
+        // NOTE:For a given point
+        const size_t num_points = 2;
+        const double some_points[] = {0.5, 0.5, 0.1, 0.2};
+        std::vector<double> ref_vertex_basis_values(12 * num_points);
+        ufc_element.evaluate_reference_basis(ref_vertex_basis_values.data(), num_points, some_points);
 
-    const Cell cell(mesh, cell_index);
-    std::vector<double> vertex_coordinates(6);
-    cell.get_vertex_coordinates(vertex_coordinates);
-    printf("vertex_coordinates: %f, %f, %f, %f, %f, %f\n", vertex_coordinates[0], vertex_coordinates[1], vertex_coordinates[2], vertex_coordinates[3], vertex_coordinates[4], vertex_coordinates[5]);
+        std::vector<double> values(value_size * num_points);
 
-        const auto midpoint = cell.midpoint();
-        printf("midpoint: %f, %f\n", midpoint[0], midpoint[1]);
-        double ref_vertex_basis_values[12];
-        ufc_element.evaluate_reference_basis(ref_vertex_basis_values, 1, midpoint.coordinates());
-        // // Create work vector for basis
-        // std::vector<double> basis(value_size_loc);
-
-        // // Initialise values
-        // for (std::size_t j = 0; j < value_size_loc; ++j)
-        //     values[j] = 0.0;
-
-        printf("element.space_dimension(): %ld\n", element.space_dimension());
-        // // Compute linear combination
-        double values[2]={0.0, 0.0};
-        for (std::size_t i = 0; i < element.space_dimension(); ++i)
+        for (size_t k = 0; k < num_points; k++)
         {
-        //     element.evaluate_basis(i, basis.data(), x.data(),
-        //                            coordinate_dofs.data(),
-        //                            ufc_cell.orientation);
-
-        printf("cooefficients[%ld]: %f\n",i, coefficients[i]);
-            for (std::size_t j = 0; j < value_size_loc; ++j){
-                values[j] += coefficients[i] * ref_vertex_basis_values[2*i+j];
-                printf("ref_vertex_basis_values[%ld]: %f\n",2*i+j, ref_vertex_basis_values[2*i+j]);
+            for (std::size_t i = 0; i < space_dimension; ++i)
+            {
+                for (std::size_t j = 0; j < value_size; ++j)
+                {
+                    values[2 * k + j] += coefficients[i] * ref_vertex_basis_values[12 * k + 2 * i + j];
+                }
             }
-                // values[j] += coefficients[i] * basis[j];
         }
+
+        for (size_t i = 0; i < values.size(); i++)
+        {
+            printf("%f ", values[i]);
+        }
+        printf("\n");
     }
 
     void fun(std::shared_ptr<Function> disp, std::shared_ptr<Function> force)
