@@ -1,0 +1,9 @@
+
+element = VectorElement("Lagrange", triangle, 1)
+
+v = TestFunction(element)
+U = TrialFunction(element)
+f = Coefficient(element)
+
+a = v[0].dx(i)*U[0].dx(i)*dx
+L = v[0]*f[0]*dx

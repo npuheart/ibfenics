@@ -23,3 +23,4 @@ data/large
 *.csv
 
 nohup.out
+cpp/Poisson2D.h
