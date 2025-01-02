@@ -65,19 +65,24 @@ public:
         std::vector<double> coefficients(element.space_dimension());
 
         // NOTE:For a given cell
-        size_t cell_index = 10;
+        size_t cell_index = 9;
         const Cell cell(mesh, cell_index);
         auto dofs = dofmap.cell_dofs(cell_index);
         disp->vector()->get_local(coefficients.data(), dofs.size(), dofs.data());
 
         std::vector<double> vertex_coordinates(6);
         cell.get_vertex_coordinates(vertex_coordinates);
+        printf("vertex_coordinates: %f %f %f %f %f %f\n",
+               vertex_coordinates[0], vertex_coordinates[1], vertex_coordinates[2],
+               vertex_coordinates[3], vertex_coordinates[4], vertex_coordinates[5]);
 
         // NOTE:For a given point
         const size_t num_points = 2;
-        const double some_points[] = {0.5, 0.5, 0.1, 0.2};
+        const std::vector<double> some_points = {0.5, 0.5, 0.1, 0.2};
+        std::vector<double> some_points_local(some_points.size());
+        linearInterpolation<2>(some_points_local.data(), some_points.data(), vertex_coordinates.data(), num_points);
         std::vector<double> ref_vertex_basis_values(12 * num_points);
-        ufc_element.evaluate_reference_basis(ref_vertex_basis_values.data(), num_points, some_points);
+        ufc_element.evaluate_reference_basis(ref_vertex_basis_values.data(), num_points, some_points.data());
 
         std::vector<double> values(value_size * num_points);
 
@@ -95,6 +100,17 @@ public:
         for (size_t i = 0; i < values.size(); i++)
         {
             printf("%f ", values[i]);
+        }
+        printf("\n");
+
+        for (size_t i = 0; i < 2 * num_points; i++)
+        {
+            printf("%f ", some_points_local[i]);
+        }
+        printf("\n");
+        for (size_t i = 0; i < 2 * num_points; i++)
+        {
+            printf("%f ", some_points[i]);
         }
         printf("\n");
     }
