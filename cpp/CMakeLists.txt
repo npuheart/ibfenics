@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME} main.cpp QuadratureRules.cpp)
 target_link_libraries(${PROJECT_NAME} dolfin)
 
 set_source_files_properties(QuadratureRules.cpp PROPERTIES COMPILE_FLAGS "-std=c++17")
+set_source_files_properties(main.cpp PROPERTIES COMPILE_FLAGS "-std=c++17")
 
 
 
