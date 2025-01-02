@@ -115,70 +115,86 @@ public:
         printf("\n");
     }
 
-    void fun(std::shared_ptr<Function> disp, std::shared_ptr<Function> force)
+    void fun2(std::shared_ptr<Function> disp)
     {
         // TODO: check if disp and force are on the same function space
         auto _function_space = disp->function_space();
         const Mesh &mesh = *_function_space->mesh();
+        const std::size_t D = mesh.topology().dim();
         const GenericDofMap &dofmap = *_function_space->dofmap();
         const FiniteElement &element = *_function_space->element();
-
-        // TODO: find facets on the boundary
-        // init_facets(mesh.mpi_comm());
-
-        const std::size_t D = mesh.topology().dim();
-        mesh.init(D - 1); // Is it neccessary ?
-        mesh.init(D);
-        mesh.init(D - 1, D);
+        const ufc::finite_element &ufc_element = *element.ufc_element();
 
         ufc::cell ufc_cell;
-        std::vector<double> coordinate_dofs;
-
         auto value_size = disp->value_size();
         auto space_dimension = element.space_dimension();
         std::vector<double> basis_values(value_size * space_dimension);
+        std::vector<double> coefficients(element.space_dimension());
+
+        // TODO: Gauss Quadrature points on local element
+        const size_t num_points = 1;
+        const std::vector<std::vector<double>> some_points_all = {{0.5, 0.5},{0.0, 0.5},{0.5, 0.0}};
+
 
         for (std::size_t f = 0; f < _facets.size(); ++f)
         {
+            // Create facet
             const Facet facet(mesh, _facets[f]);
+
+            // Get cell to which facet belongs.
+            dolfin_assert(facet.num_entities(D) > 0);
             const std::size_t cell_index = facet.entities(D)[0];
             const Cell cell(mesh, cell_index);
-            const size_t facet_local_index = cell.index(facet);
-            // TODO: get the Gauss quadrature points on local facet
+            
+            // Get local index of facet with respect to the cell
+            const std::size_t local_facet = cell.index(facet);
+            // TODO: Get Gauss Quadrature Rule for local facet.
+            const auto some_points = some_points_all[local_facet];
+            printf("local_facet: %ld\n",local_facet);
 
-            // TODO: evaluate disp and force at the quadrature points
-            cell.get_coordinate_dofs(coordinate_dofs);
-            cell.get_cell_data(ufc_cell, facet_local_index);
+            auto dofs = dofmap.cell_dofs(cell_index);
+            disp->vector()->get_local(coefficients.data(), dofs.size(), dofs.data());
 
-            std::vector<double> w;
-            disp->restrict(w.data(), element, cell, coordinate_dofs.data(), ufc_cell);
-            auto cell_dofs = dofmap.cell_dofs(cell.index());
+            std::vector<double> vertex_coordinates(6);
+            cell.get_vertex_coordinates(vertex_coordinates);
+            printf("vertex_coordinates: %f %f, %f %f, %f %f\n",
+                   vertex_coordinates[0], vertex_coordinates[1], vertex_coordinates[2],
+                   vertex_coordinates[3], vertex_coordinates[4], vertex_coordinates[5]);
 
-            // TODO: calculate values on gauss points
-            // element->evaluate_basis_all(
-            //     basis_values.data(),
-            //     point.coordinates(),
-            //     coordinate_dofs.data(),
-            //     ufc_cell.orientation);
-            // 计算出函数值
+            std::vector<double> some_points_local(some_points.size());
+            linearInterpolation<2>(some_points_local.data(), some_points.data(), vertex_coordinates.data(), num_points);
+            std::vector<double> ref_vertex_basis_values(12 * num_points);
+            ufc_element.evaluate_reference_basis(ref_vertex_basis_values.data(), num_points, some_points.data());
 
-            // TODO: disp->vector()->getitem(0), basis_values, cell_dofs
-            // 遍历层数:
-            //   space_dimension
-            //   num_gauss_points
-            //   value_size
-            std::vector<double> disp_values;
-            size_t num_gauss_points = 10;
-            for (size_t i = 0; i < space_dimension; i++)
+            std::vector<double> values(value_size * num_points);
+
+            for (size_t k = 0; k < num_points; k++)
             {
-                for (size_t j = 0; j < num_gauss_points; j++)
+                for (std::size_t i = 0; i < space_dimension; ++i)
                 {
-                    for (size_t k = 0; k < value_size; k++)
+                    for (std::size_t j = 0; j < value_size; ++j)
                     {
-                        disp_values[D * j + k] = basis_values[i] * disp->vector()->getitem(D * cell_dofs[i] + k);
+                        values[2 * k + j] += coefficients[i] * ref_vertex_basis_values[12 * k + 2 * i + j];
                     }
                 }
             }
+
+            // for (size_t i = 0; i < values.size(); i++)
+            // {
+            //     printf("%f ", values[i]);
+            // }
+            // printf("\n");
+
+            for (size_t i = 0; i < 2 * num_points; i++)
+            {
+                printf("%f ", some_points_local[i]);
+            }
+            printf("\n");
+            // for (size_t i = 0; i < 2 * num_points; i++)
+            // {
+            //     printf("%f ", some_points[i]);
+            // }
+            // printf("\n");
         }
     }
 
@@ -245,7 +261,7 @@ int main()
     File file_bdry("bdry.pvd");
     file_bdry << *bdry;
 
-    facet_integration.fun1(force);
+    facet_integration.fun2(force);
 
     return 0;
 }

@@ -10,6 +10,9 @@
 
 #pragma once
 
+// 排列方式：
+// p1_x, p1_y, p2_x, p2_y, p3_x, p3_y
+
 template <size_t DIM>
 void linearInterpolation(double *points_local, const double *points_ref, const double *vertices, size_t num_points)
 {
@@ -23,7 +26,7 @@ void linearInterpolation(double *points_local, const double *points_ref, const d
         {
 
             points_local[DIM * i + j] = alpha * vertices[j] + beta * vertices[DIM + j] + gamma * vertices[2 * DIM + j];
-            printf("alpha: %f, beta: %f, gamma: %f\n", alpha, beta, gamma);
+            // printf("alpha: %f, beta: %f, gamma: %f\n", alpha, beta, gamma);
         }
     }
 }
