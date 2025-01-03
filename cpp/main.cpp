@@ -328,26 +328,25 @@ public:
         return std::make_pair(basis_values, cell_dofmap_vector);
     }
 
-
-
     void fun4(const std::shared_ptr<Function> &disp, const std::shared_ptr<Function> &force)
     {
         auto ret = fun3(disp, force);
-            std::vector<std::array<double, 3>> points0;
-            std::vector<std::array<double, 3>> points;
-            std::vector<std::array<double, 3>> velocities;
+        std::vector<std::array<double, 3>> points0;
+        std::vector<std::array<double, 3>> points;
+        std::vector<std::array<double, 3>> velocities;
 
-        size_t num_points = ret.first.size()/disp->value_size();
-            for (size_t i = 0; i < num_points; i++) {
-                points0.push_back({ret.first[2*i], ret.first[2*i+1], 0.0});
-                points.push_back({ret.first[2*i], ret.first[2*i+1], 0.0});
-                velocities.push_back({ret.first[2*i], ret.first[2*i+1], 0.0});
-            }
-            std::vector<std::array<double, 3>> data1 = points;
-            std::vector<std::array<double, 3>> data2 = velocities;
+        size_t num_points = ret.first.size() / disp->value_size();
+        for (size_t i = 0; i < num_points; i++)
+        {
+            points0.push_back({ret.first[2 * i], ret.first[2 * i + 1], 0.0});
+            points.push_back({ret.first[2 * i], ret.first[2 * i + 1], 0.0});
+            velocities.push_back({ret.first[2 * i], ret.first[2 * i + 1], 0.0});
+        }
+        std::vector<std::array<double, 3>> data1 = points;
+        std::vector<std::array<double, 3>> data2 = velocities;
 
-            std::vector<std::string> tags{"position"};
-            IO::write_particles_to_vtu("a.vtu", points, tags, data2);
+        std::vector<std::string> tags{"position"};
+        IO::write_particles_to_vtu("a.vtu", points, tags, data2);
     }
     ~FacetIntegration()
     {
@@ -356,8 +355,15 @@ public:
 
 int main()
 {
-    auto mesh = std::make_shared<Mesh>(
-        UnitSquareMesh::create({{32, 32}}, CellType::Type::triangle));
+    // auto mesh = std::make_shared<Mesh>(
+    //     UnitSquareMesh::create({{32, 32}}, CellType::Type::triangle));
+
+    auto mesh = std::make_shared<dolfin::Mesh>();
+    {
+        dolfin::XDMFFile mesh_file_1("/home/fenics/mesh/benchmark/cylinder/cylinder_40.xdmf");
+        mesh_file_1.read(*mesh);
+        mesh_file_1.close();
+    }
 
     auto bdry = std::make_shared<MeshFunction<std::size_t>>(
         mesh, mesh->topology().dim() - 1, 0);
@@ -379,13 +385,11 @@ int main()
     File file_bdry("bdry.pvd");
     file_bdry << *bdry;
 
-    facet_integration.fun4(force,force);
+    facet_integration.fun4(force, force);
 
     std::vector<double> some_points = {0.5, 0.5, 0.1, 0.2};
     auto result = vectors_to_strings(some_points);
     std::cout << result[0] << std::endl;
-
-
 
     return 0;
 }
