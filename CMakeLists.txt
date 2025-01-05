@@ -20,5 +20,7 @@ target_compile_definitions(cpp
                            PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
 
 
+add_subdirectory(src/gauss_quadrature)
+
 # Target the library
-target_link_libraries(cpp PRIVATE dolfin)
+target_link_libraries(cpp PRIVATE dolfin gauss_quadrature)
