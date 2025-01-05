@@ -1,2 +1,15 @@
+
+
+find_package(DOLFIN REQUIRED)
+include(${DOLFIN_USE_FILE})
+
+
+
 # 创建静态库目标
-add_library(gauss_quadrature STATIC a.cpp)
+add_library(gauss_quadrature STATIC main.cpp QuadratureRules.cpp)
+
+# Target libraries
+target_link_libraries(gauss_quadrature PRIVATE dolfin)
+
+set_source_files_properties(main.cpp PROPERTIES COMPILE_FLAGS "-std=c++17")
+set_source_files_properties(QuadratureRules.cpp PROPERTIES COMPILE_FLAGS "-std=c++17")

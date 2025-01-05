@@ -1,3 +1,13 @@
+/// @date 2025-01-02
+/// @file main.cpp
+/// @author Ma Pengfei (code@pengfeima.cn)
+/// @version 0.1
+/// @copyright Copyright (c) 2025 Ma Pengfei
+/// 
+/// @brief 
+/// 
+///
+
 #include <dolfin.h>
 #include "main.h"
 #include "Poisson2D.h"
@@ -192,7 +202,7 @@ public:
     }
 };
 
-int main()
+int main_2()
 {
     // auto mesh = std::make_shared<Mesh>(
     //     UnitSquareMesh::create({{32, 32}}, CellType::Type::triangle));
