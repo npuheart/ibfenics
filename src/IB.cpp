@@ -41,6 +41,7 @@ PYBIND11_MODULE(cpp, m)
     py::class_<FacetIntegration>(m, "FacetIntegration")
         .def(py::init<std::shared_ptr<Mesh>, std::shared_ptr<MeshFunction<std::size_t>>, size_t>())
 		.def("fun4", &FacetIntegration::fun4)
+		.def("fun3", &FacetIntegration::fun3)
 		;
 
     py::class_<IBInterpolation>(m, "IBInterpolation")
@@ -48,6 +49,7 @@ PYBIND11_MODULE(cpp, m)
 		.def("solid_to_fluid_derivative", &IBInterpolation::solid_to_fluid_derivative)
 		.def("solid_to_fluid", &IBInterpolation::solid_to_fluid)
 		.def("fluid_to_solid", &IBInterpolation::fluid_to_solid)
+		.def("points_to_fluid", &IBInterpolation::points_to_fluid)
 		.def("evaluate_current_points", &IBInterpolation::evaluate_current_points)
 		.def("evaluate_weights", &IBInterpolation::evaluate_weights)
 		;

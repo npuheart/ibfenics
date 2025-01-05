@@ -7,6 +7,7 @@
 /// @brief
 ///
 ///
+#define DEBUG
 #include "VTUIO.h"
 #include "FacetIntegration.h"
 using namespace dolfin;
@@ -34,7 +35,7 @@ void linearInterpolation(double *points_local, const double *points_ref, const d
     }
 }
 
-auto FacetIntegration::fun3(const std::shared_ptr<Function> &disp, const std::shared_ptr<Function> &force)
+std::pair<std::vector<double>, std::vector<double>> FacetIntegration::fun3(const std::shared_ptr<Function> &disp, const std::shared_ptr<Function> &force)
 {
     // TODO: check if disp and force are on the same function space
     auto _function_space = disp->function_space();
@@ -43,6 +44,9 @@ auto FacetIntegration::fun3(const std::shared_ptr<Function> &disp, const std::sh
     const GenericDofMap &dofmap = *_function_space->dofmap();
     const FiniteElement &element = *_function_space->element();
     const ufc::finite_element &ufc_element = *element.ufc_element();
+
+    dolfin_assert(D==2 );
+
 
     ufc::cell ufc_cell;
     auto value_size = disp->value_size();
@@ -69,7 +73,7 @@ auto FacetIntegration::fun3(const std::shared_ptr<Function> &disp, const std::sh
         const std::size_t local_facet = cell.index(facet);
         // TODO: Get Gauss Quadrature Rule for local facet.
         const auto some_points = some_points_all[local_facet];
-        printf("local_facet: %ld\n", local_facet);
+        // printf("local_facet: %ld\n", local_facet);
 
         auto dofs = dofmap.cell_dofs(cell_index);
         disp->vector()->get_local(coefficients_disp.data(), dofs.size(), dofs.data());
@@ -77,13 +81,13 @@ auto FacetIntegration::fun3(const std::shared_ptr<Function> &disp, const std::sh
 
         std::vector<double> vertex_coordinates(6);
         cell.get_vertex_coordinates(vertex_coordinates);
-        printf("vertex_coordinates: %f %f, %f %f, %f %f\n",
-               vertex_coordinates[0], vertex_coordinates[1], vertex_coordinates[2],
-               vertex_coordinates[3], vertex_coordinates[4], vertex_coordinates[5]);
+        // printf("vertex_coordinates: %f %f, %f %f, %f %f\n",
+        //        vertex_coordinates[0], vertex_coordinates[1], vertex_coordinates[2],
+        //        vertex_coordinates[3], vertex_coordinates[4], vertex_coordinates[5]);
 
         std::vector<double> some_points_local(some_points.size());
         linearInterpolation<2>(some_points_local.data(), some_points.data(), vertex_coordinates.data(), num_points);
-        std::vector<double> ref_vertex_basis_values(2 * space_dimension * num_points);
+        std::vector<double> ref_vertex_basis_values(value_size * space_dimension * num_points);
         ufc_element.evaluate_reference_basis(ref_vertex_basis_values.data(), num_points, some_points.data());
 
         std::vector<double> values_disp(value_size * num_points);
@@ -95,8 +99,8 @@ auto FacetIntegration::fun3(const std::shared_ptr<Function> &disp, const std::sh
             {
                 for (std::size_t j = 0; j < value_size; ++j)
                 {
-                    values_disp[2 * k + j] += coefficients_disp[i] * ref_vertex_basis_values[2 * space_dimension * k + 2 * i + j];
-                    values_force[2 * k + j] += coefficients_force[i] * ref_vertex_basis_values[2 * space_dimension * k + 2 * i + j];
+                    values_disp[value_size * k + j] += coefficients_disp[i] * ref_vertex_basis_values[value_size * space_dimension * k + value_size * i + j];
+                    values_force[value_size * k + j] += coefficients_force[i] * ref_vertex_basis_values[value_size * space_dimension * k + value_size * i + j];
                 }
             }
         }
@@ -115,21 +119,21 @@ auto FacetIntegration::fun3(const std::shared_ptr<Function> &disp, const std::sh
         // }
         // printf("\n");
 
-        for (size_t i = 0; i < 2 * num_points; i++)
-        {
-            printf("%.e ", some_points_local[i]);
-        }
+        // for (size_t i = 0; i < 2 * num_points; i++)
+        // {
+        //     printf("%.e ", some_points_local[i]);
+        // }
+        // printf("\n");
+        // for (size_t i = 0; i < 2 * num_points; i++)
+        // {
+        //     printf("%.e ", values_disp[i]);
+        // }
         printf("\n");
-        for (size_t i = 0; i < 2 * num_points; i++)
-        {
-            printf("%.e ", values_disp[i]);
-        }
-        printf("\n");
-        for (size_t i = 0; i < 2 * num_points; i++)
+        for (size_t i = 0; i < value_size * num_points; i++)
         {
             printf("%.e ", values_force[i] - values_disp[i] * values_disp[i]);
         }
-        printf("\n");
+        // printf("\n");
         // for (size_t i = 0; i < 2 * num_points; i++)
         // {
         //     printf("%f ", some_points[i]);

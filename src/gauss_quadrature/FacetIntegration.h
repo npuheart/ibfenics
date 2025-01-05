@@ -23,7 +23,7 @@ namespace dolfin
         // Find all id of facets on the given sub_domain
         FacetIntegration(const std::shared_ptr<Mesh> &mesh, const std::shared_ptr<MeshFunction<std::size_t>> &bdry, size_t sub_domain);
 
-        auto fun3(const std::shared_ptr<Function> &disp, const std::shared_ptr<Function> &force);
+        std::pair<std::vector<double>, std::vector<double>> fun3(const std::shared_ptr<Function> &disp, const std::shared_ptr<Function> &force);
 
         void fun4(const std::shared_ptr<Function> &disp, const std::shared_ptr<Function> &force);
 
