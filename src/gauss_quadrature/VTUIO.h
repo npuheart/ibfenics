@@ -12,6 +12,7 @@
 #include <array>
 #include "pugixml.hpp"
 #include <vector>
+#include <sstream>
 
 namespace {
 [[maybe_unused]] void processStringStream(std::stringstream& sstream, const double& x) { sstream << x << " "; }

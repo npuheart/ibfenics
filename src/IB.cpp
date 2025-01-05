@@ -9,6 +9,7 @@
 ///
 #include "IBInterpolation.h"
 #include "IBMesh.h"
+#include "gauss_quadrature/FacetIntegration.h"
 
 #include <pybind11/stl.h>
 #include <pybind11/pybind11.h>
@@ -35,6 +36,11 @@ PYBIND11_MODULE(cpp, m)
 		.def("extract_dofs", &IBMesh::extract_dofs)
 		.def("assign_dofs", &IBMesh::assign_dofs)
 		.def("evaluate", &IBMesh::evaluate)
+		;
+
+    py::class_<FacetIntegration>(m, "FacetIntegration")
+        .def(py::init<std::shared_ptr<Mesh>, std::shared_ptr<MeshFunction<std::size_t>>, size_t>())
+		.def("fun4", &FacetIntegration::fun4)
 		;
 
     py::class_<IBInterpolation>(m, "IBInterpolation")
