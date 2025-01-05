@@ -1,5 +1,5 @@
 
-element = VectorElement("Lagrange", triangle, 1)
+element = VectorElement("Lagrange", triangle, 2)
 
 v = TestFunction(element)
 U = TrialFunction(element)
