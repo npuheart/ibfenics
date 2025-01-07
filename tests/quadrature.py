@@ -27,7 +27,7 @@ def boundary_quardrature_rule(disp, force):
     return facets_points, facets_values, facets_weights
 
 
-boundary_quardrature_rule(disp, force)
+facets_values,facets_points,facets_weights = boundary_quardrature_rule(disp, force)
 from fenics import *
 from ibfenics1.cpp import IBMesh, IBInterpolation
 

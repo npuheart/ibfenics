@@ -134,9 +134,16 @@ for n in range(1, num_steps + 1):
     # advance_disp_be(disp, velocity, dt)
     
     force = elastic_disk.pently_force(disp)
+    # ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
+    # facets_values,facets_points,facets_weights = boundary_quardrature_rule(disp, force)
+    # ib_interpolation.points_to_fluid(f._cpp_object,facets_values,facets_points,facets_weights)
     facets_values,facets_points,facets_weights = boundary_quardrature_rule(disp, force)
-    ib_interpolation.points_to_fluid(f._cpp_object,facets_values,facets_points,facets_weights)
-    print("force: ", assemble(inner(f,f)*dx))    
+    print("facets_values: ", facets_values)
+    print("facets_points: ", facets_points)
+    print("facets_weights: ", facets_weights)
+    ib_interpolation.points_to_fluid(u0_1._cpp_object,facets_values,facets_points,facets_weights)
+    File("f.pvd") << u0_1
+    print("force: ", assemble(inner(f,f)*dx))   
     
     ib_interpolation.evaluate_current_points(disp._cpp_object)
     # step 6. update variables and save to file.
