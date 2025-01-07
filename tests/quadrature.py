@@ -2,16 +2,9 @@ import ibfenics1
 from fenics import *
 from mshr import *
 
-class DirichletBoundary(SubDomain):
-    def inside(self, x, on_boundary):
-        return on_boundary
-
 
 domain = Circle(Point(0.5, 0.5), 0.25)
 mesh = generate_mesh(domain, 10)
-bdry = MeshFunction("size_t", mesh, 1)
-DirichletBoundary().mark(bdry, 1)
-fade = ibfenics1.cpp.FacetIntegration(mesh, bdry, 1)
 V = VectorFunctionSpace(mesh, "CG", 1)
 disp = Function(V)
 force = Function(V)
@@ -19,16 +12,27 @@ force = Function(V)
 disp.interpolate(Expression(("x[0]","x[1]"),degree=1))
 force.interpolate(Expression(("x[0]*x[0]","x[1]*x[1]"),degree=1))
 
-fade.fun4(disp._cpp_object, force._cpp_object)
-facets_points, facets_values = fade.fun3(disp._cpp_object, force._cpp_object)
-facets_weights = [1]*(len(facets_points)//2)
+def boundary_quardrature_rule(disp, force):
+    mesh = disp.function_space().mesh()
+    bdry = MeshFunction("size_t", mesh, mesh.topology().dim()-1)
+    class DirichletBoundary(SubDomain):
+        def inside(self, x, on_boundary):
+            return on_boundary
+    bdry = MeshFunction("size_t", mesh, 1)
+    DirichletBoundary().mark(bdry, 1)
+    fade = ibfenics1.cpp.FacetIntegration(mesh, bdry, 1)
+    fade.fun4(disp._cpp_object, force._cpp_object)
+    facets_points, facets_values = fade.fun3(disp._cpp_object, force._cpp_object)
+    facets_weights = [1]*(len(facets_points)//2)
+    return facets_points, facets_values, facets_weights
 
 
+boundary_quardrature_rule(disp, force)
 from fenics import *
 from ibfenics1.cpp import IBMesh, IBInterpolation
 
 # 创建一个流体网格
-seperations = [32,32]
+seperations = [128,128]
 points = [Point(0, 0), Point(1, 1)]
 ib_mesh = IBMesh(points, seperations, 1)
 fluid_mesh = ib_mesh.mesh()

@@ -136,6 +136,10 @@ for n in range(1, num_steps + 1):
     force = elastic_disk.pently_force(disp)
     ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
     
+    facets_values,facets_points,facets_weights = boundary_quardrature_rule(disp, force)
+    ib_interpolation.points_to_fluid(f._cpp_object,facets_values,facets_points,facets_weights)
+    
+    
     ib_interpolation.evaluate_current_points(disp._cpp_object)
     # step 6. update variables and save to file.
     output_data(file_fluid, file_solid, u0, p0, f, elastic_disk.xi, force, velocity, t, n)

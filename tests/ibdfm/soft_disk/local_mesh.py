@@ -57,3 +57,18 @@ def calculate_fluid_boundary_conditions(V, Q):
     bcp = [pinpoint]
     return bcu, bcp
 
+
+def boundary_quardrature_rule(disp, force):
+    mesh = disp.function_space().mesh()
+    bdry = MeshFunction("size_t", mesh, mesh.topology().dim()-1)
+    class DirichletBoundary(SubDomain):
+        def inside(self, x, on_boundary):
+            return on_boundary
+    bdry = MeshFunction("size_t", mesh, 1)
+    DirichletBoundary().mark(bdry, 1)
+    import ibfenics1
+    fade = ibfenics1.cpp.FacetIntegration(mesh, bdry, 1)
+    fade.fun4(disp._cpp_object, force._cpp_object)
+    facets_points, facets_values = fade.fun3(disp._cpp_object, force._cpp_object)
+    facets_weights = [1]*(len(facets_points)//2)
+    return facets_points, facets_values, facets_weights
