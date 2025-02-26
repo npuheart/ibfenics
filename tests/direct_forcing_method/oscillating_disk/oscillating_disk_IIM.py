@@ -6,7 +6,7 @@
 #
 # email : ibfenics@pengfeima.cn
 #
-# brief : DISK LID DRIVEN CAVITY
+# brief : OSCILLATING DISK SURROUNDED BY FLUID
 
 import os
 import numpy as np
@@ -23,7 +23,7 @@ from ibfenics.io import (
     write_excel,
 )
 from local_mesh import *
-from ElasticDisk import ElasticDisk
+from OscillatingDisk import OscillatingDisk
 
 construct_function_space_bc = IPCSSolver.construct_function_space_bc
 
@@ -43,6 +43,7 @@ def sigma(u,p):
 
 # Create functions for fluid
 u0 = Function(Vf, name="velocity")
+u0.interpolate(initial_velocity)
 u0_1 = Function(Vf_1, name="velocity 1st order")
 p0 = Function(Vp, name="pressure")
 f = Function(Vf_1, name="force")
@@ -62,7 +63,6 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 # Define fluid solver object
 V, Q = construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-# trial_velocity_solver = ProjectSolver(u0, p0, dt, nu, rho)
 navier_stokes_solver = IPCSSolver(
     u0, p0, f, dt, nu, stab=stab, alpha=alpha, bcu=bcu, bcp=bcp
 )
@@ -104,7 +104,7 @@ write_paramters(
 
 t = dt
 time_manager = TimeManager(T, num_steps, 20)
-elastic_disk = ElasticDisk(Vs, dt, nu_s, rho)
+elastic_disk = OscillatingDisk(Vs, dt, nu_s, rho)
 volume_list = []
 for n in range(1, num_steps + 1):
     # step 1. calculate velocity and pressure

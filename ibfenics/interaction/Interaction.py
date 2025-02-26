@@ -1,15 +1,41 @@
 from fenics import *
 from ibfenics.cpp import IBMesh, IBInterpolation
 
+#定义整个周期性边界条件
+class PeriodicBoundary(SubDomain):
+    def inside(self, x, on_boundary):
+        # 检查是否位于左边界或下边界（需要两个条件都满足）
+        return bool(
+            (x[0] < DOLFIN_EPS and on_boundary) or  # 左边界 x = 0
+            (x[1] < DOLFIN_EPS and on_boundary)     # 下边界 y = 0
+        )
 
+    def map(self, x, y):
+        # 检查右边界 x = 1 映射到 x = 0
+        if near(x[0], 1.0):
+            y[0] = x[0] - 1.0
+            y[1] = x[1]
+        # 检查上边界 y = 1 映射到 y = 0
+        elif near(x[1], 1.0):
+            y[0] = x[0]
+            y[1] = x[1] - 1.0
+        else:
+            # 如果没有匹配到周期性条件，则保持原位置
+            y[0] = x[0]
+            y[1] = x[1]
+        
+#定义周期性边界条件
 class Interaction:
     def __init__(self, points, seperations, solid_mesh, orders):
         # 背景网格使用一阶元
         ib_mesh = IBMesh(points, seperations, 1)
         fluid_mesh = ib_mesh.mesh()
         Vf_1 = VectorFunctionSpace(fluid_mesh, "P", 1)
+        
         # 构造函数空间
         Vf = VectorFunctionSpace(fluid_mesh, "P", orders[0])
+        # Vf = VectorFunctionSpace(fluid_mesh, "P", orders[0], constrained_domain= PeriodicBoundary())
+        # Vp = FunctionSpace(fluid_mesh, "P", orders[1], constrained_domain= PeriodicBoundary())
         Vp = FunctionSpace(fluid_mesh, "P", orders[1])
         Vs = VectorFunctionSpace(solid_mesh, "P", orders[2])
         # 初始化插值算子和分布算子
