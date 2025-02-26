@@ -128,11 +128,11 @@ std::pair<std::vector<double>, std::vector<double>> FacetIntegration::fun3(const
         // {
         //     printf("%.e ", values_disp[i]);
         // }
-        printf("\n");
-        for (size_t i = 0; i < value_size * num_points; i++)
-        {
-            printf("%.e ", values_force[i] - values_disp[i] * values_disp[i]);
-        }
+        // printf("\n");
+        // for (size_t i = 0; i < value_size * num_points; i++)
+        // {
+        //     printf("%.e ", values_force[i] - values_disp[i] * values_disp[i]);
+        // }
         // printf("\n");
         // for (size_t i = 0; i < 2 * num_points; i++)
         // {

@@ -2,9 +2,9 @@ from fenics import *
 from local_parameters import dt
 
 class ElasticDisk:
-    coefficient = 0.1
-    eta = 0.1*640*coefficient
-    kappa = 0.001*640*640*coefficient
+    coefficient = 0.5
+    eta = 0.05*640*coefficient
+    kappa = 0.01*640*640*coefficient
     def __init__(self, W, dt, nu_s, rho):
         self.W = W
         self.xi = Function(W)
@@ -33,7 +33,7 @@ class ElasticDisk:
         F = grad(self.xi_)
         C = F.T*F
         P1 = nu_s * (F - inv(F).T)
-        nv = 0.499
+        nv = 0.4999
         K_s = 2.0*nu_s*(1.0+nv)/3/(1-2*nv)
         J = det(F)
         P2 = K_s*J*ln(J)*inv(F.T)

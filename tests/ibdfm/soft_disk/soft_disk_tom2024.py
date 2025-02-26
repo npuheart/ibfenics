@@ -13,7 +13,7 @@ import numpy as np
 from loguru import logger
 from mshr import *
 from fenics import *
-from ibfenics1.nssolver import TaylorHoodSolver
+from ibfenics1.nssolver import IPCSSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
@@ -23,7 +23,7 @@ from ibfenics1.io import (
 )
 from local_mesh import *
 from ElasticDisk import ElasticDisk
-construct_function_space_bc = TaylorHoodSolver.construct_function_space_bc
+construct_function_space_bc = IPCSSolver.construct_function_space_bc
 
 def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
     disp.rename("displacement", "displacement")
@@ -37,8 +37,6 @@ def output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n):
         file_solid.write(force, t)
         file_solid.write(velocity, t)
 
-def sigma(u,p):
-    return 2*nu*sym(grad(u))-p*Identity(len(u))
 
 # Create functions for fluid
 u0 = Function(Vf, name="velocity")
@@ -48,9 +46,8 @@ f = Function(Vf_1, name="force")
 
 # Create functions for solid
 velocity = Function(Vs, name="velocity")
+velocity_d = Function(Vs, name="velocity d")
 disp = Function(Vs, name="displacement")
-Sigma_part_1 =Function(Vs, name="Sigma_part_1")
-Sigma_part_2 =Function(Vs, name="Sigma_part_2")
 force = Function(Vs, name="force")
 disp.interpolate(initial_disp)
 disp0 = Function(Vs, name="displacement0")
@@ -60,7 +57,12 @@ ib_interpolation.evaluate_current_points(disp._cpp_object)
 # Define fluid solver object
 V, Q = construct_function_space_bc(u0, p0)
 bcu, bcp = calculate_fluid_boundary_conditions(V, Q)
-navier_stokes_solver = TaylorHoodSolver(u0, p0, f, dt, nu, stab=stab, alpha=alpha, conv=conv)
+trial_velocity_solver = IPCSSolver(
+    u0, p0, f, dt, nu, stab=stab, alpha=alpha, bcu=bcu, bcp=bcp
+)
+navier_stokes_solver = IPCSSolver(
+    u0, p0, f, dt, nu, stab=stab, alpha=alpha, bcu=bcu, bcp=bcp
+)
 
 # Define output path
 file_log_name = unique_filename(os.path.basename(__file__), str(dt), "/info.log")
@@ -104,44 +106,36 @@ time_manager = TimeManager(T, num_steps, 20)
 elastic_disk = ElasticDisk(Vs, dt, nu_s, rho)
 volume_list = []
 for n in range(1, num_steps + 1):
+    u_tilde = trial_velocity_solver.solve(bcu)
     # step 1. calculate velocity and pressure
-    u1, p1 = navier_stokes_solver.solve(bcu, bcp)
-    navier_stokes_solver.update(u1, p1)
-    logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
-    logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
-    logger.info(f"f.vector().norm('l2')  {f.vector().norm('l2')}")
-    logger.info(f"kinematic_energy(u0)   {kinematic_energy(u0)}")
-    logger.info(f"total_energy(u0)       {total_energy(u1, disp)}")
+    # logger.info(f"kinematic_energy(u0) {kinematic_energy(u0)}")
     # step 2. interpolate velocity from fluid to solid
-    u0_1 = project(u0, Vf_1)
+    u0_1 = project(u_tilde, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
     # step 3. calculate disp for solid and update current gauss points and dof points
-    advance_disp_be(disp, velocity, dt)
-    ib_interpolation.evaluate_current_points(disp._cpp_object)
-    
-    sigma_f =sigma(u0,p0)
-    sigma_part_1 = project(as_vector([sigma_f[0,0], sigma_f[0,1]]), Vf_1)
-    sigma_part_2 = project(as_vector([sigma_f[1,0], sigma_f[1,1]]), Vf_1)
-    ib_interpolation.fluid_to_solid(sigma_part_1._cpp_object, Sigma_part_1._cpp_object)
-    ib_interpolation.fluid_to_solid(sigma_part_2._cpp_object, Sigma_part_2._cpp_object)
-    elastic_disk.Sigma_part_1.assign(Sigma_part_1)
-    elastic_disk.Sigma_part_2.assign(Sigma_part_2)
-    
-    # step 4. calculate body force. 计算固体力
-    elastic_disk.solve()             # 更新固体的位移
-    
+
+    # step 4. calculate body force.
+    elastic_disk.update_velocity(velocity)
+    elastic_disk.update_displacement(disp)
+    velocity_d = elastic_disk.solve()  # 更新固体的速度
+    force.vector()[:] = (velocity_d.vector()[:] - velocity.vector()[:]) / dt 
+
+    # step 5. interpolate force from solid to fluid
+    ib_interpolation.solid_to_fluid(f._cpp_object, force._cpp_object)
+    u1, p1 = navier_stokes_solver.solve(bcu, bcp)
+    navier_stokes_solver.update(u1, p1)
+    trial_velocity_solver.update(u1, p1)
+    logger.info(f"u0.vector().norm('l2') {u0.vector().norm('l2')}")
+    logger.info(f"p0.vector().norm('l2') {p0.vector().norm('l2')}")
+    logger.info(f"f.vector().norm('l2') {f.vector().norm('l2')}")
     u0_1 = project(u1, Vf_1)
     ib_interpolation.fluid_to_solid(u0_1._cpp_object, velocity._cpp_object)
-    # advance_disp_be(disp, velocity, dt)
-    
-    force = elastic_disk.pently_force(disp)
-    facets_values,facets_points,facets_weights = boundary_quardrature_rule(disp, force)
-    ib_interpolation.points_to_fluid(f._cpp_object,facets_values,facets_points,facets_weights)
-    print("force: ", assemble(inner(f,f)*dx))    
-    
+    advance_disp_be(disp, velocity, dt)
+    elastic_disk.update_displacement(disp)
+
     ib_interpolation.evaluate_current_points(disp._cpp_object)
     # step 6. update variables and save to file.
-    output_data(file_fluid, file_solid, u0, p0, f, elastic_disk.xi, force, velocity, t, n)
+    output_data(file_fluid, file_solid, u0, p0, f, disp, force, velocity, t, n)
     volume_list.append(calculate_volume(disp))
     t = n * dt
 
