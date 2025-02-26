@@ -31,19 +31,20 @@ class ElasticDisk:
         # 计算固体方程
         F = grad(self.xi_)
         C = F.T*F
-        P1 = nu_s*det(F) * ( F - 0.5*tr(C)*inv(F).T)
+        P1 = nu_s/det(F) * ( F - 0.5*tr(C)*inv(F).T)
         nv = 0.499
         K_s = 2.0*nu_s*(1.0+nv)/3/(1-2*nv)
         J = det(F)
         P2 = K_s*J*ln(J)*inv(F.T)
         P = P1 + P2
-        
-        # F = rho/k/k*inner((self.xi_-2*self.xi + self.xi_n),v)*dx + inner(P,grad(v))*dx - inner(Expression(("0.0001", "0.0001"),degree=2), v)*dx
-        F = rho/k/k*inner((self.xi_-2*self.xi + self.xi_n),v)*dx + inner(P,grad(v))*dx - inner(det(F)*Sigma*inv(F.T)*N, v)*ds
+        j = J*sqrt(inner(inv(F).T* N,inv(F).T* N))
+        # F = rho/k/k*inner((self.xi_-2*self.xi + self.xi_n),v)*dx + inner(P,grad(v))*dx - inner(det(F)*Sigma*inv(F.T)*N, v)*ds
+        F = rho/k/k*inner((self.xi_-2*self.xi + self.xi_n),v)*dx + inner(P,grad(v))*dx - inner(j*Sigma*inv(F.T)*N, v)*ds
         J = derivative(F, self.xi_, dxi)
 
         self.F = F
         self.J = J
+        
 
     # # 更新上一步的位移和速度
     # def update_displacement(self, disp):

@@ -26,6 +26,6 @@ order_pressure = 1
 order_displacement = 1
 
 # 1/20/80
-dt = 1 / 60 / n_mesh_fluid
+dt = 1 / 20 / n_mesh_fluid
 num_steps = int(T / dt)
 alpha = 10.0 * dt
