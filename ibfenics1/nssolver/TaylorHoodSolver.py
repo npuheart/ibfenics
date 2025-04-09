@@ -50,6 +50,7 @@ class TaylorHoodSolver:
         N = FacetNormal(mesh)
         self.w_ = Function(W)
         self.un, self.pn = u0, p0
+        _, self.s = Function(W).split()
 
         if bdry is not None:
             ds = Measure("ds", domain=mesh, subdomain_data=bdry)
@@ -72,7 +73,7 @@ class TaylorHoodSolver:
         if stab:
             F += alpha * inner(grad(u - self.un), grad(v)) * dx  # 稳定项
 
-        F += q * div(u) * dx
+        F += q * div(u) * dx - q * self.s * dx
         a = lhs(F)
         self.W = W
         self.A = assemble(a)
@@ -88,3 +89,5 @@ class TaylorHoodSolver:
         [bc.apply(self.A, b) for bc in bcp]
         solve(self.A, self.w_.vector(), b)
         return self.w_.split(True)
+
+
