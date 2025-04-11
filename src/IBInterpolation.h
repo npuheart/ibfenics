@@ -182,13 +182,18 @@ public:
 		size_t value_size = position.value_size();        
 		size_t dof_size = position.function_space()->dim();
 		std::vector<double> data_flatten(dof_size);
+		printf("dof size : %ld\n", dof_size);
+		printf("value size : %ld\n", value_size);
+		printf("data size : %ld\n", data.size());
 
 		// unpack the data_flatten
 		for (size_t i = 0; i < dof_size/value_size; i++)
 		{
 			data_flatten[i*value_size] = data[i].u1;
 			data_flatten[i*value_size+1] = data[i].u2;
+			data_flatten[i*value_size+2] = data[i].u3;
 		}
+		printf("unpack data size : %ld\n", data_flatten.size());
 		position.vector()->set_local(data_flatten);
 	}
 
@@ -225,6 +230,7 @@ public:
 		{
 			data[i].x =  data_flatten[i*value_size];
 			data[i].y =  data_flatten[i*value_size+1];
+			data[i].z =  data_flatten[i*value_size+2];
 		}
 	}
 

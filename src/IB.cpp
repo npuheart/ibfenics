@@ -65,11 +65,11 @@ PYBIND11_MODULE(cpp, m)
 	py::class_<IBInterpolation3D>(m, "IBInterpolation3D")
         .def(py::init<std::shared_ptr<IBMesh3D>, std::shared_ptr<Mesh>>())
 		// .def("solid_to_fluid_derivative", &IBInterpolation::solid_to_fluid_derivative)
-		// .def("solid_to_fluid", &IBInterpolation::solid_to_fluid)
-		// .def("fluid_to_solid", &IBInterpolation::fluid_to_solid)
+		.def("solid_to_fluid", &IBInterpolation3D::solid_to_fluid)
+		.def("fluid_to_solid", &IBInterpolation3D::fluid_to_solid)
 		// .def("points_to_fluid", &IBInterpolation::points_to_fluid)
-		// .def("evaluate_current_points", &IBInterpolation::evaluate_current_points)
-		// .def("evaluate_weights", &IBInterpolation::evaluate_weights)
+		.def("evaluate_current_points", &IBInterpolation3D::evaluate_current_points)
+		.def("evaluate_weights", &IBInterpolation3D::evaluate_weights)
 		;
 
 
