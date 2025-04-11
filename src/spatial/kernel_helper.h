@@ -141,11 +141,11 @@ struct IBKernel
 
     void compute(const Vector<T, dim> &X)
     {
-        printf("dh        : %f %f %f\n", dh[0], dh[1], dh[2]);
+        // printf("dh        : %f %f %f\n", dh[0], dh[1], dh[2]);
         Vector<T, dim> X0 = multiply(one_over_dh, X);
         base_node = baseNode<PlaceValue>(X0);
         // printf("base_node : %6ld %6ld\n", base_node[0], base_node[1]);
-        printf("X0        : %f %f %f\n", X0[0], X0[1], X0[2]);
+        // printf("X0        : %f %f %f\n", X0[0], X0[1], X0[2]);
 
         if constexpr (dim == 1){
             evaluate_kernel_peskin<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0]);
@@ -157,8 +157,8 @@ struct IBKernel
         }
         if constexpr (dim == 3)
         {
-            printf("base_node : %6d %6d %6d\n", base_node[0], base_node[1], base_node[2]);
-            printf("X0        : %6.1f %6.1f %6.1f\n", X0[0], X0[1], X0[2]);
+            // printf("base_node : %6d %6d %6d\n", base_node[0], base_node[1], base_node[2]);
+            // printf("X0        : %6.1f %6.1f %6.1f\n", X0[0], X0[1], X0[2]);
             evaluate_kernel_peskin<T, PlaceValue::_0>(X0[0]-base_node[0], &w[0]);
             evaluate_kernel_peskin<T, PlaceValue::_1>(X0[1]-base_node[1], &w[PlaceValue::_0]);
             evaluate_kernel_peskin<T, PlaceValue::_2>(X0[2]-base_node[2], &w[PlaceValue::_0 + PlaceValue::_1]);

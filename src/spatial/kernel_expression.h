@@ -45,8 +45,8 @@ void evaluate_kernel_peskin(const T dx, T *w, T *dw = nullptr, T *ddw = nullptr)
         w[1] = (3.0 - 2.0 * d1 + std::sqrt(1.0 + 4.0 * d1 - 4.0 * d1 * d1)) / 8.0;
         w[2] = (3.0 - 2.0 * d2 + std::sqrt(1.0 + 4.0 * d2 - 4.0 * d2 * d2)) / 8.0;
         w[3] = (5.0 - 2.0 * d3 - std::sqrt(-7.0 + 12.0 * d3 - 4.0 * d3 * d3)) / 8.0;
-        printf("dx : %f, d1 : %f, d2 : %f, d3 : %f\n", dx, d1, d2, d3);
-        printf("w[0] : %f, w[1] : %f, w[2] : %f, w[3] : %f\n", w[0], w[1], w[2], w[3]);
+        // printf("dx : %f, d1 : %f, d2 : %f, d3 : %f\n", dx, d1, d2, d3);
+        // printf("w[0] : %f, w[1] : %f, w[2] : %f, w[3] : %f\n", w[0], w[1], w[2], w[3]);
     }
     if constexpr (kernel_width == 5)
     {

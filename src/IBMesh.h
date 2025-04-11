@@ -115,6 +115,20 @@ public:
 };
 
 template <typename GridState, typename Index, typename Particle, typename T>
+class FunctorSpread3D
+{
+public:
+	FunctorSpread3D(T dx, T dy, T dz) : dx(dx), dy(dy), dz(dz) {}
+	T dx, dy, dz;
+	void operator()(GridState &grid_state, Particle &particle, const Index &base_node, T wijk, T dwijkdxi, T dwijkdxj, T dwijkdxk) const
+	{
+		grid_state.x += particle.u1 * wijk * particle.w / dx / dy / dz;
+		grid_state.y += particle.u2 * wijk * particle.w / dx / dy / dz;
+		grid_state.z += particle.u3 * wijk * particle.w / dx / dy / dz;
+	}
+};
+
+template <typename GridState, typename Index, typename Particle, typename T>
 class FunctorSpreadDerivative
 {
 public:
@@ -153,7 +167,6 @@ void iterate_grid_2D(Grid &grid, Particle &particle, const Kernel &kernel, const
 	}
 }
 
-
 template <typename Particle, typename Grid, typename Kernel, typename Function>
 void iterate_grid_3D(Grid &grid, Particle &particle, const Kernel &kernel, const Function &function)
 {
@@ -171,8 +184,8 @@ void iterate_grid_3D(Grid &grid, Particle &particle, const Kernel &kernel, const
 			for (size_t k = 0; k < kernel_width::_2; k++)
 			{
 				index_type node{
-					kernel.base_node[0] + i, 
-					kernel.base_node[1] + j, 
+					kernel.base_node[0] + i,
+					kernel.base_node[1] + j,
 					kernel.base_node[2] + k};
 
 				if (node.i >= grid.grid_size.i || node.j >= grid.grid_size.j || node.k >= grid.grid_size.k)
@@ -188,25 +201,24 @@ void iterate_grid_3D(Grid &grid, Particle &particle, const Kernel &kernel, const
 				auto wi = kernel.w[i];
 				auto wj = kernel.w[kernel_width::_0 + j];
 				auto wk = kernel.w[kernel_width::_0 + kernel_width::_1 + k];
-				printf("wi : %f, wj : %f, wk : %f\n", wi, wj, wk);
+				// printf("wi : %f, wj : %f, wk : %f\n", wi, wj, wk);
 				auto wijk = wi * wj * wk;
 				auto dwijkdxi = wj * wk * kernel.one_over_dh[0] * kernel.dw[i];
 				auto dwijkdxj = wi * wk * kernel.one_over_dh[1] * kernel.dw[kernel_width::_0 + j];
 				auto dwijkdxk = wi * wj * kernel.one_over_dh[2] * kernel.dw[kernel_width::_0 + kernel_width::_1 + k];
 				state_type &grid_state = grid.get_state(node);
-				function(grid_state, particle, node, wijk, dwijkdxi, dwijkdxj,dwijkdxk);
+				function(grid_state, particle, node, wijk, dwijkdxi, dwijkdxj, dwijkdxk);
 			}
 		}
 	}
 }
 
-
 class IBMesh3D
 {
 public:
 	IBMesh3D(
-		std::array<dolfin::Point, 2> points, 
-		std::array<size_t, 3> dims, 
+		std::array<dolfin::Point, 2> points,
+		std::array<size_t, 3> dims,
 		size_t order)
 		: order(order)
 	{
@@ -306,6 +318,42 @@ public:
 		return index.j * nx + index.i + index.k * nx * ny;
 	}
 
+	void distribution(
+		std::vector<double3> &data_to,
+		const std::vector<Particle<double>> &data_from,
+		const std::vector<Particle<double>> &coordinates) const
+	{
+		// assert(data_from.size() == coordinates.size());
+		constexpr size_t dim = 3;
+		constexpr size_t kernel_width_x = 4;
+		constexpr size_t kernel_width_y = 4;
+		constexpr size_t kernel_width_z = 4;
+
+		using MyGrid = Grid<double3>;
+		using PV = PlaceValue<octal_to_decimal<kernel_width_x, kernel_width_y, kernel_width_z>()>;
+		using LKernel = IBKernel<PV, double, dim, std::array>;
+		using Spread = FunctorSpread3D<MyGrid::state_type, MyGrid::index_type, Particle<double>, double>;
+
+		MyGrid grid({nx, ny, nz});
+		size_t num_lagrangian = coordinates.size();
+		for (size_t idx = 0; idx < num_lagrangian; idx++)
+		{
+			Particle<MyGrid::value_type> particle;
+			particle.x = coordinates[idx].x;
+			particle.y = coordinates[idx].y;
+			particle.z = coordinates[idx].z;
+			particle.u1 = data_from[idx].u1;
+			particle.u2 = data_from[idx].u2;
+			particle.u3 = data_from[idx].u3;
+			particle.w = data_from[idx].w;
+			LKernel kernel({particle.x, particle.y, particle.z}, {dx, dy, dz});
+			iterate_grid_3D(grid, particle, kernel, Spread(dx, dy,dz));
+		}
+
+		// 将 grid 复制到 data_to 中
+		grid.copy_to(data_to);
+	}
+
 	void interpolation(
 		std::vector<Particle<double>> &data_to,
 		const std::vector<double3> &data_from,
@@ -333,9 +381,9 @@ public:
 			particle.x = coordinates[idx].x;
 			particle.y = coordinates[idx].y;
 			particle.z = coordinates[idx].z;
-			printf("interpolation point : %f, %f, %f\n", particle.x, particle.y, particle.z);
+			// printf("interpolation point : %f, %f, %f\n", particle.x, particle.y, particle.z);
 			LKernel kernel({particle.x, particle.y, particle.z}, {dx, dy, dz});
-			printf("dx : %f, dy : %f, dz : %f\n", dx, dy, dz);
+			// printf("dx : %f, dy : %f, dz : %f\n", dx, dy, dz);
 			iterate_grid_3D(grid, particle, kernel, Interpolate());
 			data_to[idx].u1 = particle.u1;
 			data_to[idx].u2 = particle.u2;
@@ -350,13 +398,32 @@ public:
 		{
 			for (size_t j = 0; j < ny; j++)
 			{
-				for (size_t k = 0; k < nz; k++){
-					size_t hash = i + j * nx + k*nx*ny;
+				for (size_t k = 0; k < nz; k++)
+				{
+					size_t hash = i + j * nx + k * nx * ny;
 					double3 tmp{};
 					tmp.x = function.vector()->getitem(global_map[hash]);
 					tmp.y = function.vector()->getitem(global_map[hash] + 1);
 					tmp.z = function.vector()->getitem(global_map[hash] + 2);
 					data[hash] = tmp;
+				}
+			}
+		}
+	}
+
+	void assign_dofs(const std::vector<double3> &data, Function &function) const
+	{
+		for (size_t i = 0; i < nx; i++)
+		{
+			for (size_t j = 0; j < ny; j++)
+			{
+				for (size_t k = 0; k < nz; k++)
+				{
+
+					size_t hash = i + j * nx + k * nx * ny;
+					function.vector()->setitem(global_map[hash], data[hash].x);
+					function.vector()->setitem(global_map[hash] + 1, data[hash].y);
+					function.vector()->setitem(global_map[hash] + 2, data[hash].z);
 				}
 			}
 		}
@@ -374,10 +441,10 @@ public:
 			coordinates[0].y = point.y();
 			coordinates[0].z = point.z();
 		}
-		printf("evaluate point : %f, %f, %f\n", coordinates[0].x, coordinates[0].y, coordinates[0].z);
+		// printf("evaluate point : %f, %f, %f\n", coordinates[0].x, coordinates[0].y, coordinates[0].z);
 		interpolation(data_to, data_from, coordinates);
 		auto p = data_to[0];
-		printf("evaluate result : %f, %f, %f\n", p.u1, p.u2, p.u3);
+		// printf("evaluate result : %f, %f, %f\n", p.u1, p.u2, p.u3);
 		return {p.u1, p.u2, p.u3};
 	}
 
@@ -626,7 +693,6 @@ public:
 		interpolation(data_to, data_from, coordinates);
 		return data_to[0];
 	}
-
 
 	struct Index
 	{
