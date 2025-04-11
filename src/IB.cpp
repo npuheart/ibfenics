@@ -38,6 +38,14 @@ PYBIND11_MODULE(cpp, m)
 		.def("evaluate", &IBMesh::evaluate)
 		;
 
+	py::class_<IBMesh3D, std::shared_ptr<IBMesh3D>>(m, "IBMesh3D")
+        .def(py::init<std::array<dolfin::Point, 2>, std::array<size_t, 3>, size_t>())
+		.def("mesh",&IBMesh3D::mesh)
+		.def("get_hash",&IBMesh3D::get_hash)
+		.def("build_map", &IBMesh3D::build_map)
+		.def("evaluate", &IBMesh3D::evaluate)
+		;
+
     py::class_<FacetIntegration>(m, "FacetIntegration")
         .def(py::init<std::shared_ptr<Mesh>, std::shared_ptr<MeshFunction<std::size_t>>, size_t>())
 		.def("fun4", &FacetIntegration::fun4)

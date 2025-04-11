@@ -35,3 +35,8 @@ pip3 show serverchan-sdk
 python3 -m venv myenv
 source myenv/bin/activate
 pip3 install -r requirements.txt
+
+
+
+## 可能存在问题
+1. 函数 iterate_grid_3D 中的 index_type 可能出现负值。

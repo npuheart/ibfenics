@@ -11,7 +11,6 @@ include(${DOLFIN_USE_FILE})
 add_definitions("-Wall -g")
 add_definitions("-O3")
 
-# pybind11_add_module(cpp src/main.cpp)
 pybind11_add_module(cpp src/IB.cpp src/IBMesh.cpp src/IBInterpolation.cpp)
 
 # EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
@@ -24,3 +23,7 @@ add_subdirectory(src/gauss_quadrature)
 
 # Target the library
 target_link_libraries(cpp PRIVATE dolfin gauss_quadrature)
+set_source_files_properties(
+    src/IB.cpp src/IBMesh.cpp 
+    src/IBInterpolation.cpp 
+    PROPERTIES COMPILE_FLAGS "-std=c++17 -fPIC")
