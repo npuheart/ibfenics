@@ -106,7 +106,7 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="ibfenics",
-    version="0.0.6",
+    version="0.0.7",
     author="Ma Pengfei",
     author_email="mapengfei@mail.nwpu.edu.cn",
     description="IB-FEniCS project using pybind11",
