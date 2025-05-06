@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier:    LGPL-3.0-or-later
 #
-# email: ibfenics1@pengfeima.cn
+# email: mapengfei@mail.nwpu.edu.cn
 # brief: 如果想要将数据存储到大文件夹, 可以创建一个软链接:
 #           mkdir /mnt/large0/data0/ibfenics1
 #           ln -s /mnt/large0/data0/ibfenics1 data/large
@@ -52,7 +52,7 @@ def send_to_xiaomi(desp):
     sdk_key = "sctp1508t8kbmtrb5kat2nsazwhmqy2"
     from serverchan_sdk import sc_send
 
-    response = sc_send(sdk_key, "ibfenics1 log", desp, {"tags": "ibfenics1"})
+    response = sc_send(sdk_key, "IB-FEniCS LOG...", desp, {"tags": "ibfenics1"})
 
     return response
 
