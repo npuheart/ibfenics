@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4...3.18)
-project(cpp)
+project(ibfenics)
 
 # Find pybind11
 find_package(pybind11 REQUIRED)

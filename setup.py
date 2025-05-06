@@ -123,6 +123,11 @@ class CMakeBuild(build_ext):
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
 
+        print(f"build_temp: {build_temp}")
+        print(f"ext.sourcedir: {ext.sourcedir}")
+        print(f"cmake_args: {cmake_args}")
+        print(f"build_args: {build_args}")
+        
         subprocess.run(
             ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
         )
@@ -134,7 +139,7 @@ class CMakeBuild(build_ext):
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="npuheart-ibfenics1",
+    name="ibfenics",
     version="0.0.6",
     author="Ma Pengfei",
     author_email="ibfenics1@pengfeima.cn",
