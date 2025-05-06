@@ -11,7 +11,7 @@
 import os
 import numpy as np
 from loguru import logger
-from mshr import *
+# from mshr import *
 from fenics import *
 from ibfenics1.nssolver import TaylorHoodSolver
 from ibfenics1.io import (

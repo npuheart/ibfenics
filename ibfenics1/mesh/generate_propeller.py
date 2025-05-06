@@ -7,7 +7,7 @@ from ibfenics1.io import (
 )
 from ibfenics1.IU import IU
 from dolfin import *
-from mshr import *
+# from mshr import *
 import os
 
 mesh_index = 9998

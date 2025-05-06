@@ -12,7 +12,7 @@ import os
 from loguru import logger
 import numpy as np
 from fenics import *
-from mshr import *
+# from mshr import *
 from ibfenics1 import Interaction
 from ibfenics1.nssolver import SAVTaylorHoodSolverBDF2
 from ibfenics1.io import unique_filename, create_xdmf_file, write_excel

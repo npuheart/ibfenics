@@ -7,7 +7,7 @@
 # email : ibfenics1@pengfeima.cn
 
 from dolfin import *
-from mshr import *
+# from mshr import *
 import numpy as np
 from scipy.optimize import fsolve
 

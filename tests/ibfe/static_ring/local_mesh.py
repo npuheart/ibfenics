@@ -1,6 +1,6 @@
 from ibfenics1 import Interaction
 from dolfin import *
-from mshr import *
+# from mshr import *
 import numpy as np
 
 from local_parameters import *

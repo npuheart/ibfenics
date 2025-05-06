@@ -1,6 +1,6 @@
 import ibfenics1
 from fenics import *
-from mshr import *
+# from mshr import *
 
 
 domain = Circle(Point(0.5, 0.5), 0.25)

@@ -13,7 +13,7 @@ import os
 import pandas as pd
 from datetime import datetime
 from dolfin import *
-from mshr import *
+# from mshr import *
 import json
 
 output_path = "data/large/"

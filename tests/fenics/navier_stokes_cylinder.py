@@ -9,7 +9,7 @@ Scheme (IPCS).
 
 from __future__ import print_function
 from fenics import *
-from mshr import *
+# from mshr import *
 import numpy as np
 
 T = 5.0  # final time

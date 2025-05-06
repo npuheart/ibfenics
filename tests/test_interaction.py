@@ -7,7 +7,7 @@
 
 
 from fenics import *
-from mshr import *
+# from mshr import *
 from ibfenics1 import Interaction, Interaction2
 
 order_velocity = 2
