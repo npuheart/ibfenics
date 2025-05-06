@@ -159,17 +159,11 @@ public:
 	std::shared_ptr<IBMesh3D> fluid_mesh;
 	std::shared_ptr<Mesh> solid_mesh;
 	std::vector<Particle<double>> current_coordinates;
-	std::vector<double> weights;
 
 	IBInterpolation3D(std::shared_ptr<IBMesh3D> fluid_mesh,
 					std::shared_ptr<Mesh> solid_mesh) : fluid_mesh(fluid_mesh),
 														solid_mesh(solid_mesh)
 	{
-	}
-
-	void evaluate_weights(const std::vector<double> & weights_input)
-	{
-		weights = weights_input;
 	}
 
 	void evaluate_current_points(const Function& position)
@@ -251,32 +245,8 @@ public:
 		assign(array_solid, solid);
 		for (size_t i = 0; i < array_solid.size(); i++)
 		{
-			array_solid[i].w = weights[i];
+			array_solid[i].w = 1.0;
 		}
-		fluid_mesh->distribution(array_fluid, array_solid, current_coordinates);
-		fluid_mesh->assign_dofs(array_fluid, fluid);
-	}
-
-	void points_to_fluid(Function &fluid, const std::vector<double> &values,const std::vector<double> &points, const std::vector<double> &weights)
-	{
-		std::vector<Particle<double>> array_solid(weights.size());
-		std::vector<Particle<double>> current_coordinates(weights.size());
-		std::vector<double3> array_fluid;
-
-		for (size_t i = 0; i < array_solid.size(); i++)
-		{
-			current_coordinates[i].x = points[2*i];
-			current_coordinates[i].y = points[2*i+1];
-		}
-
-		for (size_t i = 0; i < array_solid.size(); i++)
-		{
-			array_solid[i].w = weights[i];
-			array_solid[i].u1 = values[2*i];
-			array_solid[i].u2 = values[2*i+1];
-		}
-
-
 		fluid_mesh->distribution(array_fluid, array_solid, current_coordinates);
 		fluid_mesh->assign_dofs(array_fluid, fluid);
 	}

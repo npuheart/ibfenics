@@ -122,3 +122,6 @@ class IPCSSolver:
         b3 = assemble(self.L3)
         solve(self.A3, self.u_.vector(), b3, "cg", "sor")
         return self.u_, self.p_
+
+    def construct_function_space_bc(u0, p0):
+        return u0.function_space(),p0.function_space()
