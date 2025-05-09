@@ -7,8 +7,8 @@
 /// @brief 封装IBInterpolation和IBMesh类，提供python接口
 /// 
 ///
-#include "IBInterpolation.h"
-#include "IBMesh.h"
+#include "IBMesh3D.h"
+#include "IBInterpolation3D.h"
 #include "gauss_quadrature/FacetIntegration.h"
 
 #include <pybind11/stl.h>
@@ -32,9 +32,6 @@ PYBIND11_MODULE(cpp, m)
 		.def("mesh",&IBMesh::mesh)
 		.def("get_hash",&IBMesh::get_hash)
  		.def("build_map", &IBMesh::build_map)
-		.def("assign_value_on_dofs", &IBMesh::assign_value_on_dofs)
-		.def("extract_dofs", &IBMesh::extract_dofs)
-		.def("assign_dofs", &IBMesh::assign_dofs)
 		.def("evaluate", &IBMesh::evaluate)
 		;
 
@@ -54,12 +51,9 @@ PYBIND11_MODULE(cpp, m)
 
     py::class_<IBInterpolation>(m, "IBInterpolation")
         .def(py::init<std::shared_ptr<IBMesh>, std::shared_ptr<Mesh>>())
-		.def("solid_to_fluid_derivative", &IBInterpolation::solid_to_fluid_derivative)
 		.def("solid_to_fluid", &IBInterpolation::solid_to_fluid)
 		.def("fluid_to_solid", &IBInterpolation::fluid_to_solid)
-		.def("points_to_fluid", &IBInterpolation::points_to_fluid)
 		.def("evaluate_current_points", &IBInterpolation::evaluate_current_points)
-		.def("evaluate_weights", &IBInterpolation::evaluate_weights)
 		;
 	
 	py::class_<IBInterpolation3D>(m, "IBInterpolation3D")
