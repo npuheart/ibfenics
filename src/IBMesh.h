@@ -302,7 +302,7 @@ public:
 				data[hash] = tmp;
 			}
 		}
-		printf("extract dofs size : %ld\n", data.size());
+		// printf("extract dofs size : %ld\n", data.size());
 	}
 
 	void assign_dofs(const std::vector<double2> &data, Function &function) const

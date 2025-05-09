@@ -1,28 +1,56 @@
 from fenics import VectorFunctionSpace, FunctionSpace, Point
-from fenics import DirichletBC, Expression, Constant
+from fenics import DirichletBC, Expression, Constant, interpolate
 from fenics import RectangleMesh
+from ibfenics1.cpp import IBMesh, IBInterpolation
 import numpy as np
 
 # Parameters
-nv = 0.001
-T = 1.0
+nv = 0.01
+T = 10.0
 dt = 0.005
 num_steps = int(T/dt)
 rho = 1.0
-n_mesh = 50
+Nl = 10
+Ne = 50
 dt_minimum = 1e-4
 
-# Create mesh
-fluid_mesh = RectangleMesh(Point(0.0, 0.0), Point(1.0, 1.0), n_mesh, n_mesh)
+# Mesh
+order_velocity = 2
+order_pressure = 1
+order_displacement = 2
+
+ib_mesh = IBMesh([Point(0, 0), Point(1, 1)], [Ne, Ne], order_velocity)
+fluid_mesh = ib_mesh.mesh()
+solid_mesh = RectangleMesh(Point(0.4, 0.4), Point(0.6, 0.6), Nl, Nl)
 
 # Define function spaces
-V = VectorFunctionSpace(fluid_mesh, "P", 2)
-Q = FunctionSpace(fluid_mesh, "P", 1)
+Qf = FunctionSpace(fluid_mesh, "P", order_pressure)
+Vf = VectorFunctionSpace(fluid_mesh, "P", order_velocity)
+Vs = VectorFunctionSpace(solid_mesh, "P", order_displacement)
 
-def calculate_fluid_boundary_conditions(V, Q):
+# 初始化
+uf = interpolate(Expression(("x[0]", "x[1]"), degree=2), Vf)
+ib_mesh.build_map(uf._cpp_object)
+inter = IBInterpolation(ib_mesh, solid_mesh)
+us = interpolate(Expression(("x[0]", "x[1]"), degree=2), Vs)
+inter.evaluate_current_points(us._cpp_object)
+
+
+
+
+
+
+
+
+
+
+
+
+
+def calculate_fluid_boundary_conditions(Vf, Qf):
     flow_velocity = Expression(("1.0", "0.0"), degree=1)
-    bcu_inflow = DirichletBC(V, flow_velocity, "near(x[1],1.0)")
-    bcu_wall = DirichletBC(V, Expression(("0.0", "0.0"), degree=1), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)")
+    bcu_inflow = DirichletBC(Vf, flow_velocity, "near(x[1],1.0)")
+    bcu_wall = DirichletBC(Vf, Expression(("0.0", "0.0"), degree=1), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)")
     bcu = [bcu_inflow, bcu_wall]
     bcp = []
     return bcu, bcp
@@ -60,15 +88,18 @@ def extract_over_mid_x(u0, p0, x, y, n=10):
 
 
 __all__ = [
-    "V",
-    "Q",
+    "Vs",
+    "Vf",
+    "Qf",
+    "inter",
     "fluid_mesh",
+    "solid_mesh",
     "calculate_fluid_boundary_conditions",
     "nv",
     "T",
     "num_steps",
     "dt_minimum",
-    "n_mesh",
+    "Ne",
     "dt",
     "rho",
     "extract_over_mid_x",

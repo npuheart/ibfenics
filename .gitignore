@@ -24,3 +24,5 @@ data/large
 
 nohup.out
 cpp/Poisson2D.h
+
+*.xlsx
