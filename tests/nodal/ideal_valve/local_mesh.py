@@ -1,13 +1,44 @@
 from fenics import VectorFunctionSpace, FunctionSpace, Point
 from fenics import DirichletBC, Expression, Constant, interpolate
-from fenics import RectangleMesh
+from fenics import RectangleMesh, Mesh, MeshEditor, CellType
 from ibfenics1.cpp import IBMesh, IBInterpolation
 import numpy as np
+
+def connect_mesh(mesh0, mesh1):
+    mesh = Mesh()
+    editor = MeshEditor()
+    mesh0_vertices = mesh0.num_vertices()
+    mesh1_vertices = mesh1.num_vertices()
+    mesh0_cells = mesh0.num_cells()
+    mesh1_cells = mesh1.num_cells()
+    editor.open(mesh, "triangle", 2, 2)
+    editor.init_vertices(mesh0_vertices + mesh1_vertices)
+    editor.init_cells(mesh0_cells + mesh1_cells)
+    # 先把第一个网格的单元移动到新的网格上
+    for i in range(mesh0_vertices):
+        point = mesh0.coordinates()[i]
+        node = Point(point[0], point[1])
+        editor.add_vertex(i, node)
+    for i in range(mesh1_vertices):
+        point = mesh1.coordinates()[i]
+        node = Point(point[0], point[1])
+        editor.add_vertex(i+mesh0_vertices, node)
+    # 把第一个网格的单元移动到新的网格上
+    for i in range(mesh0_cells):
+        cell = mesh0.cells()[i]
+        element = [cell[0], cell[1], cell[2]]
+        editor.add_cell(i, element)
+    for i in range(mesh1_cells):
+        cell = mesh1.cells()[i]
+        element = [cell[0]+mesh0_vertices, cell[1]+mesh0_vertices, cell[2]+mesh0_vertices]
+        editor.add_cell(i+mesh0_cells, element)
+    editor.close()
+    return mesh
 
 # Parameters
 nv = 0.1
 T = 10.0
-dt = 0.00005
+dt = 1e-4
 num_steps = int(T/dt)
 rho = 1.0
 Nl = 4
@@ -21,7 +52,10 @@ order_displacement = 2
 
 ib_mesh = IBMesh([Point(0, 0), Point(8, 1.61)], [4*Ne, Ne], order_velocity)
 fluid_mesh = ib_mesh.mesh()
-solid_mesh = RectangleMesh(Point(2.0, 0.0), Point(2.0212, 0.7), Nl, Nl*10)
+solid_mesh_0 = RectangleMesh(Point(2.0, 0.0), Point(2.0212, 0.7), Nl, Nl*20)
+# solid_mesh = RectangleMesh.create([Point(2.0, 0.0), Point(2.0212, 0.7)], [Nl, Nl*20], CellType.Type.quadrilateral)
+solid_mesh_1 = RectangleMesh(Point(2.0, 0.91), Point(2.0212, 1.61), Nl, Nl*20)
+solid_mesh = connect_mesh(solid_mesh_0, solid_mesh_1)
 
 # Define function spaces
 Qf = FunctionSpace(fluid_mesh, "P", order_pressure)
@@ -34,7 +68,6 @@ ib_mesh.build_map(uf._cpp_object)
 inter = IBInterpolation(ib_mesh, solid_mesh)
 us = interpolate(Expression(("x[0]", "x[1]"), degree=2), Vs)
 inter.evaluate_current_points(us._cpp_object)
-
 
 
 

@@ -15,8 +15,8 @@ from dolfin import *
 class ChorinSolver:
     def __init__(
         self,
-        u0,
-        p0,
+        u_n,
+        p_n,
         f,
         dt,
         nu,
@@ -30,9 +30,9 @@ class ChorinSolver:
         bcp=None,
     ):
         # Reconstruct element space
-        mesh = u0.function_space().mesh()
-        V = u0.function_space()
-        Q = p0.function_space()
+        mesh = u_n.function_space().mesh()
+        V = u_n.function_space()
+        Q = p_n.function_space()
 
         # Define trial and test functions
         u = TrialFunction(V)
@@ -41,9 +41,9 @@ class ChorinSolver:
         q = TestFunction(Q)
 
         # Define functions for solutions at previous and current time steps
-        # u0 = Function(V)
-        u1 = Function(V)
-        p1 = Function(Q)
+        # u_n = Function(V)
+        u_ = Function(V)
+        p_ = Function(Q)
 
         k = Constant(dt)
         nu = Constant(nu)
@@ -51,7 +51,7 @@ class ChorinSolver:
 
         # Tentative velocity step
         F1 = (
-            (1 / k) * inner(u - u0, v) * dx
+            (1 / k) * inner(u - u_n, v) * dx
             + nu * inner(grad(u), grad(v)) * dx
             - inner(f, v) * dx
         )
@@ -59,16 +59,16 @@ class ChorinSolver:
         L1 = rhs(F1)
         
         if conv:
-            F1 += inner(grad(u0) * u0, v) * dx
+            F1 += inner(grad(u_n) * u_n, v) * dx
             
 
         # Pressure update
         a2 = inner(grad(p), grad(q)) * dx
-        L2 = -(1 / k) * div(u1) * q * dx
+        L2 = -(1 / k) * div(u_) * q * dx
 
         # Velocity update
         a3 = inner(u, v) * dx
-        L3 = inner(u1, v) * dx - k * inner(grad(p1), v) * dx
+        L3 = inner(u_, v) * dx - k * inner(grad(p_), v) * dx
 
         # Assemble matrices
         A1 = assemble(a1)
@@ -79,10 +79,10 @@ class ChorinSolver:
         [bc.apply(A1) for bc in bcu]
         [bc.apply(A2) for bc in bcp]
 
-        self.u0 = u0
-        self.p0 = p0
-        self.u1 = u1
-        self.p1 = p1
+        self.u_n = u_n
+        self.p_n = p_n
+        self.u_ = u_
+        self.p_ = p_
 
         self.L1 = L1
         self.L2 = L2
@@ -93,25 +93,25 @@ class ChorinSolver:
 
         self.prec = "amg" if has_krylov_solver_preconditioner("amg") else "default"
 
-    def update(self, u0, p0):
-        self.u0.assign(u0)
-        self.p0.assign(p0)
+    def update(self, u_n, p_n):
+        self.u_n.assign(u_n)
+        self.p_n.assign(p_n)
 
     def solve(self, bcu, bcp):
         # Compute tentative velocity step
         b1 = assemble(self.L1)
         [bc.apply(self.A1, b1) for bc in bcu]
-        solve(self.A1, self.u1.vector(), b1, "bicgstab", "default")
+        solve(self.A1, self.u_.vector(), b1, "bicgstab", "default")
 
         # Pressure correction
         b2 = assemble(self.L2)
         [bc.apply(self.A2, b2) for bc in bcp]
-        [bc.apply(self.p1.vector()) for bc in bcp]
-        solve(self.A2, self.p1.vector(), b2, "bicgstab", self.prec)
+        [bc.apply(self.p_.vector()) for bc in bcp]
+        solve(self.A2, self.p_.vector(), b2, "bicgstab", self.prec)
 
         # Velocity correction
         b3 = assemble(self.L3)
         [bc.apply(self.A3, b3) for bc in bcu]
-        solve(self.A3, self.u1.vector(), b3, "bicgstab", "default")
-        # print(assemble(div(self.u1)*dx))
-        return self.u1, self.p1
+        solve(self.A3, self.u_.vector(), b3, "bicgstab", "default")
+        # print(assemble(div(self.u_)*dx))
+        return self.u_, self.p_

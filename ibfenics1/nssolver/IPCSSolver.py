@@ -43,7 +43,6 @@ class IPCSSolver:
         # Define functions for solutions at previous and current time steps
         # u_n = Function(V)
         u_ = Function(V)
-        # p_n = Function(Q)
         p_ = Function(Q)
 
         # Define expressions used in variational forms

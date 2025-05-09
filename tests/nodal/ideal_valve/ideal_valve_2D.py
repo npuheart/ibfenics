@@ -5,6 +5,7 @@ from loguru import logger
 from fenics import *
 from local_mesh import *
 from ibfenics1.nssolver import IPCSSolver
+from ibfenics1.nssolver import ChorinSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
@@ -14,13 +15,14 @@ from ibfenics1.io import (
     write_excel_sheets,
 )
 
+nssolver = "projection"
+
 swanlab.login(api_key="VBxEp1UBe2606KHDM9264", save=True)
 swanlab.init(
     project=os.path.splitext(os.path.basename(__file__))[0],
-    experiment_name=f"dt_{dt}_",
-    description="二维放枪驱动圆盘",
+    experiment_name=f"dt_{dt}_Ne_{Ne}_{nssolver}",
+    description="二维理想瓣膜",
 )
-swanlab.config['n_mesh'] = Ne
 
 u0 = Function(Vf, name="velocity")
 p0 = Function(Qf, name="pressure")
@@ -28,7 +30,8 @@ f0 = Function(Vf, name="force")
 
 time_manager = TimeManager(T, num_steps, 200)
 bcu, bcp = calculate_fluid_boundary_conditions(Vf, Qf)
-fluid_solver = IPCSSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
+# fluid_solver = IPCSSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
+fluid_solver = ChorinSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
 
 file_xlsx_name_x = unique_filename(os.path.basename(__file__), "note", "/results_x.xlsx")
 file_xlsx_name_y = unique_filename(os.path.basename(__file__), "note", "/results_y.xlsx")
@@ -77,6 +80,9 @@ for n in range(num_steps):
         swanlab.log(
             {
                 "timecost": time.time() - start_time,
+                "inflow":flow_velocity(0.0,0.805)[0],
+                "x_displacement": X0(2.0106,0.91+1e-4)[0] - 2.0106,
+                "y_displacement": X0(2.0106,0.91+1e-4)[1] - 0.91,
                 "time": t, 
                 "u_max": un.vector().max(), 
                 "u_norm_l2":  un.vector().norm("l2")
