@@ -26,3 +26,4 @@ nohup.out
 cpp/Poisson2D.h
 
 *.xlsx
+tests/nodal/ideal_valve/jitfailure*

@@ -117,6 +117,16 @@ void iterate_grid_2D(Grid &grid, Particle &particle, const Kernel &kernel, const
 		for (size_t j = 0; j < kernel_width::_1; j++)
 		{
 			index_type node{kernel.base_node[0] + i, kernel.base_node[1] + j};
+			if (node.i >= grid.grid_size.i || node.j >= grid.grid_size.j)
+			{
+				// printf("node out of range : %ld, %ld\n", node.i, node.j);
+				continue;
+			}
+			if (node.i < 0 || node.j < 0)
+			{
+				// printf("node out of range : %ld, %ld\n", node.i, node.j);
+				continue;
+			}
 			auto wi = kernel.w[i];
 			auto wj = kernel.w[kernel_width::_0 + j];
 			auto wij = wi * wj;

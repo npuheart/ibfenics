@@ -5,23 +5,23 @@ from ibfenics1.cpp import IBMesh, IBInterpolation
 import numpy as np
 
 # Parameters
-nv = 0.01
+nv = 0.1
 T = 10.0
-dt = 0.005
+dt = 0.00005
 num_steps = int(T/dt)
 rho = 1.0
-Nl = 10
-Ne = 50
-dt_minimum = 1e-4
+Nl = 4
+Ne = 32
+dt_minimum = 1e-5
 
 # Mesh
 order_velocity = 2
 order_pressure = 1
 order_displacement = 2
 
-ib_mesh = IBMesh([Point(0, 0), Point(1, 1)], [Ne, Ne], order_velocity)
+ib_mesh = IBMesh([Point(0, 0), Point(8, 1.61)], [4*Ne, Ne], order_velocity)
 fluid_mesh = ib_mesh.mesh()
-solid_mesh = RectangleMesh(Point(0.4, 0.4), Point(0.6, 0.6), Nl, Nl)
+solid_mesh = RectangleMesh(Point(2.0, 0.0), Point(2.0212, 0.7), Nl, Nl*10)
 
 # Define function spaces
 Qf = FunctionSpace(fluid_mesh, "P", order_pressure)
@@ -45,14 +45,15 @@ inter.evaluate_current_points(us._cpp_object)
 
 
 
+flow_velocity = Expression(("5 * (sin(2 * M_PI * t) + 1.1) * x[1] * (1.61 - x[1]);", "0.0"), degree=1, t=0.0)
 
 
 def calculate_fluid_boundary_conditions(Vf, Qf):
-    flow_velocity = Expression(("1.0", "0.0"), degree=1)
-    bcu_inflow = DirichletBC(Vf, flow_velocity, "near(x[1],1.0)")
-    bcu_wall = DirichletBC(Vf, Expression(("0.0", "0.0"), degree=1), "near(x[1],0.0) || near(x[0],0.0) || near(x[0],1.0)")
+    bcu_inflow = DirichletBC(Vf, flow_velocity, "near(x[0],0.0)")
+    bcu_wall = DirichletBC(Vf, Expression(("0.0", "0.0"), degree=1), "near(x[1],0.0) || near(x[1],1.61)")
+    bcp_outlet = DirichletBC(Qf, Expression("0.0", degree=1), "near(x[0],8.0)")
     bcu = [bcu_inflow, bcu_wall]
-    bcp = []
+    bcp = [bcp_outlet]
     return bcu, bcp
 
 
@@ -91,6 +92,7 @@ __all__ = [
     "Vs",
     "Vf",
     "Qf",
+    "flow_velocity",
     "inter",
     "fluid_mesh",
     "solid_mesh",
