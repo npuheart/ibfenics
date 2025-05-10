@@ -33,13 +33,12 @@ bcu, bcp = calculate_fluid_boundary_conditions(Vf, Qf)
 # fluid_solver = IPCSSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
 fluid_solver = ChorinSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
 
-file_xlsx_name_x = unique_filename(os.path.basename(__file__), "note", "/results_x.xlsx")
-file_xlsx_name_y = unique_filename(os.path.basename(__file__), "note", "/results_y.xlsx")
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
 file_fluid = create_xdmf_file(fluid_mesh.mpi_comm(), file_fluid_name)
 file_solid = create_xdmf_file(solid_mesh.mpi_comm(), file_solid_name)
-
+swanlab.config['file_fluid'] = file_fluid_name
+swanlab.config['file_solid'] = file_solid_name
 
 
 # Solid Mechanics
@@ -53,8 +52,8 @@ F0 = Function(Vs, name="force")
 
 dVs = TestFunction(Vs)
 FF = grad(X0)
-# L_hat = - inner(mu_s*(FF-inv(FF).T) + lambda_s*ln(det(FF))*inv(FF).T, grad(dVs))*dx
-L_hat = - inner(mu_s*(FF-inv(FF).T), grad(dVs))*dx
+L_hat = - inner(mu_s*(FF-inv(FF).T) + lambda_s*ln(det(FF))*inv(FF).T, grad(dVs))*dx
+# L_hat = - inner(mu_s*(FF-inv(FF).T), grad(dVs))*dx
 # 
 t = 0
 start_time = time.time()
