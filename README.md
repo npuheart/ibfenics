@@ -22,3 +22,7 @@ pip3 install -r requirements.txt
 
 ## 可能存在问题
 1. 函数 iterate_grid_3D 中的 index_type 可能出现负值。
+
+
+# Documentation
+See https://npuheart.github.io/ibfenics
