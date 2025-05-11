@@ -19,7 +19,7 @@ jobs:
         run: pip install jupyter-book
       
       - name: Build Jupyter Book
-        run: jb build .
+        run: cd docs && jb build .
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
