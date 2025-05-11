@@ -4,6 +4,7 @@
 title: AFSI
 author: Ma Pengfei
 logo: logo.png
+favicon: favicon.ico
 
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html

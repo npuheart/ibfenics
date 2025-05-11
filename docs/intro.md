@@ -28,7 +28,7 @@ pip3 install -r requirements.txt
 ## Documentation
 
 ```bash
-jupyter-book build . && python3 -m http.server 8000 -d _build/html
+cd docs && jupyter-book build . && python3 -m http.server 8000 -d _build/html
 ```
 
 The address for the documentaion online is available on https://npuheart.github.io/ibfenics.
