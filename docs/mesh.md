@@ -4,7 +4,7 @@
 
 ### 1.1. 网格生成
 
-左心室网格由[fenicsx-ldrb]()生成，需要进入docker容器执行代码。
+左心室网格由[ldrb](https://finsberg.github.io/ldrb/demo_lv.html)生成，需要进入docker容器执行代码。
 
 `sudo docker run --rm -v $PWD:/home/shared -w /home/shared -it ghcr.io/finsberg/ldrb:latest bash`
 

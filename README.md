@@ -4,25 +4,5 @@
 
 
 
-# IB-FEniCS
-
-(WIP)
-
-## 安装
-
-```
-source .bashrc
-python3 -m build && pip3 install dist/*.whl --force-reinstall
-pip3 install -r requirements.txt
-```
-
-## Test Eulerian-Lagrangian Interaction
-
-
-
-## 可能存在问题
-1. 函数 iterate_grid_3D 中的 index_type 可能出现负值。
-
-
-# Documentation
-See https://npuheart.github.io/ibfenics
+# AFSI
+See https://npuheart.github.io/ibfenics for details.

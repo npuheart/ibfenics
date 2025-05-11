@@ -6,3 +6,6 @@ scipy
 wheel
 setuptools
 swanlab
+
+matplotlib
+jupyter-book
