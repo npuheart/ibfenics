@@ -1,44 +1,33 @@
 from fenics import VectorFunctionSpace, FunctionSpace, Point
-from fenics import DirichletBC, Expression, Constant, interpolate
-from fenics import BoxMesh, Mesh, MeshEditor, CellType
+from fenics import DirichletBC, Expression, Constant, interpolate, File
+from fenics import BoxMesh, Mesh, MeshEditor, CellType, MeshFunction, Function, XDMFFile
 from ibfenics1.cpp import IBMesh3D, IBInterpolation3D
 import numpy as np
 
-def connect_mesh(mesh0, mesh1):
+def read_fibers(mesh, data_file, W, index = 0):
+    f0 = Function(W)
+    s0 = Function(W)
+    n0 = Function(W)
+    f_in = XDMFFile(mesh.mpi_comm(), data_file)
+    f_in.read_checkpoint(f0, "fiber", 0)
+    f_in.read_checkpoint(s0, "sheet", 0)
+    f_in.read_checkpoint(n0, "normal", 0)
+    f_in.close()
+    return f0,s0,n0
+
+def read_mesh_general(mesh_path):
+    mesh_file = XDMFFile(mesh_path)
     mesh = Mesh()
-    editor = MeshEditor()
-    mesh0_vertices = mesh0.num_vertices()
-    mesh1_vertices = mesh1.num_vertices()
-    mesh0_cells = mesh0.num_cells()
-    mesh1_cells = mesh1.num_cells()
-    editor.open(mesh, "triangle", 2, 2)
-    editor.init_vertices(mesh0_vertices + mesh1_vertices)
-    editor.init_cells(mesh0_cells + mesh1_cells)
-    # 先把第一个网格的单元移动到新的网格上
-    for i in range(mesh0_vertices):
-        point = mesh0.coordinates()[i]
-        node = Point(point[0], point[1])
-        editor.add_vertex(i, node)
-    for i in range(mesh1_vertices):
-        point = mesh1.coordinates()[i]
-        node = Point(point[0], point[1])
-        editor.add_vertex(i+mesh0_vertices, node)
-    # 把第一个网格的单元移动到新的网格上
-    for i in range(mesh0_cells):
-        cell = mesh0.cells()[i]
-        element = [cell[0], cell[1], cell[2]]
-        editor.add_cell(i, element)
-    for i in range(mesh1_cells):
-        cell = mesh1.cells()[i]
-        element = [cell[0]+mesh0_vertices, cell[1]+mesh0_vertices, cell[2]+mesh0_vertices]
-        editor.add_cell(i+mesh0_cells, element)
-    editor.close()
+    mesh_file.read(mesh)
+    mesh_file.close()
     return mesh
 
+
 # Parameters
+mesh_path = "/kokkos_2/mesh-benchmark/B009-ldrb/"
 nv = 0.1
 T = 10.0
-dt = 1e-3
+dt = 1e-4
 num_steps = int(T/dt)
 rho = 1.0
 Nl = 4
@@ -51,14 +40,28 @@ order_pressure = 1
 order_displacement = 2
 
 
-ib_mesh = IBMesh3D([Point(0, 0, 0), Point(1, 1, 1)], [Ne, Ne, Ne], order_velocity)
+ib_mesh = IBMesh3D([Point(0, 0, 0), Point(5, 5, 5)], [Ne, Ne, Ne], order_velocity)
 fluid_mesh = ib_mesh.mesh()
-solid_mesh = BoxMesh(Point(0.4, 0.4, 0.4), Point(0.6, 0.6, 0.6), Nl, Nl, Nl)
+solid_mesh = read_mesh_general(mesh_path+"mesh.xdmf")
+boundaries = MeshFunction("size_t", solid_mesh, mesh_path + "boundaries.xml")
 
+
+for i in range(len(solid_mesh.coordinates())):
+    solid_mesh.coordinates()[i][0] *= 0.1
+    solid_mesh.coordinates()[i][1] *= 0.1
+    solid_mesh.coordinates()[i][2] *= 0.1
+for i in range(len(solid_mesh.coordinates())):
+    solid_mesh.coordinates()[i][0] += 3.0
+    solid_mesh.coordinates()[i][1] += 2.5
+    solid_mesh.coordinates()[i][2] += 2.5
+        
 # Define function spaces
 Qf = FunctionSpace(fluid_mesh, "P", order_pressure)
 Vf = VectorFunctionSpace(fluid_mesh, "P", order_velocity)
 Vs = VectorFunctionSpace(solid_mesh, "P", order_displacement)
+
+e1, e2, e3 = read_fibers(solid_mesh, mesh_path+"microstructure.xdmf", Vs)
+
 
 # 初始化
 uf = interpolate(Expression(("x[0]", "x[1]", "x[2]"), degree=2), Vf)
@@ -69,13 +72,17 @@ inter.evaluate_current_points(us._cpp_object)
 
 
 
-
+File("bdry.pvd") << boundaries
+File("mesh.pvd") << solid_mesh
+# File("fibers.pvd") << f0
+# File("sheet.pvd") << s0
+# File("normal.pvd") << n0
 
 def calculate_fluid_boundary_conditions(Vf, Qf):
-    flow_velocity = Expression(("1.0", "0.0", "0.0"), degree=1)
-    bcu_inflow = DirichletBC(Vf, flow_velocity, "near(x[1],1.0)")
+    flow_velocity = Expression(("0.0", "0.0", "0.0"), degree=1)
+    bcu_inflow = DirichletBC(Vf, flow_velocity, "near(x[1],5.0)")
     bcu_wall = DirichletBC(Vf, Expression(("0.0", "0.0", "0.0"), degree=1), 
-                           "near(x[0],0.0) || near(x[0],1) || near(x[1],0.0) || near(x[2],0.0) || near(x[2],1.0)")
+                           "near(x[0],0.0) || near(x[0],5.0) || near(x[1],0.0) || near(x[2],0.0) || near(x[2],5.0)")
     # bcp_outlet = DirichletBC(Qf, Expression("0.0", degree=1), "near(x[0],8.0)")
     bcu = [bcu_inflow, bcu_wall]
     bcp = []
@@ -117,16 +124,18 @@ __all__ = [
     "Vs",
     "Vf",
     "Qf",
-    # "flow_velocity",
+    "e1","e2","e3",
     "inter",
     "fluid_mesh",
     "solid_mesh",
+    "boundaries",
     "calculate_fluid_boundary_conditions",
     "nv",
     "T",
     "num_steps",
     "dt_minimum",
     "Ne",
+    "Nl",
     "dt",
     "rho",
     "extract_over_mid_x",

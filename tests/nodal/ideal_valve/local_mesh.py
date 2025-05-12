@@ -37,7 +37,7 @@ def connect_mesh(mesh0, mesh1):
 
 # Parameters
 nv = 0.1
-T = 10.0
+T = 3.0
 dt = 5e-5
 num_steps = int(T/dt)
 rho = 1.0

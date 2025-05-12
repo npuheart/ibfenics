@@ -15,16 +15,16 @@ from ibfenics1.io import (
     write_excel_sheets,
 )
 beta = 1e8
-# C0=2e5
-C0=0
+C0=2e5
+# C0=0
 C1=1e6
-# kappa_s=4e5
-kappa_s=0
+kappa_s=4e5
+# kappa_s=0
 
 ds = Measure('ds', domain=solid_mesh, subdomain_data=boundaries)
 
 nssolver = "projection"
-material = "f1" # "n1", "n2", "f0", "f1", "f2", "f3"
+material = "f5" # "n1", "n2", "f0", "f1", "f2", "f3"
 
 swanlab.login(api_key="VBxEp1UBe2606KHDM9264", save=True)
 swanlab.init(
@@ -32,7 +32,6 @@ swanlab.init(
     experiment_name=f"dt_{dt}_beta_{beta}_C0_{C0}_C1_{C1}_ks_{kappa_s}_Ne_{Ne}_Nl_{Nl}_{material}",
     description="二维理想瓣膜",
     config={'dt': dt, 'beta': beta, 'C0': C0, 'C1':C1, 'ks':kappa_s, 'Ne': Ne, 'Nl': Nl, 'material': material},
-    
 )
 
 u0 = Function(Vf, name="velocity")
@@ -80,10 +79,30 @@ def MaterialModel_2(X0):
     L_hat = - inner(mu_s*(FF-inv(FF).T), grad(dVs))*dx
     return L_hat
 
-f1 = Constant((1.0, 0.0))
+f1 = Constant((0.5, 0.8660254037844386))
 f2 = Constant((0.7071067811865475,0.7071067811865475))
-f3 = Constant((0.0, 1.0))
+f3 = Constant((0.8660254037844386, 0.5))
+f4 = Constant((0.9991320700239181,0.041654611386019086))
+f5 = Constant((0.041654611386019086, 0.9991320700239181))
 def MaterialModel_3(X0, fiber, C0, C1, kappa_s):
+    # 计算形变梯度
+    FF = variable(grad(X0))
+    J = det(FF)
+    FF_bar = J**(-1/2)*FF
+    CC_bar = FF_bar.T*FF_bar
+    CC = FF.T*FF
+    I1_bar = tr(CC_bar)
+    m = fiber
+    I4_bar = dot(m, CC_bar*m)
+    # 本构参数
+    Psi = 0.5*C0*(I1_bar-3) + C1*(exp(I4_bar-1) - I4_bar) + 0.5*kappa_s*(0.5*(J*J-1)-ln(J))
+    dPsi = diff(Psi, FF)    
+    dVs = TestFunction(Vs)
+    L_hat = - inner(dPsi, grad(dVs))*dx
+    return L_hat
+
+# 想改成另一个二尖瓣的本构
+def MaterialModel_4(X0, fiber, C0, C1, kappa_s):
     # 计算形变梯度
     FF = variable(grad(X0))
     J = det(FF)
@@ -101,7 +120,6 @@ def MaterialModel_3(X0, fiber, C0, C1, kappa_s):
     L_hat = - inner(dPsi, grad(dVs))*dx
     return L_hat
 
-
 if material == "n1":
     L_hat = MaterialModel_1(X0)
 elif material == "n2":
@@ -114,6 +132,10 @@ elif material == "f2":
     L_hat = MaterialModel_3(X0, f2, C0=C0, C1=C1, kappa_s=kappa_s)
 elif material == "f3":
     L_hat = MaterialModel_3(X0, f3, C0=C0, C1=C1, kappa_s=kappa_s)
+elif material == "f4":
+    L_hat = MaterialModel_3(X0, f4, C0=C0, C1=C1, kappa_s=kappa_s)
+elif material == "f5":
+    L_hat = MaterialModel_3(X0, f5, C0=C0, C1=C1, kappa_s=kappa_s)
 
 L_hat += beta*inner(X_start-X0, TestFunction(Vs))*ds(1)
 
