@@ -1,8 +1,8 @@
 
 
-![](logo.png)
+![](logo.jpg)
 [![](https://raw.githubusercontent.com/SwanHubX/assets/main/badge2.svg)](https://swanlab.cn/@SimCardiac/ideal_valve_2D/overview)
-# AFSI: Automated Fluid-Structure Interaction Solver Development for Nonlinear Solid Mechanics
+# AFSI: Automated Fluid-Structure Interaction Solver
 (WIP)
 
 
