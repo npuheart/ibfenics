@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 # Parameters
-nv = 0.1
+nv = 0.01
 T = 10.0
 dt = 1e-3
 num_steps = int(T/dt)

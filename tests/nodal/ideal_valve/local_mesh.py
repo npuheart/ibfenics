@@ -36,7 +36,7 @@ def connect_mesh(mesh0, mesh1):
     return mesh
 
 # Parameters
-nv = 0.1
+nv = 0.2
 T = 3.0
 dt = 5e-5
 num_steps = int(T/dt)
@@ -52,9 +52,9 @@ order_displacement = 2
 
 ib_mesh = IBMesh([Point(0, 0), Point(8, 1.61)], [4*Ne, Ne], order_velocity)
 fluid_mesh = ib_mesh.mesh()
-solid_mesh_0 = RectangleMesh(Point(2.0, 0.0), Point(2.0212, 0.7), Nl, Nl*20)
+solid_mesh_0 = RectangleMesh(Point(2.0-0.0212, 0.0), Point(2.0, 0.7), Nl, Nl*10)
 # solid_mesh = RectangleMesh.create([Point(2.0, 0.0), Point(2.0212, 0.7)], [Nl, Nl*20], CellType.Type.quadrilateral)
-solid_mesh_1 = RectangleMesh(Point(2.0, 0.91), Point(2.0212, 1.61), Nl, Nl*20)
+solid_mesh_1 = RectangleMesh(Point(2.0-0.0212, 0.91), Point(2.0, 1.61), Nl, Nl*10)
 solid_mesh = connect_mesh(solid_mesh_0, solid_mesh_1)
 
 boundaries = MeshFunction("size_t", solid_mesh, solid_mesh.topology().dim()-1)
@@ -87,7 +87,7 @@ inter.evaluate_current_points(us._cpp_object)
 
 
 
-flow_velocity = Expression(("5 * (sin(2 * M_PI * t) + 1.1) * x[1] * (1.61 - x[1]);", "0.0"), degree=1, t=0.0)
+flow_velocity = Expression(("5 * (sin(2 * M_PI * t) + 1.1) * x[1] * (1.61 - x[1]);", "0.0"), degree=2, t=0.0)
 
 
 def calculate_fluid_boundary_conditions(Vf, Qf):

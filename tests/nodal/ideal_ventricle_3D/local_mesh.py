@@ -25,9 +25,9 @@ def read_mesh_general(mesh_path):
 
 # Parameters
 mesh_path = "/kokkos_2/mesh-benchmark/B009-ldrb/"
-nv = 0.1
-T = 10.0
-dt = 1e-4
+nv = 0.04
+T = 1.0
+dt = 1e-5
 num_steps = int(T/dt)
 rho = 1.0
 Nl = 4

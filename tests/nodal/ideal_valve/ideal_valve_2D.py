@@ -20,16 +20,23 @@ C0=2e5
 C1=1e6
 kappa_s=4e5
 # kappa_s=0
+E = 5.6e5
+nu_s = 0.4
+mu_s = E/2/(1+nu_s)
+lambda_s = 2*mu_s*nu_s/(1-2*nu_s)
+
+
+damping = nv*0.0
 
 ds = Measure('ds', domain=solid_mesh, subdomain_data=boundaries)
 
 nssolver = "projection"
-material = "f5" # "n1", "n2", "f0", "f1", "f2", "f3"
+material = "s0" # "n1", "n2", "f0", "f1", "f2", "f3"
 
 swanlab.login(api_key="VBxEp1UBe2606KHDM9264", save=True)
 swanlab.init(
     project=os.path.splitext(os.path.basename(__file__))[0],
-    experiment_name=f"dt_{dt}_beta_{beta}_C0_{C0}_C1_{C1}_ks_{kappa_s}_Ne_{Ne}_Nl_{Nl}_{material}",
+    experiment_name=f"dt_{dt}_beta_{beta:.2e}_lambda{lambda_s:.2e}_Ne_{Ne}_Nl_{Nl}_{material}",
     description="二维理想瓣膜",
     config={'dt': dt, 'beta': beta, 'C0': C0, 'C1':C1, 'ks':kappa_s, 'Ne': Ne, 'Nl': Nl, 'material': material},
 )
@@ -120,6 +127,23 @@ def MaterialModel_4(X0, fiber, C0, C1, kappa_s):
     L_hat = - inner(dPsi, grad(dVs))*dx
     return L_hat
 
+# 想改成另一个二尖瓣的本构
+def MaterialModel_5(X0):
+    FF = variable(grad(X0))
+    CC = FF.T*FF
+    EE = 0.5*(CC - Identity(2))
+    JJ = det(FF)
+    JJ = det(FF)
+    FF_bar = JJ**(-1/2)*FF
+    CC_bar = FF_bar.T*FF_bar
+    # 本构参数
+    # Psi = 0.5*mu_s*(tr(CC_bar) - 3)  + 0.5*lambda_s*ln(JJ)*ln(JJ)
+    Psi = mu_s*tr(EE*EE) + 0.5*lambda_s*tr(EE)*tr(EE)
+    dPsi = diff(Psi, FF)    
+    dVs = TestFunction(Vs)
+    L_hat = - inner(dPsi, grad(dVs))*dx
+    return L_hat
+
 if material == "n1":
     L_hat = MaterialModel_1(X0)
 elif material == "n2":
@@ -136,8 +160,11 @@ elif material == "f4":
     L_hat = MaterialModel_3(X0, f4, C0=C0, C1=C1, kappa_s=kappa_s)
 elif material == "f5":
     L_hat = MaterialModel_3(X0, f5, C0=C0, C1=C1, kappa_s=kappa_s)
+elif material == "s0":
+    L_hat = MaterialModel_5(X0)
 
 L_hat += beta*inner(X_start-X0, TestFunction(Vs))*ds(1)
+# L_hat += damping*inner(-U0, TestFunction(Vs))*dx
 
 # L_hat = - inner(mu_s*(FF-inv(FF).T), grad(dVs))*dx
 # 
@@ -166,8 +193,8 @@ for n in range(num_steps):
             {
                 "timecost": time.time() - start_time,
                 "inflow":flow_velocity(0.0,0.805)[0],
-                "x_displacement": X0(2.0106,0.91+1e-4)[0] - 2.0106,
-                "y_displacement": X0(2.0106,0.91+1e-4)[1] - 0.91,
+                "x_displacement": X0(2.0-0.0106,0.91+1e-4)[0] - (2.0-0.0106),
+                "y_displacement": X0(2.0-0.0106,0.91+1e-4)[1] - 0.91,
                 "time": t, 
                 "u_max": un.vector().max(), 
                 "u_norm_l2":  un.vector().norm("l2")

@@ -47,7 +47,7 @@ mu_s = 0.1
 nv_s = 0.4
 lambda_s = 2*mu_s*(1-nv_s)/3.0/(1-2*nv_s)
 U0 = Function(Vs, name="velocity")
-X0 = interpolate(Expression(("x[0]", "x[1]","x[2]"), degree=2), Vs)
+X0 = interpolate(Expression(("x[0]", "x[1]", "x[2]"), degree=2), Vs)
 F0 = Function(Vs, name="force")
 
 dVs = TestFunction(Vs)

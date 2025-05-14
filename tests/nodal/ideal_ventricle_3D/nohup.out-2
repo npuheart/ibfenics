@@ -1,0 +1,165 @@
+[1m[34mswanlab[0m[0m: \ Waiting for the swanlab cloud response.                                                                                                    [1m[34mswanlab[0m[0m: swanlab version 0.5.7 is available!  Upgrade: `pip install -U swanlab`
+[1m[34mswanlab[0m[0m: \ Getting project...                                                                                                    [1m[34mswanlab[0m[0m: \ Creating experiment...                                                                                                    
+[notice] A new release of pip is available: 23.1.2 -> 25.1.1
+[notice] To update, run: python3 -m pip install --upgrade pip
+2025-05-13 10:08:02.204 | INFO     | __main__:<module>:113 - t = 1e-05
+2025-05-13 10:08:10.585 | INFO     | __main__:<module>:113 - t = 2e-05
+[1m[34mswanlab[0m[0m: Tracking run with swanlab version 0.5.5
+[1m[34mswanlab[0m[02025-05-13 10:09:08.606 | INFO     | __main__:<module>:113 - t = 0.0021000000000000003
+[1m[34mswanlab[0m[0m: Tracking run with swanlab version 0.5.5
+[1m[34mswanlab[0m[0m: Run data will be saved locally in [35m[1m/kokkos_2/ibfenics/tests/nodal/ideal_ventricle_3D/swanlog/run-20250513_100702-b9796901[0m[0m
+[1m[34mswanlab[0m[0m: 👋 Hi [1m[39mSimCardiac[0m[0m, welcome to swanlab!
+[1m[34mswanlab[0m[0m: Syncing run [33mdt_0.0001_Ne_20_Nl_4_nv_0.04[0m to the cloud
+[1m[34mswanlab[0m[0m: 🏠 View project at [34m[4mhttps://swanlab.cn/@SimCardiac/ideal_ventricle_3D[0m[0m
+[1m[34mswanlab[0m[0m: 🚀 View run at [34m[4mhttps://swanlab.cn/@SimCardiac/ideal_ventricle_3D/runs/fswfmbw9ijofp6u9costg[0m[0m
+data/large/ 文件夹已存在。
+data/large/ideal_ventricle_3D/note/20250513-100712 文件夹已创建。
+data/large/ 文件夹已存在。
+data/large/ideal_ventricle_3D/note/20250513-100712 文件夹已存在。
+流体求解:  3.8014049530029297
+速度插值:  0.015827417373657227
+计算力:  0.052313804626464844
+分布力:  0.01006460189819336
+流体求解:  5.061984300613403
+速度插值:  0.015736103057861328
+计算力:  0.04900503158569336
+分布力:  0.010082244873046875
+流体求解:  7.0243237018585205
+速度插值:  0.01329183578491211
+计算力:  0.04996180534362793
+分布力:  0.01201319694519043
+流体求解:  4.9012463092803955
+速度插值:  0.013455867767333984
+计算力:  0.04771828651428223
+分布力:  0.00999903678894043
+流体求解:  5.845478773117065
+速度插值:  0.015691041946411133
+计算力:  0.05188417434692383
+分布力:  0.01019906997680664
+流体求解:  5.018929719924927
+速度插值:  0.014221668243408203
+计算力:  0.04724597930908203
+分布力:  0.009679794311523438
+流体求解:  5.245381832122803
+速度插值:  0.01370096206665039
+计算力:  0.04748678207397461
+分布力:  0.010344982147216797
+流体求解:  5.256751298904419
+速度插值:  0.017218828201293945
+计算力:  0.047635793685913086
+分布力:  0.010178804397583008
+流体求解:  5.304120302200317
+速度插值:  0.014679431915283203
+计算力:  0.04690432548522949
+分布力:  0.009798526763916016
+流体求解:  5.121234893798828
+速度插值:  0.012950897216796875
+计算力:  0.04736757278442383
+分布力:  0.009693384170532227
+流体求解:  5.475849390029907
+速度插值:  0.012996435165405273
+计算力:  0.047171592712402344
+分布力:  0.009849071502685547
+流体求解:  6.0632898807525635
+速度插值:  0.01322627067565918
+计算力:  0.04709148406982422
+分布力:  0.01018524169921875
+流体求解:  5.590198040008545
+速度插值:  0.014711380004882812
+计算力:  0.047295331954956055
+分布力:  0.011405229568481445
+流体求解:  5.137924671173096
+速度插值:  0.014214277267456055
+计算力:  0.04698371887207031
+分布力:  0.009884834289550781
+流体求解:  5.230588912963867
+速度插值:  0.013979911804199219
+计算力:  0.04740476608276367
+分布力:  0.010836362838745117
+流体求解:  5.641358137130737
+速度插值:  0.01312112808227539
+计算力:  0.04831981658935547
+分布力:  0.009686708450317383
+流体求解:  5.625200033187866
+速度插值:  0.01519632339477539
+计算力:  0.04728198051452637
+分布力:  0.009863138198852539
+流体求解:  5.371212959289551
+速度插值:  0.013433456420898438
+计算力:  0.04829001426696777
+分布力:  0.009824991226196289
+流体求解:  7.370649576187134
+速度插值:  0.014217615127563477
+计算力:  0.048505306243896484
+分布力:  0.009807586669921875
+流体求解:  5.686160326004028
+速度插值:  0.013038158416748047
+计算力:  0.04860973358154297
+分布力:  0.009903192520141602
+流体求解:  5.167749881744385
+速度插值:  0.014173269271850586
+计算力:  0.04711508750915527
+分布力:  0.00973200798034668
+流体求解:  6.119001865386963
+速度插值:  0.013181924819946289
+计算力:  0.04711174964904785
+分布力:  0.010192155838012695
+流体求解:  5.380652666091919
+速度插值:  0.013213157653808594
+计算力:  0.04739189147949219
+分布力:  0.00992274284362793
+流体求解:  5.083771467208862
+速度插值:  0.012886285781860352
+计算力:  0.048009634017944336
+分布力:  0.009696483612060547
+流体求解:  6.597950220108032
+速度插值:  0.01332998275756836
+计算力:  0.052761077880859375
+分布力:  0.009741783142089844
+流体求解:  5.1000659465789795
+速度插值:  0.013330221176147461
+计算力:  0.04748129844665527
+分布力:  0.009645938873291016
+流体求解:  5.018855094909668
+速度插值:  0.013562202453613281
+计算力:  0.04701423645019531
+分布力:  0.009906291961669922
+流体求解:  5.3751842975616455
+速度插值:  0.015755653381347656
+计算力:  0.047707557678222656
+分布力:  0.01015782356262207
+[1m[34mswanlab[0m[0m: Error happened while training
+[1m[34mswanlab[0m[0m: 🏠 View project at [34m[4mhttps://swanlab.cn/@SimCardiac/ideal_ventricle_3D[0m[0m
+[1m[34mswanlab[0m[0m: 🚀 View run at [34m[4mhttps://swanlab.cn/@SimCardiac/ideal_ventricle_3D/runs/fswfmbw9ijofp6u9costg[0m[0m
+[1m[34mswanlab[0m[0m: \ Waiting for uploading complete[1m[34mswanlab[0m[0m: | Waiting for uploading complete                                                                                                    [1m[34mswanlab[0m[0m: \ Updating experiment status...                                                                                                      File "/kokkos_2/ibfenics/tests/nodal/ideal_ventricle_3D/ideal_ventricle_3D.py", line 96, in <module>
+    un, pn = fluid_solver.solve(bcu, bcp)
+  File "/kokkos_2/spack/opt/spack/linux-ubuntu24.04-zen4/gcc-11.4.0/python-venv-1.0-63etcsthcqm4hyv4eonqz3u4ysr6j6k7/lib/python3.10/site-packages/ibfenics1/nssolver/ChorinSolver.py", line 110, in solve
+    solve(self.A2, self.p1.vector(), b2, "bicgstab", self.prec)
+  File "/kokkos_2/spack/var/spack/environments/kokkos/.spack-env/view/lib/python3.10/site-packages/dolfin/fem/solving.py", line 227, in solve
+    return dolfin.la.solver.solve(*args)
+  File "/kokkos_2/spack/var/spack/environments/kokkos/.spack-env/view/lib/python3.10/site-packages/dolfin/la/solver.py", line 72, in solve
+    return cpp.la.solve(A, x, b, method, preconditioner)
+
+
+*** -------------------------------------------------------------------------
+*** DOLFIN encountered an error. If you are not able to resolve this issue
+*** using the information listed below, you can ask for help at
+***
+***     fenics-support@googlegroups.com
+***
+*** Remember to include the error message listed below and, if possible,
+*** include a *minimal* running example to reproduce the error.
+***
+*** -------------------------------------------------------------------------
+*** Error:   Unable to solve linear system using PETSc Krylov solver.
+*** Reason:  Solution failed to converge in 22 iterations (PETSc reason DIVERGED_DTOL, residual norm ||r|| = 2.340682e+07).
+*** Where:   This error was encountered inside PETScKrylovSolver.cpp.
+*** Process: 0
+*** 
+*** DOLFIN version: 2019.1.0
+*** Git changeset:  
+*** -------------------------------------------------------------------------
+
+order : 2
+mesh size : 41, 41, 41
+mesh size : 0.125000, 0.125000, 0.125000
