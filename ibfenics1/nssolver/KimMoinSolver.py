@@ -12,7 +12,7 @@
 from dolfin import *
 
 
-class ChorinSolver:
+class KimMoinSolver:
     def __init__(
         self,
         u_n,
@@ -42,7 +42,10 @@ class ChorinSolver:
 
         # Define functions for solutions at previous and current time steps
         # u_n = Function(V)
+        u_n_1 = Function(V)
         u_ = Function(V)
+        u_hat = 2.0 * u_n - u_n_1
+        p_n_1 = Function(Q)
         p_ = Function(Q)
 
         k = Constant(dt)
@@ -51,8 +54,8 @@ class ChorinSolver:
 
         # Tentative velocity step
         F1 = (
-            rho*(1/k)*inner(u - u_n, v) * dx + rho * inner(grad(u0)*u0, v)*dx + \
-            nu*inner(grad(u), grad(v))*dx - inner(f, v)*dx
+            rho*(1/k)*inner(u - u_n, v) * dx + rho * inner(grad(u_hat)*u_hat, v)*dx + \
+            nu*inner(0.5*grad(u+u_n), grad(v))*dx - inner(f, v)*dx
         )
         a1 = lhs(F1)
         L1 = rhs(F1)
@@ -75,6 +78,7 @@ class ChorinSolver:
         [bc.apply(A2) for bc in bcp]
 
         self.u_n = u_n
+        self.u_n_1 = u_n_1
         self.p_n = p_n
         self.u_ = u_
         self.p_ = p_
@@ -89,6 +93,7 @@ class ChorinSolver:
         self.prec = "amg" if has_krylov_solver_preconditioner("amg") else "default"
 
     def update(self, u_n, p_n):
+        self.u_n_1.assign(self.u_n)  # u_{n-1} = u_n
         self.u_n.assign(u_n)
         self.p_n.assign(p_n)
 

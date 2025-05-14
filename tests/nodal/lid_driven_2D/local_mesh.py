@@ -8,11 +8,11 @@ import os
 # Parameters
 nv = 0.01
 T = 10.0
-dt = 1e-3
+dt = 2e-4
 num_steps = int(T/dt)
 rho = 1.0
-Nl = 10
-Ne = 20
+Nl = 20
+Ne = 32
 dt_minimum = 1e-5
 
 # Mesh
@@ -49,9 +49,9 @@ def calculate_fluid_boundary_conditions(Vf, Qf):
     bcu_inflow = DirichletBC(Vf, flow_velocity, "near(x[1],1.0)")
     bcu_wall = DirichletBC(Vf, Expression(("0.0", "0.0"), degree=1), 
                            "near(x[0],0.0) || near(x[0],1) || near(x[1],0.0)")
-    # bcp_outlet = DirichletBC(Qf, Expression("0.0", degree=1), "near(x[0],8.0)")
+    bcp_outlet = DirichletBC(Qf, Expression("0.0", degree=1), "near(x[0],1.0) && near(x[1],1.0)", "pointwise")
     bcu = [bcu_inflow, bcu_wall]
-    bcp = []
+    bcp = [bcp_outlet]
     return bcu, bcp
 
 

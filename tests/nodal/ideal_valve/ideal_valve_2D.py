@@ -4,8 +4,8 @@ import time
 from loguru import logger
 from fenics import *
 from local_mesh import *
-from ibfenics1.nssolver import IPCSSolver
-from ibfenics1.nssolver import ChorinSolver
+from ibfenics1.nssolver import KimMoinSolver
+# from ibfenics1.nssolver import ChorinSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
@@ -14,13 +14,13 @@ from ibfenics1.io import (
     write_excel,
     write_excel_sheets,
 )
-beta = 1e8
+beta = 1e11
 C0=2e5
 # C0=0
 C1=1e6
 kappa_s=4e5
 # kappa_s=0
-E = 5.6e5
+E = 5.6e7
 nu_s = 0.4
 mu_s = E/2/(1+nu_s)
 lambda_s = 2*mu_s*nu_s/(1-2*nu_s)
@@ -48,7 +48,7 @@ f0 = Function(Vf, name="force")
 time_manager = TimeManager(T, num_steps, 200)
 bcu, bcp = calculate_fluid_boundary_conditions(Vf, Qf)
 # fluid_solver = IPCSSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
-fluid_solver = ChorinSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
+fluid_solver = KimMoinSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=rho, conv=True)
 
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
@@ -62,6 +62,7 @@ swanlab.config['file_solid'] = file_solid_name
 # from ufl import ln
 
 U0 = Function(Vs, name="velocity")
+U0_1 = Function(Vs, name="velocity_old")
 X0 = interpolate(Expression(("x[0]", "x[1]"), degree=2), Vs)
 X_start = interpolate(Expression(("x[0]", "x[1]"), degree=2), Vs)
 F0 = Function(Vs, name="force")

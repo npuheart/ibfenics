@@ -36,11 +36,11 @@ def connect_mesh(mesh0, mesh1):
     return mesh
 
 # Parameters
-nv = 0.2
+nv = 10.0
 T = 3.0
 dt = 5e-5
 num_steps = int(T/dt)
-rho = 1.0
+rho = 100.0
 Nl = 4
 Ne = 32
 dt_minimum = 1e-5
