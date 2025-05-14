@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>网格 &#8212; AFSI</title>
+    <title>Mesh generation &#8212; AFSI</title>
   
   
   
@@ -61,7 +61,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Markdown Files" href="markdown.html" />
-    <link rel="prev" title="AFSI: Automated Fluid-Structure Interaction Solver" href="intro.html" />
+    <link rel="prev" title="Getting started" href="getting_started.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -180,7 +180,9 @@
             </li>
         </ul>
         <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">网格</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Mesh generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown.html">Markdown Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks.html">Content with notebooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="markdown-notebooks.html">Notebooks with MyST Markdown</a></li>
@@ -369,7 +371,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>网格</h1>
+    <h1>Mesh generation</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -379,9 +381,9 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. 左心室网格</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. 网格生成</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. 读取网格、边界和纤维</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">1. 左心室网格</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1.1. 网格生成</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.2. 读取网格、边界和纤维</a></li>
 </ul>
 </li>
 </ul>
@@ -395,12 +397,12 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="id1">
-<h1>网格<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="mesh-generation">
+<h1>Mesh generation<a class="headerlink" href="#mesh-generation" title="Link to this heading">#</a></h1>
+<section id="id1">
+<h2>1. 左心室网格<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <section id="id2">
-<h2>1. 左心室网格<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
-<section id="id3">
-<h3>1.1. 网格生成<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<h3>1.1. 网格生成<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
 <p>左心室网格由<a class="reference external" href="https://finsberg.github.io/ldrb/demo_lv.html">ldrb</a>生成，需要进入docker容器执行代码。</p>
 <p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">docker</span> <span class="pre">run</span> <span class="pre">--rm</span> <span class="pre">-v</span> <span class="pre">$PWD:/home/shared</span> <span class="pre">-w</span> <span class="pre">/home/shared</span> <span class="pre">-it</span> <span class="pre">ghcr.io/finsberg/ldrb:latest</span> <span class="pre">bash</span></code></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dolfin</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">df</span>
@@ -450,8 +452,8 @@ document.write(`
 </pre></div>
 </div>
 </section>
-<section id="id4">
-<h3>1.2. 读取网格、边界和纤维<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<section id="id3">
+<h3>1.2. 读取网格、边界和纤维<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mesh_path</span> <span class="o">=</span> <span class="s2">&quot;/kokkos_2/mesh-benchmark/B009-ldrb/&quot;</span>
 <span class="n">order</span><span class="o">=</span><span class="mi">2</span>
 
@@ -514,12 +516,12 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="intro.html"
+       href="getting_started.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">AFSI: Automated Fluid-Structure Interaction Solver</p>
+        <p class="prev-next-title">Getting started</p>
       </div>
     </a>
     <a class="right-next"
@@ -547,9 +549,9 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. 左心室网格</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. 网格生成</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. 读取网格、边界和纤维</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">1. 左心室网格</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1.1. 网格生成</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.2. 读取网格、边界和纤维</a></li>
 </ul>
 </li>
 </ul>

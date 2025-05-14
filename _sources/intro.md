@@ -35,7 +35,7 @@ The address for the documentaion online is available on https://npuheart.github.
 
 
 
-Check out the content pages bundled with this sample book to see more.
+## Contents
 
 ```{tableofcontents}
 ```
