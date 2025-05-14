@@ -5,7 +5,7 @@ from loguru import logger
 from fenics import *
 from local_mesh import *
 from ibfenics1.nssolver import KimMoinSolver
-# from ibfenics1.nssolver import ChorinSolver
+from ibfenics1.nssolver import ChorinSolver
 from ibfenics1.io import (
     unique_filename,
     create_xdmf_file,
@@ -14,32 +14,59 @@ from ibfenics1.io import (
     write_excel,
     write_excel_sheets,
 )
+import requests
+
+
+project_name = os.path.basename(__file__).split('.')[0].replace("_", "-")
 beta = 1e11
 C0=2e5
-# C0=0
 C1=1e6
 kappa_s=4e5
-# kappa_s=0
 E = 5.6e7
 nu_s = 0.4
 mu_s = E/2/(1+nu_s)
 lambda_s = 2*mu_s*nu_s/(1-2*nu_s)
-
-
 damping = nv*0.0
+ns = "chorin"
+
+
+if ns == "chorin":
+    NavierStokesSolver = KimMoinSolver
+elif ns == "kim-moin":
+    NavierStokesSolver = KimMoinSolver
+
 
 ds = Measure('ds', domain=solid_mesh, subdomain_data=boundaries)
 
 nssolver = "projection"
 material = "s0" # "n1", "n2", "f0", "f1", "f2", "f3"
-
-swanlab.login(api_key="VBxEp1UBe2606KHDM9264", save=True)
+swanlab.login(api_key='5z4lwzHZK8rpXY1lyTcey', host='http://swanlab.pengfeima.cn', save=True)
+# swanlab.login(api_key="VBxEp1UBe2606KHDM9264", save=True)
 swanlab.init(
-    project=os.path.splitext(os.path.basename(__file__))[0],
-    experiment_name=f"dt_{dt}_beta_{beta:.2e}_lambda{lambda_s:.2e}_Ne_{Ne}_Nl_{Nl}_{material}",
+    project=project_name,
+    experiment_name=requests.get(f"http://counter.pengfeima.cn/{project_name}").text,
     description="二维理想瓣膜",
-    config={'dt': dt, 'beta': beta, 'C0': C0, 'C1':C1, 'ks':kappa_s, 'Ne': Ne, 'Nl': Nl, 'material': material},
+    config={
+        "nv": nv,
+        "T": T,
+        'dt': dt, 
+        "num_steps": num_steps,
+        "rho": rho,
+        'beta': beta, 
+        'C0': C0, 
+        'C1':C1, 
+        'ks':kappa_s, 
+        'E': E,
+        'lambda_s': lambda_s,
+        'nu_s': nu_s,
+        'Ne': Ne, 
+        'Nl': Nl, 
+        'material': material,
+        "ns": ns,
+    },
 )
+
+
 
 u0 = Function(Vf, name="velocity")
 p0 = Function(Qf, name="pressure")
@@ -48,7 +75,7 @@ f0 = Function(Vf, name="force")
 time_manager = TimeManager(T, num_steps, 200)
 bcu, bcp = calculate_fluid_boundary_conditions(Vf, Qf)
 # fluid_solver = IPCSSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=1.0, conv=True)
-fluid_solver = KimMoinSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=rho, conv=True)
+fluid_solver = NavierStokesSolver(u0, p0, f0, dt, nv, bcp=bcp, bcu=bcu, rho=rho, conv=True)
 
 file_fluid_name = unique_filename(os.path.basename(__file__), "note", "/fluid.xdmf")
 file_solid_name = unique_filename(os.path.basename(__file__), "note", "/solid.xdmf")
@@ -194,9 +221,9 @@ for n in range(num_steps):
             {
                 "timecost": time.time() - start_time,
                 "inflow":flow_velocity(0.0,0.805)[0],
-                "x_displacement": X0(2.0-0.0106,0.91+1e-4)[0] - (2.0-0.0106),
-                "y_displacement": X0(2.0-0.0106,0.91+1e-4)[1] - 0.91,
-                "time": t, 
+                "data/x_displacement": X0(2.0-0.0106,0.91+1e-4)[0] - (2.0-0.0106),
+                "data/y_displacement": X0(2.0-0.0106,0.91+1e-4)[1] - 0.91,
+                "data/time": t, 
                 "u_max": un.vector().max(), 
                 "u_norm_l2":  un.vector().norm("l2")
             }, step = int(1+t/dt_minimum)

@@ -42,7 +42,7 @@ dt = 5e-5
 num_steps = int(T/dt)
 rho = 100.0
 Nl = 4
-Ne = 32
+Ne = 40
 dt_minimum = 1e-5
 
 # Mesh
@@ -99,37 +99,6 @@ def calculate_fluid_boundary_conditions(Vf, Qf):
     return bcu, bcp
 
 
-def extract_over_mid_y(u0, p0, x, y, n=10):
-    u_list = []
-    v_list = []
-    p_list = []
-    x_list = []
-    for i in range(n):
-        xx = x[0] + (x[1]-x[0])*i/(n-1)
-        yy = 0.5*(y[0] + y[1])
-        x_list.append(xx)
-        p_list.append(p0(xx,yy))
-        u_list.append(u0(xx,yy)[0])
-        v_list.append(u0(xx,yy)[1])
-    
-    return u_list, v_list, p_list, x_list 
-
-def extract_over_mid_x(u0, p0, x, y, n=10):
-    u_list = []
-    v_list = []
-    p_list = []
-    y_list = []
-    for i in range(n):
-        xx = 0.5*(x[0] + x[1])
-        yy = y[0] + (y[1]-y[0])*i/(n-1)
-        y_list.append(yy)
-        p_list.append(p0(xx,yy))
-        u_list.append(u0(xx,yy)[0])
-        v_list.append(u0(xx,yy)[1])
-    
-    return u_list, v_list, p_list, y_list 
-
-
 __all__ = [
     "Vs",
     "Vf",
@@ -148,6 +117,4 @@ __all__ = [
     "Nl",
     "dt",
     "rho",
-    "extract_over_mid_x",
-    "extract_over_mid_y",
 ]

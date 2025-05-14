@@ -51,7 +51,7 @@ class ChorinSolver:
 
         # Tentative velocity step
         F1 = (
-            rho*(1/k)*inner(u - u_n, v) * dx + rho * inner(grad(u0)*u0, v)*dx + \
+            rho*(1/k)*inner(u - u_n, v) * dx + rho * inner(grad(u_n)*u_n, v)*dx + \
             nu*inner(grad(u), grad(v))*dx - inner(f, v)*dx
         )
         a1 = lhs(F1)
