@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies for pyvista
-        run: apt-get update && apt-get install -y libgl1-mesa-glx libxrender1 xvfb
+        run: sudo apt-get update && apt-get install -y libgl1-mesa-glx libxrender1 xvfb
       
       - name: Install Jupyter Book and dependencies
         run: pip install jupyter-book pyvista panel ipyvtklink ipywidgets trame trame-vuetify trame-vtk
