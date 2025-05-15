@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies for pyvista
-        run: sudo apt-get update && apt-get install -y libgl1-mesa-glx libxrender1 xvfb
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx libxrender1 xvfb
       
       - name: Install Jupyter Book and dependencies
         run: pip install jupyter-book pyvista panel ipyvtklink ipywidgets trame trame-vuetify trame-vtk
@@ -38,4 +38,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html
+          publish_dir: ${{ env.PUBLISH_DIR }}
