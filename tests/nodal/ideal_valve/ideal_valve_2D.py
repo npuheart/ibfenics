@@ -18,7 +18,7 @@ import requests
 
 
 project_name = os.path.basename(__file__).split('.')[0].replace("_", "-")
-beta = 1e11
+beta = 1e12
 C0=2e5
 C1=1e6
 kappa_s=4e5
@@ -27,11 +27,11 @@ nu_s = 0.4
 mu_s = E/2/(1+nu_s)
 lambda_s = 2*mu_s*nu_s/(1-2*nu_s)
 damping = nv*0.0
-ns = "chorin"
+ns = "kim-moin"
 
 
 if ns == "chorin":
-    NavierStokesSolver = KimMoinSolver
+    NavierStokesSolver = ChorinSolver
 elif ns == "kim-moin":
     NavierStokesSolver = KimMoinSolver
 
