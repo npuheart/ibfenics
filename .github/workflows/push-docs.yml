@@ -11,8 +11,8 @@ jobs:
     env:
       PUBLISH_DIR: ./docs/_build/html
       DISPLAY: ":99.0"
-      PYVISTA_TRAME_SERVER_PROXY_PREFIX: "/ibfenics/proxy/"
-      PYVISTA_TRAME_SERVER_PROXY_ENABLED: "True"
+      # PYVISTA_TRAME_SERVER_PROXY_PREFIX: "/ibfenics/proxy/"
+      # PYVISTA_TRAME_SERVER_PROXY_ENABLED: "True"
       PYVISTA_OFF_SCREEN: false
       PYVISTA_JUPYTER_BACKEND: "html"
     
