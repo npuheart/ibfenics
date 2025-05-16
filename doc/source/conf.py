@@ -194,17 +194,17 @@ class ResetPyVista:
 from sphinx_gallery.sorting import FileNameSortKey  # noqa: E402
 
 tutorial_dirs = [
-    "../../tutorial/00_intro/",
+    # "../../tutorial/00_intro/",
     "../../tutorial/00_jupyter/",
-    "../../tutorial/01_basic/",
-    "../../tutorial/02_mesh/",
-    "../../tutorial/03_figures/",
-    "../../tutorial/04_filters/",
-    "../../tutorial/05_action/",
-    "../../tutorial/06_vtk/",
+    # "../../tutorial/01_basic/",
+    # "../../tutorial/02_mesh/",
+    # "../../tutorial/03_figures/",
+    # "../../tutorial/04_filters/",
+    # "../../tutorial/05_action/",
+    # "../../tutorial/06_vtk/",
     # '../../tutorial/07_sphinx/',
-    "../../tutorial/08_widgets/",
-    "../../tutorial/09_trame/",
+    # "../../tutorial/08_widgets/",
+    # "../../tutorial/09_trame/",
 ]
 
 sphinx_gallery_conf = {
