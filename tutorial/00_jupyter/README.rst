@@ -56,9 +56,9 @@ Trame Jupyter Modes
 The PyVista Trame jupyter backend provides three modes of operation (technically
 as three separate backend choices):
 
-* ``'trame'``: Uses a view that can switch between client- and server-rendering modes.
-* ``'server'``: Uses a view that is purely server-rendering.
-* ``'client'``: Uses a view that is purely client-rendering (generally safe without a virtual frame buffer)
+.. * ``'trame'``: Uses a view that can switch between client- and server-rendering modes.
+.. * ``'server'``: Uses a view that is purely server-rendering.
+.. * ``'client'``: Uses a view that is purely client-rendering (generally safe without a virtual frame buffer)
 
 You can choose your backend either by using :func:`set_jupyter_backend() <pyvista.set_jupyter_backend>`
 or passing ``jupyter_backend`` on the :func:`show() <pyvista.Plotter.show>` call.
